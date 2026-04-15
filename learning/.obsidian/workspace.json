@@ -4,21 +4,19 @@
     "type": "split",
     "children": [
       {
-        "id": "e6ea5782b63bc8ed",
+        "id": "f9271bf53cc9c4d1",
         "type": "tabs",
         "children": [
           {
-            "id": "a79a66978c117b8d",
+            "id": "ef135bcf16d2fc59",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "excalidraw",
               "state": {
-                "aFile": "learning/Welcome.md",
-                "bFile": "learning/Welcome.md",
-                "aRef": ""
+                "file": "2026-04-15 11.58.19 Концепт.md"
               },
-              "icon": "diff",
-              "title": "Diff: Welcome  (Working Tree)"
+              "icon": "excalidraw-icon",
+              "title": "2026-04-15 11.58.19 Концепт"
             }
           }
         ]
@@ -177,7 +175,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 822.5
+    "width": 200,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -192,8 +191,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "a79a66978c117b8d",
+  "active": "ef135bcf16d2fc59",
   "lastOpenFiles": [
+    "Excalidraw/Drawing 2026-04-15 11.58.00.excalidraw.md",
+    "2026-04-15 11.58.19 Концепт.md",
+    "Excalidraw",
+    "Excalidraw/Drawing 2026-04-15 11.57.11.excalidraw.md",
     "Welcome.md"
   ]
 }
