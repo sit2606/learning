@@ -1,0 +1,17 @@
+{
+  "showSheetButton": "true",
+  "folder": "/",
+  "excelFilenamePrefix": "Excel ",
+  "excelFilenameDateTime": "YYYY-MM-DD HH.mm.ss",
+  "sheetHeight": "300",
+  "rowHeight": "25",
+  "colWidth": "100",
+  "authorizationCode": "6wRki5rael6uWueDv20yg5Uj6zjXmxTz",
+  "embedLinkShowFooter": "false",
+  "numberFormatLocal": "en",
+  "mobileRenderMode": "desktop",
+  "darkModal": "dark",
+  "isBigSheet": "false",
+  "fontFolder": "",
+  "selectedFontName": ""
+}
