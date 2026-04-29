@@ -1,0 +1,210 @@
+{
+  "main": {
+    "id": "a31b33a95318b358",
+    "type": "split",
+    "children": [
+      {
+        "id": "074726fa7fa893c9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "86b9dc6f51ce6671",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "01. Технологии программирования/Практика/2026-04-15 11.58.19 Концепт.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "2026-04-15 11.58.19 Концепт"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "8b933562181886a0",
+    "type": "split",
+    "children": [
+      {
+        "id": "f5c0cb86a7e4bded",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2874c1a338282320",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Файловый менеджер"
+            }
+          },
+          {
+            "id": "f49c6b60c7bbca2c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Поиск"
+            }
+          },
+          {
+            "id": "b7c4fbdf628017ca",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Закладки"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "fa70f31cc9bae09a",
+    "type": "split",
+    "children": [
+      {
+        "id": "28da6fa451c51c65",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1256ac66a5476589",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "01. Технологии программирования/Практика/2026-04-15 11.58.19 Концепт.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Обратные ссылки для 2026-04-15 11.58.19 Концепт"
+            }
+          },
+          {
+            "id": "afea3123a9009aef",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "01. Технологии программирования/Практика/2026-04-15 11.58.19 Концепт.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Исходящие ссылки из 2026-04-15 11.58.19 Концепт"
+            }
+          },
+          {
+            "id": "b6525303cd45ae14",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Теги"
+            }
+          },
+          {
+            "id": "0517aafcc743f701",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Все свойства"
+            }
+          },
+          {
+            "id": "2645292bcedc196c",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "01. Технологии программирования/Практика/2026-04-15 11.58.19 Концепт.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Структура 2026-04-15 11.58.19 Концепт"
+            }
+          },
+          {
+            "id": "37833373d3a8017d",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Меню быстрого перехода": false,
+      "graph:Граф": false,
+      "canvas:Создать новый холст": false,
+      "daily-notes:Сегодняшняя заметка": false,
+      "templates:Вставить шаблон": false,
+      "command-palette:Открыть палитру команд": false,
+      "bases:Создать новую базу": false,
+      "obsidian-git:Open Git source control": false,
+      "obsidian-excalidraw-plugin:New drawing": false,
+      "sheet-plus:Создать Excel Файл": false
+    }
+  },
+  "active": "86b9dc6f51ce6671",
+  "lastOpenFiles": [
+    "01. Технологии программирования/Практика/2026-04-15 17.50 Концепция.md",
+    "01. Технологии программирования/Практика/2026-04-15 18.10 Роли.md",
+    "01. Технологии программирования/Практика/2026-04-15 18.33 Пользовательские истории.md",
+    "01. Технологии программирования/Практика/2026-04-15 18.58 Функциональные требования.md",
+    "01. Технологии программирования/Практика/2026-04-21 Сценарий и диаграмма вариантов использования.md",
+    "01. Технологии программирования/Практика/2026-04-22 22.49 Модель предметной области.md",
+    "01. Технологии программирования/Практика/2026-04-25 Практика, переделка функции.md",
+    "01. Технологии программирования/Практика/Модель предметной области.svg",
+    "01. Технологии программирования/Практика/2026-04-15 11.58.19 Концепт.md",
+    "01. Технологии программирования/2026-04-27 Седьмое занятие.md"
+  ]
+}
