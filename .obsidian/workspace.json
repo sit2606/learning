@@ -18,8 +18,23 @@
               "icon": "excalidraw-icon",
               "title": "2026-04-15 11.58.19 Концепт"
             }
+          },
+          {
+            "id": "0ffc6903e89fefea",
+            "type": "leaf",
+            "state": {
+              "type": "split-diff-view",
+              "state": {
+                "aFile": ".obsidian/workspace.json",
+                "bFile": ".obsidian/workspace.json",
+                "aRef": ""
+              },
+              "icon": "diff",
+              "title": "Diff: workspace.json  (Working Tree)"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -174,7 +189,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 5
       }
     ],
     "direction": "horizontal",
@@ -194,8 +209,9 @@
       "sheet-plus:Создать Excel Файл": false
     }
   },
-  "active": "86b9dc6f51ce6671",
+  "active": "0ffc6903e89fefea",
   "lastOpenFiles": [
+    "conflict-files-obsidian-git.md",
     "01. Технологии программирования/Практика/2026-04-15 11.58.19 Концепт.md",
     "01. Технологии программирования/Практика/2026-04-15 17.50 Концепция.md",
     "01. Технологии программирования/Практика/2026-04-15 18.10 Роли.md",
