@@ -1,1 +1,2 @@
+#python #image
 ![[Pasted image 20260608200744.png]]
