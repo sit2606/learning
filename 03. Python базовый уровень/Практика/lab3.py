@@ -1,6 +1,4 @@
 import math
-
-
 def get_values():
 
     d1 = float(input("Введите кратчайшее расстояние между спасателем и кромкой воды, d1 (ярды) => \n"))
@@ -46,7 +44,7 @@ def calculate(d1,theta1_rad,h,d2,v_sand,n):
     Скорость в футах в секунду
     Градусы в радианах
     
-    >>> # Тест 1: Угол 30 градусов 
+    >>> # Тест 1: Угол 30 градусов (соответствует выходным данным convert(5, 10, 6, 30))
     >>> # d1=15 футов, h=30 футов, d2=15 футов, v_sand=8.8 фут/с, n=1.5
     >>> calculate(15, 0.5235987755982988, 30, 15, 8.8, 1.5) # doctest: +ELLIPSIS
     6.41440...
@@ -57,10 +55,36 @@ def calculate(d1,theta1_rad,h,d2,v_sand,n):
     """
     x = d1 * math.tan(theta1_rad)
     L1 = math.sqrt(math.pow(x,2) + math.pow(d1,2))
-
     L2 = math.sqrt(math.pow((h-x),2) + math.pow(d2,2))
     t = 1/v_sand * (L1 + n * L2)
     return(t)
+
+
+def calculateAngle(d1,h,d2,v_sand,n):
+    """
+    Рассчитывает оптимальный угол движения спасателя.
+    На вход должны поступать расстояния в футах
+    Скорость в футах в секунду
+    
+    >>> # Тест 1: Угол 30 градусов 
+    >>> # d1=15 футов, h=30 футов, d2=15 футов, v_sand=8.8 фут/с, n=1.5
+    >>> calculateAngle(15, 30, 15, 8.8, 1.5) 
+    53.726
+    >>> # Тест 2: Угол 45 градусов 
+    >>> # d1=30 футов, h=60 футов, d2=10 футов, v_sand=4.4 фут/с, n=2.0
+    >>> calculateAngle(30, 60, 10, 4.4, 2.0)
+    61.438
+    """
+    bestAngle = 0
+    bestTime = 100
+    for x in range(0,90000):
+        x_deg = x/1000
+        x_rad = math.radians(x_deg)
+        current_time = calculate(d1, x_rad, h, d2, v_sand, n)
+        if current_time < bestTime:
+            bestTime = current_time
+            bestAngle = x_deg
+    return(bestAngle)
 if __name__ == '__main__':
     import doctest
     doctest.testmod(verbose=True)
