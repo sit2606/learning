@@ -11,10 +11,14 @@
             "id": "453f32fb54b72fa9",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Граф"
+              "type": "markdown",
+              "state": {
+                "file": "03. Python базовый уровень/Практика/lab4_4.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "lab4_4"
             }
           }
         ]
@@ -193,8 +197,10 @@
       "markdown-table-editor:Open Markdown Table Editor": false
     }
   },
-  "active": "37833373d3a8017d",
+  "active": "453f32fb54b72fa9",
   "lastOpenFiles": [
+    "03. Python базовый уровень/Изображения/Pasted image 20260610003808.png",
+    "03. Python базовый уровень/Практика/lab4_4.md",
     "03. Python базовый уровень/Практика/lab4_4.py",
     "03. Python базовый уровень/Практика/__pycache__/lab4_4a.cpython-314.pyc",
     "03. Python базовый уровень/Untitled1.ipynb",
@@ -225,7 +231,6 @@
     "02. Введение в базы данных/2026-05-12 Первое занятие.md",
     "03. Python базовый уровень/Изображения/Pasted image 20260608213801.png",
     "03. Python базовый уровень/Практика/lab4_3.md",
-    "03. Python базовый уровень/Практика/lab4_2.md",
     "03. Python базовый уровень/Изображения/Pasted image 20260608200744.png",
     "03. Python базовый уровень/Практика/lab4_3.py",
     "03. Python базовый уровень/Практика/lab4_2.py",
@@ -234,7 +239,6 @@
     "03. Python базовый уровень/Практика/lab4_1.py",
     "03. Python базовый уровень/Практика/Untitled.ipynb",
     "03. Python базовый уровень/Практика/lab4.py",
-    "03. Python базовый уровень/Практика/__pycache__/lab3.cpython-314.pyc",
     "02. Введение в базы данных/Практика/Лабораторная 5/Схема БД.svg",
     "02. Введение в базы данных/Практика/Лабораторная 5/Pasted image 20260519201345.png",
     "02. Введение в базы данных/Практика/Лабораторная 3/Pasted image 20260519201345.png",
