@@ -1,4 +1,16 @@
 def generate_field(x,y,step,manual = False):
+    """
+    Генерирует игровое поле заданного размера.
+
+    Аргументы:
+        x: Ширина поля в пикселях.
+        y: Высота поля в пикселях.
+        step: Шаг сетки.
+        manual: Флаг ручной инициализации (по умолчанию False). Если True, добавляет предустановленный паттерн.
+        
+    Возвращает:
+        dict: Словарь, представляющий игровое поле, где ключи - кортежи координат, а значения - объекты cell_info.
+    """
     from CellInfo import cell_info
     x = int(x/step)
     y = int(y/step)
@@ -7,13 +19,23 @@ def generate_field(x,y,step,manual = False):
         for a in range(0,y,1):
             game_field.update({(i,a):cell_info(False)})
     if(manual):
-        game_field.update({(1,1):cell_info(True)})
-        game_field.update({(0,4):cell_info(True)})
-        game_field.update({(0,3):cell_info(True)})
         game_field.update({(1,3):cell_info(True)})
-        game_field.update({(1,4):cell_info(True)})
+        game_field.update({(2,3):cell_info(True)})
+        game_field.update({(3,3):cell_info(True)})
+        game_field.update({(3,2):cell_info(True)})
+        game_field.update({(2,1):cell_info(True)})
     return(game_field)
+
 def populate_field(field_to_populate):
+    """
+    Случайным образом заполняет игровое поле живыми клетками.
+
+    Аргументы:
+        field_to_populate: Исходное игровое поле (словарь).
+        
+    Возвращает:
+        dict: Новое игровое поле со случайно добавленными живыми клетками.
+    """
     import copy
     from random import randrange
     from CellInfo import cell_info
@@ -33,6 +55,15 @@ def populate_field(field_to_populate):
     return(_field_to_populate)
 
 def check_for_neighbours(field):
+    """
+    Подсчитывает количество живых соседей для каждой клетки на поле.
+
+    Аргументы:
+        field: Игровое поле (словарь).
+        
+    Возвращает:
+        dict: Обновленное игровое поле, где у каждой клетки установлен атрибут _alive_neighbours.
+    """
     import copy
     last_item = next(reversed(field.items())) 
     y = last_item[0][1] + 1
@@ -78,6 +109,20 @@ def check_for_neighbours(field):
             working_field.update({(x_coord,y_coord):current_cell})
     return(working_field)
 def apply_rules(field):
+    """
+    Применяет правила игры «Жизнь» Конвея к игровому полю.
+
+    Правила:
+    - Мертвая клетка с ровно 3 живыми соседями оживает.
+    - Живая клетка с 2 или 3 живыми соседями выживает.
+    - В остальных случаях клетка умирает (от одиночества или перенаселения).
+
+    Аргументы:
+        field: Игровое поле (словарь) с уже подсчитанными соседями.
+        
+    Возвращает:
+        dict: Новое состояние игрового поля после применения правил.
+    """
     import copy
     import CellInfo
     last_item = next(reversed(field.items())) 
@@ -89,7 +134,8 @@ def apply_rules(field):
             if working_field.get((x_coord,y_coord))._alive_neighbours == 3 and  working_field.get((x_coord,y_coord))._status == False:
                 new_cell = CellInfo.cell_info(True)
                 working_field.update({(x_coord,y_coord):new_cell})
-            if working_field.get((x_coord,y_coord))._alive_neighbours > 3 or working_field.get((x_coord,y_coord))._alive_neighbours < 2 and  working_field.get((x_coord,y_coord))._status == True:
+                continue
+            if (working_field.get((x_coord,y_coord))._alive_neighbours > 3 or working_field.get((x_coord,y_coord))._alive_neighbours < 2) and  working_field.get((x_coord,y_coord))._status == True:
                 new_cell = CellInfo.cell_info(False)
                 working_field.update({(x_coord,y_coord):new_cell})
     return(working_field)
