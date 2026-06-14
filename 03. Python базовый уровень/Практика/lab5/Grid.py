@@ -30,11 +30,7 @@ class field:
         new_img = ImageOps.expand(im, border=b, fill="black")
         result = grid(x,y,_grid_step,new_img)
         return(result)
-
-
-
 def draw_coordinates(im, border_width,input_length, input_width, input_step):
-
     new_img = ImageOps.expand(im, border=border_width, fill="white")
     try:
         font = ImageFont.truetype("arial.ttf", size=border_width)
@@ -46,13 +42,14 @@ def draw_coordinates(im, border_width,input_length, input_width, input_step):
     for y in range (0,input_width, input_step):
         draw.text((0,y + 25), str(int(y/input_step)), fill="black", font=font)
     return(new_img)
-def draw_by_array(input_step,field,image_to_draw):
+def draw_by_dictionary(input_step,field,image_to_draw):
     import Grid
-    y = len(field)
-    x = len(field[0])
-    for y_coord in range(0,y,1):
-        for x_coord in range(0,x, 1):
-            if field[int(y_coord)][int(x_coord)]._status == True:
+    last_item = next(reversed(field.items())) 
+    y = last_item[0][1]
+    x = last_item[0][0]
+    for y_coord in range(0,y+1,1):
+        for x_coord in range(0,x+1, 1):
+            if field.get((int(x_coord),int(y_coord)))._status == True: 
                 Grid.draw_by_index(x_coord, y_coord, image_to_draw, input_step)
 def draw_by_index(first_index,second_index,image,step):
     draw = ImageDraw.Draw(image)
