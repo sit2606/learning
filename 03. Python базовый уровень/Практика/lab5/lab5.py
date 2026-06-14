@@ -4,7 +4,7 @@ input_length = 100
 input_width = 100
 input_step = 20
 generation_count = 10
-manual_mode = True
+manual_mode = False
 graphic = field(input_length, input_width ,  input_step).draw_grid()
 game_field = Life.generate_field(input_length,input_width,input_step, manual_mode)
 if (not manual_mode):
