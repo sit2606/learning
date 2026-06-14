@@ -1,30 +1,7 @@
 def generate_field(x,y,step):
-    game_field = [[i!=i for i in range(0,x,step)] for _ in range(0,y,step)]
-    game_field[0][0] = False
-    game_field[0][1] = False
-    game_field[0][2] = False
-    game_field[0][3] = False
-    game_field[0][4] = False
-    game_field[1][0] = False
-    game_field[1][1] = False
-    game_field[1][2] = False
-    game_field[1][3] = False
-    game_field[1][4] = False
-    game_field[2][0] = False
-    game_field[2][1] = False
-    game_field[2][2] = False
-    game_field[2][3] = False
-    game_field[2][4] = False
-    game_field[3][0] = False
-    game_field[3][1] = False
-    game_field[3][2] = True
-    game_field[3][3] = True
-    game_field[3][4] = True
-    game_field[4][0] = False
-    game_field[4][1] = False
-    game_field[4][2] = False
-    game_field[4][3] = False
-    game_field[4][4] = False
+    from GridElement import grid_element
+    game_field = [[grid_element(i,a, False) for i in range(0,x,step)] for a in range(0,y,step)]
+
     return(game_field)
 def imitate_life(generation_count, field, g):
     import Grid

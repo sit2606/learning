@@ -1,26 +1,36 @@
 from PIL import Image, ImageDraw,ImageOps, ImageFont
+from GridElement import grid_element
 
-def draw_grid(grid_length : int, grid_width :int , border_width : int, grid_step :int):
-    _grid_step = grid_step
-    x = grid_length
-    y = grid_width
-    b = border_width
-    if (y%_grid_step) or (x%_grid_step) != 0:
-        print('Невозможно разбить сетку по этому шагу')
-        print('Укажите шаг, который нацело делится и на ')
-        print('длину и на ширину ')
-        return(None)
-    im = Image.new('RGBA', (x, y), color="White") 
-    draw = ImageDraw.Draw(im)
-    for z in range(0, x + b, _grid_step):
-        draw.line((0,z , x+b*2, z), width= 1, fill="Black")
-        draw.line((z,0 , z, y+b*2), width= 1, fill="Black")
-    new_img = ImageOps.expand(im, border=b, fill="black")
-    grid = {'image' : new_img,
-            'x' : x,
-            'y' : y,
-            'grid' : _grid_step}
-    return(grid)
+class grid:
+    def __init__(self, width, length, gridStep, image):
+        self._width = width
+        self._length = length
+        self._step = gridStep
+        self._image = image
+class field:
+    def __init__(self,input_length,input_width,input_step):
+        self._input_length = input_length
+        self._input_width = input_width
+        self._input_step = input_step
+        pass
+    def draw_grid(self):
+        _grid_step = self._input_step
+        x = self._input_length
+        y = self._input_width
+        b = 5
+        if (y%_grid_step != 0) or (x%_grid_step!= 0) :
+            print('Невозможно разбить сетку по этому шагу')
+            print('Укажите шаг, который нацело делится и на ')
+            print('длину и на ширину ')
+            return(None)
+        im = Image.new('RGBA', (x, y), color="White") 
+        draw = ImageDraw.Draw(im)
+        for z in range(0, x + b, _grid_step):
+            draw.line((0,z , x+b*2, z), width= 1, fill="Black")
+            draw.line((z,0 , z, y+b*2), width= 1, fill="Black")
+        new_img = ImageOps.expand(im, border=b, fill="black")
+        result = grid(x,y,_grid_step,new_img)
+        return(result)
 
 
 
@@ -43,7 +53,7 @@ def draw_by_array(input_step,field,image_to_draw):
     x = len(field[0])
     for y_coord in range(0,y,1):
         for x_coord in range(0,x, 1):
-            if field[int(y_coord)][int(x_coord)] == True:
+            if field[int(y_coord)][int(x_coord)]._status == True:
                 Grid.draw_by_index(x_coord, y_coord, image_to_draw, input_step)
 def draw_by_index(first_index,second_index,image,step):
     draw = ImageDraw.Draw(image)
