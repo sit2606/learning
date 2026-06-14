@@ -1,5 +1,5 @@
 
-from Grid import grid,field,draw_by_array,draw_coordinates,showGrid
+from Grid import field,draw_by_array,draw_coordinates,showGrid
 import Life
 input_length = 100
 input_width = 100

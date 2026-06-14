@@ -1,5 +1,4 @@
 from PIL import Image, ImageDraw,ImageOps, ImageFont
-from GridElement import grid_element
 
 class grid:
     def __init__(self, width, length, gridStep, image):
