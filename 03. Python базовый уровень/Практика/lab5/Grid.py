@@ -128,6 +128,26 @@ def draw_by_index(first_index,second_index,image,step):
         print('Таких индексов нет в сетке')
         return(None)
     draw.rectangle((0+5+_step*_n1,0+5+_step*_n2, _n1*_step+_step+5,_step+5+_step*_n2), fill="Green")
+
+def draw_generation_count(image,generation_count):
+    """
+    Добавляет текст с номером текущего поколения к изображению.
+    
+    Аргументы:
+        image: Исходное изображение (PIL.Image), к которому добавляется текст.
+        generation_count: Целое число, представляющее номер текущего поколения.
+        
+    Возвращает:
+        PIL.Image: Изображение с добавленной белой рамкой и текстом 'Current generation: {generation_count}' в левом верхнем углу.
+    """
+    image = ImageOps.expand(image, border=20, fill="white")
+    draw = ImageDraw.Draw(image)
+    try:
+        font = ImageFont.truetype("arial.ttf", size=20)
+    except IOError:
+        font = ImageFont.load_default()
+    draw.text((0, 0),'Current generation: ' + str(generation_count), fill="black", font=font)
+    return(image)
 def showGrid(im):
     """
     Отображает изображение на экране.

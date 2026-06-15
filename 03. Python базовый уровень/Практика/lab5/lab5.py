@@ -13,36 +13,38 @@
     - Life: модуль, содержащий логику игры «Жизнь» (генерация, правила, соседи).
     - PIL (Pillow): библиотека для работы с изображениями и создания анимации.
 """
-from Grid import field,draw_by_dictionary,draw_coordinates,showGrid
+from Grid import field,draw_by_dictionary,draw_coordinates, draw_generation_count
 import Life 
 import copy
 from PIL import Image
-input_length = 100
-input_width = 100
-input_step = 20
-generation_count = 10
-manual_mode = False
-graphic = field(input_length, input_width ,  input_step).draw_grid()
-game_field = Life.generate_field(input_length,input_width,input_step, manual_mode)
-if (not manual_mode):
+INPUT_LENGTH = 200
+INPUT_WIDTH = 100
+INPUT_STEP = 20
+GENERATION_COUNT = 30
+MANUAL_MODE = False
+
+graphic = field(INPUT_LENGTH, INPUT_WIDTH ,  INPUT_STEP).draw_grid()
+game_field = Life.generate_field(INPUT_LENGTH,INPUT_WIDTH,INPUT_STEP, MANUAL_MODE)
+if (not MANUAL_MODE):
     populated_field = Life.populate_field(game_field)
 else:
     populated_field = game_field
-draw_by_dictionary(input_step,populated_field,graphic._image)
-z2 = draw_coordinates(graphic._image, 20, input_length, input_width, input_step)
+draw_by_dictionary(INPUT_STEP,populated_field,graphic._image)
+z2 = draw_coordinates(graphic._image, 20, INPUT_LENGTH, INPUT_WIDTH, INPUT_STEP)
 sim_field = Life.check_for_neighbours(populated_field)
 sim_results = []
 sim_results.append(sim_field)
-for i in range(0,generation_count,1):
+for i in range(0,GENERATION_COUNT,1):
     sim_field0 = copy.deepcopy(Life.check_for_neighbours(sim_field)) 
     sim_field1 = copy.deepcopy(Life.apply_rules(sim_field0))
     sim_results.append(sim_field1)
     sim_field = copy.deepcopy(sim_field1)
 images = []
-for i in sim_results:
-    graphic = field(input_length, input_width ,  input_step).draw_grid()
-    draw_by_dictionary(input_step,i,graphic._image)
-    img = draw_coordinates(graphic._image, 20, input_length, input_width, input_step)
+for index,item in enumerate(sim_results):
+    graphic = field(INPUT_LENGTH, INPUT_WIDTH , INPUT_STEP).draw_grid()
+    draw_by_dictionary(INPUT_STEP,item,graphic._image)
+    img = draw_coordinates(graphic._image, 20, INPUT_LENGTH, INPUT_WIDTH, INPUT_STEP)
+    img = draw_generation_count(img, index)
     images.append(img)
-im1 = Image.new("RGBA", (input_length + 50, input_width + 50), (0, 0, 0))
+im1 = Image.new("RGBA", (INPUT_LENGTH + INPUT_STEP*4, INPUT_WIDTH + INPUT_STEP*4), (0, 0, 0))
 im1.save("out.gif", save_all=True, append_images=images, duration=100, loop=0)
