@@ -54,6 +54,13 @@ def populate_field(field_to_populate):
                     is_place_vacant = False
     return(_field_to_populate)
 
+def populate_field_by_config(field_to_populate, STARTING_FIELD):
+    import copy
+    from CellInfo import cell_info
+    _field_to_populate = copy.deepcopy(field_to_populate)
+    for coord in STARTING_FIELD:
+        _field_to_populate.update({coord:cell_info(True)})
+    return(_field_to_populate)
 def check_for_neighbours(field):
     """
     Подсчитывает количество живых соседей для каждой клетки на поле.

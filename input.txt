@@ -1,0 +1,13 @@
+-- Field Options
+- Length
+140
+- Width
+160
+- Generation count
+30
+- Start Field Config (Please, provide a coordinates of alive cells)
+(1, 3)
+(2, 3)
+(3, 3)
+(3, 2)
+(2, 1)
