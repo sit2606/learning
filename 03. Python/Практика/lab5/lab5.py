@@ -1,17 +1,19 @@
 """
 Скрипт для запуска и визуализации симуляции игры «Жизнь» Конвея.
 
-Этот модуль поддерживает два режима работы:
-    - Файловый режим (FILE_MODE = True): параметры и начальные координаты живых клеток
-      считываются из файла 'input.txt' с помощью модуля fileLib.
-    - Ручной режим (FILE_MODE = False): параметры задаются непосредственно в коде.
+Использование:
+    python lab5.py                 — ручной режим, случайное заполнение
+    python lab5.py --file          — файловый режим (чтение из input.txt)
+    python lab5.py --manual        — ручной режим с предустановленным паттерном
+
+Режимы работы:
+    --file    : параметры и начальные координаты считываются из 'input.txt'
+    --manual  : предустановленный паттерн (глайдер)
+    (без флагов): случайное заполнение поля
 
 Последовательность действий:
 1. Инициализирует параметры сетки (размеры и шаг) в зависимости от выбранного режима.
-2. Создаёт начальное состояние игрового поля:
-     - случайное заполнение (если MANUAL_MODE = False и FILE_MODE = False);
-     - заполнение по конфигурации из файла (если FILE_MODE = True);
-     - предустановленный паттерн (если MANUAL_MODE = True).
+2. Создаёт начальное состояние игрового поля.
 3. Вычисляет заданное количество поколений, применяя правила игры «Жизнь».
 4. Отрисовывает каждое поколение с координатной сеткой и номером текущего поколения.
 5. Сохраняет итоговое состояние симуляции в файл 'sim_results.txt' через fileLib.
@@ -27,10 +29,13 @@ from Grid import field,draw_by_dictionary,draw_coordinates, draw_generation_coun
 import fileLib
 import Life 
 import copy
+import sys
 from PIL import Image
+
 INPUT_STEP = 20
-MANUAL_MODE = False
-FILE_MODE = True
+FILE_MODE = '--file' in sys.argv
+MANUAL_MODE = '--manual' in sys.argv
+
 if (FILE_MODE):
     INPUT_LENGTH, INPUT_WIDTH, GENERATION_COUNT,STARTING_FIELD = fileLib.openConfig();
 else:
