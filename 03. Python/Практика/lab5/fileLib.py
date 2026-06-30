@@ -45,7 +45,7 @@ def putConfigToFile(sim_result,INPUT_LENGTH, INPUT_WIDTH, GENERATION_COUNT):
     file.write(str(INPUT_WIDTH) + '\n')
     file.write('- Generation count\n')
     file.write(str(GENERATION_COUNT) + '\n')
-    file.write('- Start Field Config (Please, provide a coordinates of alive cells)\n')
+    file.write('- End Field Config (Coordinates of alive cells)\n')
     file.writelines(ENDING_FIELD)
     file.close()
 

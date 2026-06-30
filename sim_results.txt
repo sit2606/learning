@@ -1,12 +1,12 @@
 -- Field Options
 - Length
-140
+200
 - Width
-160
+100
 - Generation count
 30
-- Start Field Config (Please, provide a coordinates of alive cells)
-(5, 6)
-(5, 7)
-(6, 6)
-(6, 7)
+- End Field Config (Coordinates of alive cells)
+(3, 3)
+(3, 4)
+(4, 3)
+(4, 4)

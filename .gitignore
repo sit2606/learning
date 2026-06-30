@@ -1,5 +1,5 @@
-
-/.obsidian/workspace.json
-/conflict-files-obsidian-git.md
-/.obsidian/workspace.json
-/.venv
+test-results/
+test_lab5.py
+.idea
+.venv
+.mimocode

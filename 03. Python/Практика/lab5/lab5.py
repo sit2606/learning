@@ -48,6 +48,8 @@ if (not MANUAL_MODE and not FILE_MODE):
     populated_field = Life.populate_field(game_field)
 elif (FILE_MODE):
     populated_field = Life.populate_field_by_config(game_field,STARTING_FIELD)
+if (MANUAL_MODE):
+    populated_field = game_field
 draw_by_dictionary(INPUT_STEP,populated_field,graphic._image)
 z2 = draw_coordinates(graphic._image, 20, INPUT_LENGTH, INPUT_WIDTH, INPUT_STEP)
 sim_field = Life.check_for_neighbours(populated_field)
@@ -67,5 +69,5 @@ for index,item in enumerate(sim_results):
     img = draw_coordinates(graphic._image, 20, INPUT_LENGTH, INPUT_WIDTH, INPUT_STEP)
     img = draw_generation_count(img, index)
     images.append(img)
-im1 = Image.new("RGBA", (INPUT_LENGTH + INPUT_STEP*4, INPUT_WIDTH + INPUT_STEP*4), (0, 0, 0))
+im1 = Image.new("RGBA", (INPUT_LENGTH + INPUT_STEP*4, INPUT_WIDTH + INPUT_STEP*4), (255, 255, 255))
 im1.save("out.gif", save_all=True, append_images=images, duration=100, loop=0)

@@ -58,7 +58,7 @@ class field:
             return(None)
         im = Image.new('RGBA', (x, y), color="White") 
         draw = ImageDraw.Draw(im)
-        for z in range(0, x + b, _grid_step):
+        for z in range(0, max(x, y) + b, _grid_step):
             draw.line((0,z , x+b*2, z), width= 1, fill="Black")
             draw.line((z,0 , z, y+b*2), width= 1, fill="Black")
         new_img = ImageOps.expand(im, border=b, fill="black")
@@ -129,7 +129,7 @@ def draw_by_index(first_index,second_index,image,step):
         return(None)
     draw.rectangle((0+5+_step*_n1,0+5+_step*_n2, _n1*_step+_step+5,_step+5+_step*_n2), fill="Green")
 
-def draw_generation_count(image,generation_count):
+def draw_generation_count(image, generation_count):
     """
     Добавляет текст с номером текущего поколения к изображению.
     
@@ -140,14 +140,47 @@ def draw_generation_count(image,generation_count):
     Возвращает:
         PIL.Image: Изображение с добавленной белой рамкой и текстом 'Current generation: {generation_count}' в левом верхнем углу.
     """
-    image = ImageOps.expand(image, border=20, fill="white")
-    draw = ImageDraw.Draw(image)
+    full_text = 'Current generation: ' + str(generation_count)
+    short_text1 = 'Current generation:'
+    short_text2 = str(generation_count)
+    tiny_text1 = 'gen'
+    tiny_text2 = str(generation_count)
+
+    temp_draw = ImageDraw.Draw(image)
     try:
         font = ImageFont.truetype("arial.ttf", size=20)
     except IOError:
         font = ImageFont.load_default()
-    draw.text((0, 0),'Current generation: ' + str(generation_count), fill="black", font=font)
-    return(image)
+
+    def text_width(text):
+        bbox = temp_draw.textbbox((0, 0), text, font=font)
+        return bbox[2] - bbox[0]
+
+    line_height = temp_draw.textbbox((0, 0), "A", font=font)[3]
+
+    padding = 10
+
+    if text_width(full_text) <= image.width:
+        lines = [full_text]
+        text_width_val = text_width(full_text)
+    elif text_width(short_text1) <= image.width:
+        lines = [short_text1, short_text2]
+        text_width_val = max(text_width(short_text1), text_width(short_text2))
+    else:
+        lines = [tiny_text1, tiny_text2]
+        text_width_val = max(text_width(tiny_text1), text_width(tiny_text2))
+
+    new_width = image.width + padding * 2
+    new_height = image.height + line_height * len(lines) + padding * 2
+
+    new_image = Image.new("RGBA", (new_width, new_height), (255, 255, 255, 255))
+    new_image.paste(image, (padding, line_height * len(lines) + padding * 2))
+
+    draw = ImageDraw.Draw(new_image)
+    for i, line in enumerate(lines):
+        draw.text((padding, padding + i * line_height), line, fill="black", font=font)
+
+    return new_image
 def showGrid(im):
     """
     Отображает изображение на экране.
