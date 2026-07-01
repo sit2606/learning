@@ -11,14 +11,14 @@
             "id": "453f32fb54b72fa9",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "03. Python/Практика/lab7/App.py",
-                "bFile": "03. Python/Практика/lab7/App.py",
-                "aRef": ""
+                "file": "03. Python/Практика/lab7/2026-06-29 16.30 Физическая диаграмма.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: App.py  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "2026-06-29 16.30 Физическая диаграмма"
             }
           },
           {
@@ -102,8 +102,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "fa70f31cc9bae09a",
@@ -225,23 +224,26 @@
   },
   "active": "453f32fb54b72fa9",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/App.py~",
+    "03. Python/Практика/lab7/dataLib.py~",
+    "03. Python/Практика/lab7/MediaToMarket1.csv",
+    "03. Python/Практика/lab7/MediaToMarket.csv",
+    "03. Python/Практика/lab7/MEDIA.csv",
+    "03. Python/2026-06-29 Python  Лекция 8.md",
+    "02. Введение в базы данных/Нормальные формы.md",
+    "03. Python/Практика/lab7/fileLib.py~",
+    "03. Python/2026-06-25 Python  Лекция 7.md",
+    "03. Python/Практика/lab7/2026-06-29 16.30 Физическая диаграмма.md",
+    "03. Python/Практика/lab7/2026-06-29 16.23.31 сущности.md",
     "03. Python/Практика/lab7/2026-06-29 16.37.43 Функции.md",
+    "03. Python/Практика/lab7/Export.csv",
+    "03. Python/Практика/lab7/2026-06-29 16.10 Пользовательские истории.md",
     "03. Python/Практика/lab7/userLib.py",
     "03. Python/Практика/lab7/dataLib.py",
     "03. Python/Практика/lab7/dataLibr.py",
     "03. Python/Практика/lab7/datamanager.py",
-    "03. Python/Практика/lab7/fileLib.py",
-    "03. Python/Практика/lab7/App.py",
-    "03. Python/Практика/lab7/App.pyi",
-    "03. Python/Практика/lab7/2026-06-29 16.30 Физическая диаграмма.md",
-    "03. Python/Практика/lab7/2026-06-29 16.23.31 сущности.md",
     "03. Python/Практика/lab5/README.md",
-    "03. Python/2026-06-25 Python  Лекция 7.md",
     "03. Python/Практика/lab5/out.gif",
-    "03. Python/Практика/lab5/sim_results.txt",
-    "03. Python базовый уровень/Практика/lab5/__pycache__/CellInfo.cpython-310.pyc",
-    "03. Python/Практика/lab5/input.txt",
-    "03. Python/Практика/lab7/2026-06-29 16.10 Пользовательские истории.md",
     "03. Python/Практика/lab7/физическая диаграмма.svg",
     "02. Введение в базы данных/Практика/Лабораторная 2/Pasted image 20260514215019.png",
     "01. Технологии программирования/2026-04-27 Седьмое занятие.md",
@@ -267,8 +269,6 @@
     "01. Технологии программирования/Практика/2026-04-15 18.33 Пользовательские истории.md",
     "01. Технологии программирования/Практика/2026-04-15 18.10 Роли.md",
     "03. Python/2026-06-09 Python (базовый) Лекция 5.md",
-    "03. Python/2026-06-08 Python (базовый) Лекция 4.md",
-    "03. Python/2026-06-04 Python (базовый) Лекция 3.md",
-    "01. Технологии программирования/Практика/2026-04-15 11.58.19 Концепт.md"
+    "03. Python/2026-06-08 Python (базовый) Лекция 4.md"
   ]
 }
