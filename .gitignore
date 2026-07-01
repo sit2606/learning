@@ -3,3 +3,13 @@ test_lab5.py
 .idea
 .venv
 .mimocode
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/

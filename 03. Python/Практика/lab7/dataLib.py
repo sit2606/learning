@@ -6,12 +6,12 @@ dataLib — библиотека для управления данными о �
 через CSV-файлы.
 
 Использование:
-    from dataLib import create_reference, create_reference_entry
+    from dataLib import create_reference, create_reference_entry, read_reference_entry
 """
 
 import csv
 import uuid
-
+import os
 
 def create_market():
     """
@@ -68,10 +68,11 @@ def create_reference(reference_name):
         print("Error in create reference")
 def create_reference_entry(reference_name, data_to_create):
     """
-    Добавляет новую запись в существующий справочник.
+    Добавляет новую запись в справочник.
 
-    Генерирует уникальный UUID для поля 'Id' и записывает его вместе
-    с переданным значением в CSV-файл справочника.
+    Если CSV-файл справочника не существует, создаёт его автоматически
+    через create_reference(). Затем генерирует UUID и записывает
+    новую строку [Id, Name] в файл.
 
     Args:
         reference_name (str): Имя справочника (без расширения .csv).
@@ -86,15 +87,18 @@ def create_reference_entry(reference_name, data_to_create):
 
     Example:
         >>> create_reference_entry('categories', 'Овощи')
-        # Добавляет строку [UUID, 'Овощи'] в файл categories.csv
+        # Создаёт categories.csv (если нет) и добавляет строку [UUID, 'Овощи']
     """
     _reference_name = reference_name
     _data_to_create = data_to_create
+    file_path = f"{_reference_name}.csv"
+    if not os.path.isfile(file_path):
+        create_reference(reference_name)
     try:
-        with open(f"{_reference_name}.csv", "a", newline="", encoding="utf-8") as file:
+        with open(file_path, "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             uid = uuid.uuid4()
-            writer.writerow([uid, _data_to_create])
+            writer.writerow([uid, data_to_create])
     except Exception as e:
         print(e)
         print("Error in create_reference_entry")
@@ -102,13 +106,14 @@ def read_reference_entry(reference_name, entry_uid=None, entry_name=None):
     """
     Ищет запись в справочнике по UUID или имени.
 
-    Построчно перебирает CSV-файл и возвращает первую найденную запись,
-    где поле 'Id' совпадает с entry_uid или поле 'Name' совпадает с entry_name.
+    Если CSV-файл не существует, создаёт пустой справочник.
+    Затем перебирает строки и возвращает первую запись, где
+    поле 'Id' совпадает с entry_uid или поле 'Name' совпадает с entry_name.
 
     Args:
         reference_name (str): Имя справочника (без расширения .csv).
-        entry_uid: UUID записи для поиска по полю 'Id' (по умолчанию NULL).
-        entry_name: Имя записи для поиска по полю 'Name' (по умолчанию NULL).
+        entry_uid: UUID записи для поиска по полю 'Id' (по умолчанию None).
+        entry_name: Имя записи для поиска по полю 'Name' (по умолчанию None).
 
     Returns:
         tuple: кортеж (Id, Name) найденной записи, или None если не найдена.
@@ -126,6 +131,9 @@ def read_reference_entry(reference_name, entry_uid=None, entry_name=None):
     _reference_name = reference_name
     _entry_uid = entry_uid
     _entry_name = entry_name
+    file_path = f"{_reference_name}.csv"
+    if not os.path.isfile(file_path):
+        create_reference(reference_name)
     try:
         with open(f"{_reference_name}.csv", "r", newline="", encoding="utf-8") as file:
             reader = csv.DictReader(file)
@@ -139,32 +147,26 @@ def read_reference_entry(reference_name, entry_uid=None, entry_name=None):
         print("Error in read_reference_entry")
 def update_reference_entry(reference_name, data_to_update):
     """
-    Обновляет существующую запись в CSV-справочнике.
+    Обновляет существующую запись в CSV-справочнике по полю 'Id'.
 
-    Открывает CSV-файл справочника, перебирает строки и обновляет значения
-    в тех ячейках, где ключ столбца совпадает с ключом из переданного словаря.
+    Читает CSV-файл, находит строку с Id, совпадающим с data_to_update["Id"],
+    обновляет её значениями из data_to_update и перезаписывает файл.
 
     Args:
         reference_name (str): Имя справочника (без расширения .csv).
-            Файл ищется как '<reference_name>.csv' в текущей директории.
-        data_to_update (dict): Словарь вида {столбец: новое_значение}.
-            Ключи должны совпадать с именами столбцов CSV-файла.
+        data_to_update (dict): Словарь вида {'Id': '...', 'Name': '...'}.
+            Обязательно должен содержать ключ 'Id' для поиска записи.
 
     Returns:
         None
 
     Raises:
-        При ошибке чтения/записи файла выводит сообщение
-        "Error in update_reference_entry" в консоль.
-
-    Note:
-        Файл открывается в режиме добавления ('a'), что может привести
-        к некорректной работе DictReader. Для корректного обновления
-        рекомендуется использовать режим 'r+' или перезапись файла.
+        Exception: при ошибке чтения/записи файла выводит сообщение
+        "Error in update_reference_entry" и текст исключения в консоль.
 
     Example:
-        >>> update_reference_entry('categories', {'Name': 'Фрукты'})
-        # Заменяет значение столбца 'Name' на 'Фрукты' во всех строках
+        >>> update_reference_entry('categories', {'Id': 'abc-123', 'Name': 'Фрукты'})
+        # Обновляет Name у записи с Id 'abc-123'
     """
     _reference_name = reference_name
     _data_to_update = data_to_update
@@ -216,14 +218,14 @@ def create_connection_entry(reference_name, market_id, reference_id, status):
     """
     Добавляет запись о связи между рынком и элементом справочника.
 
-    Генерирует UUID для связи и записывает market_id, reference_id, status
-    в CSV-файл.
+    Если CSV-файл не существует, создаёт его через create_connection_reference().
+    Записывает строку [market_id, reference_id, status] в файл.
 
     Args:
         reference_name (str): Имя файла связи (без расширения .csv).
         market_id: Идентификатор рынка.
         reference_id: Идентификатор элемента справочника.
-        status: Статус связи (например, 'active', 'inactive').
+        status: Значение связи (например, URL соцсети, тип товара).
 
     Returns:
         None
@@ -233,18 +235,21 @@ def create_connection_entry(reference_name, market_id, reference_id, status):
         "Error in create reference entity" и текст исключения в консоль.
 
     Example:
-        >>> create_connection_entry('market_goods', 'mkt-1', 'good-5', 'active')
-        # Добавляет связь рынка mkt-1 с товаром good-5 в файл market_goods.csv
+        >>> create_connection_entry('MarketXSocialMedia', 'mkt-1', 'ref-5', 'https://...')
+        # Создаёт файл MarketXSocialMedia.csv (если нет) и добавляет связь
     """
+
     _reference_name = reference_name
     _market_id = market_id
     _reference_id = reference_id
     _status = status
+    file_path = f"{_reference_name}.csv"
+    if not os.path.isfile(file_path):
+        create_connection_reference(reference_name)
     try:
         with open(f"{_reference_name}.csv", "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            uid = uuid.uuid4()
-            writer.writerow([uid, market_id, reference_id, status])
+            writer.writerow([ market_id, reference_id, status])
     except Exception as e:
         print(e)
         print("Error in create reference entity")
@@ -282,3 +287,53 @@ def read_connection_entry(reference_name, market_id, reference_id):
                     return row["status"]
     except:
         print("Error in read_connection_entry")
+def create_market_base(market_info):
+    """
+    Создаёт CSV-файл MARKET_INFO.csv с расширенной информацией о рынках.
+
+    Принимает словарь market_info (возвращённый read_csv()) и записывает
+    данные в CSV-файл со структурой: market_id, market_name, street, city,
+    county, state, zip, season1date-time, season2date-time, season3date-time, season4date-time.
+
+    Args:
+        market_info (dict): Словарь {FMID: {атрибуты_рынка}} из read_csv().
+
+    Returns:
+        None
+
+    Raises:
+        Exception: при ошибке записи файла выводит сообщение
+        "Error in create market base" и текст исключения в консоль.
+
+    Example:
+        >>> data = fileLib.read_csv()
+        >>> create_market_base(data)
+        # Создаёт MARKET_INFO.csv со всеми рынками
+    """
+    _reference_name = 'MARKET_INFO'
+    field_names = ['market_id',
+                   'marketname',
+                   'street',
+                   'city',
+                   'county',
+                   'state',
+                   'zip',
+                   'season1date',
+                   'season1time',
+                   'season2date',
+                   'season2time',
+                   'season3date',
+                   'season3time',
+                   'season4date',
+                   'season4time']
+    try:
+        with open(f"{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=field_names)
+            writer.writeheader()
+            for i in market_info:
+                row = {'market_id':i}
+                row.update(market_info[i])
+                writer.writerow(row)
+    except Exception as e:
+        print(e)
+        print("Error in create market base")
