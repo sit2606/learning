@@ -13,3 +13,4 @@ __pycache__/
 *.egg
 dist/
 build/
+/03. Python/Практика/files/USER_INFO.csv

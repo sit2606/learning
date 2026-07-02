@@ -1,16 +1,16 @@
 """
-workfowLib — модуль оркестрации рабочего процесса.
+workflowLib — модуль оркестрации рабочего процесса и обработки команд.
 
 Связывает создание директории для файлов, проверку наличия файлов,
-инициализацию справочников и парсинг данных в единый рабочий процесс.
+инициализацию справочников, парсинг данных и обработку пользовательских команд.
 
 Использование:
-    from workfowLib import directory_creation, file_creation
+    from workflowLib import directory_creation, file_creation, get_command, proceed_command
 """
 import os
 
-import fileLib
-import dataLib
+from BusinessLogic import commandHandler
+from DAL import fileLib
 
 
 def directory_creation():
@@ -24,12 +24,10 @@ def directory_creation():
         "Error in directory_creation" и текст исключения в консоль.
     """
     try:
-        os.makedirs("files", exist_ok=True)
+        os.makedirs("../files", exist_ok=True)
     except Exception as e:
         print(e)
         print("Error in directory_creation")
-
-
 def file_creation():
     """
     Проверяет наличие необходимых CSV-файлов и пересоздаёт данные при необходимости.
@@ -50,3 +48,17 @@ def file_creation():
         print('User base recreation in progress...')
         fileLib.create_user_base()
         print('User base successfully created...')
+
+def get_command():
+    command = input('Пожалуйста, введите команду: ')
+    return command
+def proceed_command(command):
+    is_run = True
+    match command:
+        case 'help':
+            is_run = commandHandler.command_help()
+        case 'list':
+            is_run = commandHandler.command_list()
+        case 'exit':
+            is_run = commandHandler.command_exit()
+    return is_run

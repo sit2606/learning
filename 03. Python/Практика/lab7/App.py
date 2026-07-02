@@ -2,15 +2,15 @@
 App — точка входа приложения для управления фермерскими рынками.
 
 Содержит user_lib_testing() для демонстрации CRUD-операций с пользователями
-и main() как основную точку запуска.
+и main() как основную точку запуска с циклом обработки команд.
 
 Использование:
     python App.py
 """
 
-import dataLib
-import userLib
-from workfowLib import *
+from DAL import userLib
+from UI.uiLib import print_welcome
+from BusinessLogic.workflowLib import *
 
 
 def user_lib_testing():
@@ -27,7 +27,11 @@ def main():
     directory_creation()
     user_lib_testing()
     file_creation()
-    print('s')
+    run_app = True
+    print_welcome()
+    while run_app:
+        command = get_command()
+        run_app = proceed_command(command)
 
 if __name__ == "__main__":
     main()

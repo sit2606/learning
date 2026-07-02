@@ -2,22 +2,29 @@
 
 ## Описание
 
-Приложение для парсинга CSV-датасета фермерских рынков (Export.csv), создания справочников и связывания данных через промежуточные CSV-файлы.
+Приложение для парсинга CSV-датасета фермерских рынков (Export.csv), создания справочников и связывания данных через промежуточные CSV-файлы. Построено по трёхуровневой архитектуре: UI → BusinessLogic → DAL.
 
 ## Структура проекта
 
 ```
 lab7/
-├── App.py              # Точка входа приложения
-├── workfowLib.py       # Оркестрация рабочего процесса
-├── requiredFiles.py    # Константы категорий и список файлов для проверки
-├── referenceLib.py     # CRUD-операции со справочниками и связями
-├── dataLib.py          # CRUD-операции с рынками (заглушки)
-├── fileLib.py          # Инициализация справочников, парсинг Export.csv, проверка файлов
-├── userLib.py          # CRUD-операции с пользователями
-├── files/              # CSV-файлы (справочники, связи, данные)
-├── README.md           # Документация
-└── Export.csv          # Исходный датасет (не включён)
+├── App.py                          # Точка входа приложения
+├── BusinessLogic/                  # Слой бизнес-логики
+│   ├── workflowLib.py              # Оркестрация процесса и обработка команд
+│   └── commandHandler.py           # Обработчики команд (help, list, exit)
+├── DAL/                            # Слой доступа к данным (Data Access Layer)
+│   ├── fileLib.py                  # Парсинг Export.csv, инициализация справочников
+│   ├── referenceLib.py             # CRUD-операции со справочниками и связями
+│   ├── dataLib.py                  # CRUD-операции с рынками (заглушки)
+│   ├── userLib.py                  # CRUD-операции с пользователями
+│   └── requiredFiles.py            # Константы категорий и список файлов
+├── UI/                             # Слой интерфейса пользователя
+│   └── uiLib.py                    # Функции вывода в консоль
+├── files/                          # CSV-файлы (справочники, связи, данные)
+├── документация/                   # Диаграммы и пользовательские истории
+├── .gitignore                      # Исключения Git
+├── README.md                       # Документация
+└── Export.csv                      # Исходный датасет (не включён)
 ```
 
 ## Запуск
@@ -26,7 +33,28 @@ lab7/
 python App.py
 ```
 
-Для работы необходим файл `Export.csv` в текущей директории.
+Для работы необходим файл `Export.csv` в корневой директории проекта.
+
+## Архитектура
+
+```
+App.py
+ │
+ ├── UI/uiLib.py                    — приветствие, справка, выход
+ │
+ ├── BusinessLogic/
+ │    ├── workflowLib.py            — оркестрация, командный цикл
+ │    └── commandHandler.py         — обработчики команд
+ │
+ └── DAL/
+      ├── fileLib.py                — парсинг CSV, инициализация
+      ├── referenceLib.py           — CRUD справочников и связей
+      ├── dataLib.py                — CRUD рынков (заглушки)
+      ├── userLib.py                — CRUD пользователей
+      └── requiredFiles.py          — константы
+```
+
+Зависимости: `App.py` → `BusinessLogic` + `UI` → `DAL`
 
 ## Модули
 
@@ -36,17 +64,40 @@ python App.py
 1. `directory_creation()` — создаёт папку `files/` для CSV-файлов
 2. `user_lib_testing()` — демонстрация CRUD-операций с пользователями
 3. `file_creation()` — проверка файлов и создание данных
+4. Цикл команд: вывод приветствия, чтение и обработка команд пользователя
 
-### workfowLib.py
+### BusinessLogic/workflowLib.py
 
-Оркестрация рабочего процесса. Создание директории для файлов, проверка наличия файлов, инициализация справочников и парсинг данных.
+Оркестрация рабочего процесса и обработка пользовательских команд.
 
 | Функция | Описание |
 |---------|----------|
 | `directory_creation()` | Создаёт папку `files/` для хранения CSV-файлов |
 | `file_creation()` | Проверяет файлы через `file_status_check()`, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv и USER_INFO.csv |
+| `get_command()` | Считывает команду пользователя из stdin |
+| `proceed_command(command)` | Обрабатывает команду (help/list/exit), возвращает True для продолжения, False для выхода |
 
-### requiredFiles.py
+### BusinessLogic/commandHandler.py
+
+Обработчики команд пользователя.
+
+| Функция | Описание |
+|---------|----------|
+| `command_help()` | Выводит список доступных команд через uiLib |
+| `command_list()` | Заглушка (в разработке) — вывод таблицы рынков |
+| `command_exit()` | Выводит сообщение о завершении, возвращает False |
+
+### UI/uiLib.py
+
+Функции вывода текста в консоль (интерфейс пользователя).
+
+| Функция | Описание |
+|---------|----------|
+| `print_welcome()` | Выводит приветственное сообщение |
+| `print_help()` | Выводит список доступных команд |
+| `print_exit()` | Выводит сообщение о завершении работы |
+
+### DAL/requiredFiles.py
 
 Модуль констант. Содержит множества столбцов CSV-датасета, сгруппированные по категориям, а также список файлов для проверки:
 
@@ -61,7 +112,7 @@ python App.py
 | `GROCERY_TYPES` | Organic, Vegetables, Honey, Meat и др. (29 типов) |
 | `FILES_TO_CHECK` | Множество имён CSV-файлов для проверки наличия перед работой |
 
-### dataLib.py
+### DAL/dataLib.py
 
 CRUD-операции с фермерскими рынками (все функции — заглушки в разработке).
 
@@ -71,7 +122,7 @@ CRUD-операции с фермерскими рынками (все функ�
 | `update_market()` | Заглушка (в разработке) |
 | `delete_market()` | Заглушка (в разработке) |
 
-### referenceLib.py
+### DAL/referenceLib.py
 
 CRUD-операции со справочниками (справочные CSV-файлы) и связями между рынками и справочниками.
 
@@ -85,7 +136,7 @@ CRUD-операции со справочниками (справочные CSV-
 | `create_connection_entry(name, mkt, ref, status)` | Добавляет связь (файл создаётся автоматически) |
 | `read_connection_entry(name, mkt, ref)` | Ищет статус связи по market_id и reference_id |
 
-### fileLib.py
+### DAL/fileLib.py
 
 Инициализация справочников, парсинг Export.csv, проверка наличия файлов, создание MARKET_INFO.csv и USER_INFO.csv.
 
@@ -97,9 +148,9 @@ CRUD-операции со справочниками (справочные CSV-
 | `create_market_base(data)` | Создаёт MARKET_INFO.csv из словаря market_info |
 | `create_user_base()` | Создаёт USER_INFO.csv с заголовками: Id, user_name, password, firstname, lastname, location |
 
-### userLib.py
+### DAL/userLib.py
 
-CRUD-операции с пользователями через CSV-файл USER_INFO.csv.
+CRUD-операции с пользователями через CSV-файл files/USER_INFO.csv.
 
 | Элемент | Описание |
 |---------|----------|
@@ -114,19 +165,29 @@ CRUD-операции с пользователями через CSV-файл US
 
 ```
 App.py
- ├─ directory_creation()  → files/
- ├─ user_lib_testing()    → userLib (CRUD) → files/USER_INFO.csv
- └─ file_creation()
+ ├─ directory_creation()           → files/
+ ├─ user_lib_testing()             → DAL/userLib (CRUD) → files/USER_INFO.csv
+ ├─ print_welcome()                → UI/uiLib
+ └─ цикл команд:
          │
-         ├─ fileLib.file_status_check()  ← requiredFiles.FILES_TO_CHECK
+         ├─ get_command()          → BusinessLogic/workflowLib
+         └─ proceed_command()      → BusinessLogic/workflowLib
+                 │
+                 ├─ 'help'  → commandHandler.command_help()  → UI/uiLib.print_help()
+                 ├─ 'list'  → commandHandler.command_list()  (заглушка)
+                 └─ 'exit'  → commandHandler.command_exit()  → UI/uiLib.print_exit()
+
+ file_creation()
+         │
+         ├─ DAL/fileLib.file_status_check()  ← DAL/requiredFiles.FILES_TO_CHECK
          │       │
          │       └─ (если файлы отсутствуют)
          │
          ▼
-   requiredFiles.py (константы категорий)
+   DAL/requiredFiles.py (константы категорий)
              │
              ▼
-   fileLib.py                    referenceLib.py              dataLib.py
+   DAL/fileLib.py                DAL/referenceLib.py          DAL/dataLib.py
     ├─ prepare_ref()             ├─ create_reference()        ├─ create_market()     (заглушка)
     │   │                        ├─ create_reference_entry()  ├─ update_market()     (заглушка)
     │   ├── MEDIA.csv            ├─ read_reference_entry()    └─ delete_market()     (заглушка)

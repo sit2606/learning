@@ -16,9 +16,8 @@ fileLib — библиотека для инициализации справо�
 """
 
 import csv
-import referenceLib
-from referenceLib import create_reference_entry
-import requiredFiles
+from DAL import referenceLib, requiredFiles
+from DAL.referenceLib import create_reference_entry
 import os
 
 REF_LIST = [{'MEDIA': requiredFiles.MEDIA}, {'GROCERY_TYPES': requiredFiles.GROCERY_TYPES},
@@ -213,3 +212,18 @@ def create_user_base():
     except Exception as e:
         print(e)
         print("Error in create_user_base")
+def get_markets_base():
+    _reference_name = 'USER_INFO'
+    field_names = ['Id',
+                   'user_name',
+                   'password',
+                   'firstname',
+                   'lastname',
+                   'location']
+    try:
+        with open(f"files/{_reference_name}.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            print(reader)
+    except Exception as e:
+        print(e)
+        print("Error in get_user_base")
