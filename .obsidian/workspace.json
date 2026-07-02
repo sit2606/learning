@@ -11,14 +11,14 @@
             "id": "1f5346464920e1a6",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "03. Python/Практика/lab7/BusinessLogic/commandHandler.py",
-                "bFile": "03. Python/Практика/lab7/BusinessLogic/commandHandler.py",
-                "aRef": ""
+                "file": "README.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: commandHandler.py  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "README"
             }
           }
         ]
