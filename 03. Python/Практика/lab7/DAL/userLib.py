@@ -18,7 +18,7 @@ field_names = ['Id',
                'firstname',
                'lastname',
                'location']
-DEFAULT_USER = {'Id': 0,
+DEFAULT_USER = {'Id': None,
                 'user_name': 'test',
                 'password': '',
                 'firstname': 'test_firstname',

@@ -11,6 +11,7 @@ import os
 
 from BusinessLogic import commandHandler
 from DAL import fileLib
+from UI import uiLib
 
 
 def directory_creation():
@@ -56,9 +57,12 @@ def proceed_command(command):
     is_run = True
     match command:
         case 'help':
+            uiLib.print_help()
             is_run = commandHandler.command_help()
         case 'list':
-            is_run = commandHandler.command_list()
+            is_run, market_list = commandHandler.command_list()
+            uiLib.print_list(market_list)
         case 'exit':
+            uiLib.print_exit()
             is_run = commandHandler.command_exit()
     return is_run

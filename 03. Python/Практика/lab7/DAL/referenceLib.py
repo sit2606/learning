@@ -3,10 +3,12 @@ referenceLib — библиотека для управления справоч
 
 Модуль предоставляет CRUD-функции для работы со справочными CSV-файлами
 (references) и связями между рынками и элементами справочников (connections).
+Также содержит get_reference() для чтения справочников в dict и
+create_connection_entry_by_list() для батчевой записи связей.
 Все файлы хранятся в папке files/.
 
 Использование:
-    from referenceLib import create_reference, create_reference_entry, read_reference_entry
+    from referenceLib import create_reference, get_reference, read_reference_entry
 """
 
 import csv
@@ -265,6 +267,20 @@ def create_connection_entry(reference_name, market_id, reference_id, status):
 
 
 def create_connection_entry_by_list(reference_name, list_entries):
+    """
+    Батчевая запись списка связей в CSV-файл.
+
+    Если CSV-файл не существует, создаёт его через create_connection_reference().
+    Записывает все строки из list_entries одним блоком.
+
+    Args:
+        reference_name (str): Имя файла связи (без расширения .csv).
+        list_entries (list): Список строк [market_id, reference_id, status].
+
+    Raises:
+        Exception: при ошибке записи файла выводит сообщение
+        "create_connection_entry_by_list" и текст исключения в консоль.
+    """
     _reference_name = reference_name
     file_path = f"files/{_reference_name}.csv"
     if not os.path.isfile(file_path):

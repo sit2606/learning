@@ -11,7 +11,8 @@ lab7/
 ├── App.py                          # Точка входа приложения
 ├── BusinessLogic/                  # Слой бизнес-логики
 │   ├── workflowLib.py              # Оркестрация процесса и обработка команд
-│   └── commandHandler.py           # Обработчики команд (help, list, exit)
+│   ├── commandHandler.py           # Обработчики команд (help, list, exit)
+│   └── marketList.py               # Бизнес-логика получения списка рынков
 ├── DAL/                            # Слой доступа к данным (Data Access Layer)
 │   ├── fileLib.py                  # Парсинг Export.csv, инициализация справочников
 │   ├── referenceLib.py             # CRUD-операции со справочниками и связями
@@ -40,14 +41,15 @@ python App.py
 ```
 App.py
  │
- ├── UI/uiLib.py                    — приветствие, справка, выход
+ ├── UI/uiLib.py                    — приветствие, справка, список рынков, выход
  │
  ├── BusinessLogic/
  │    ├── workflowLib.py            — оркестрация, командный цикл
- │    └── commandHandler.py         — обработчики команд
+ │    ├── commandHandler.py         — обработчики команд
+ │    └── marketList.py             — бизнес-логика списка рынков
  │
  └── DAL/
-      ├── fileLib.py                — парсинг CSV, инициализация
+      ├── fileLib.py                — парсинг CSV, инициализация, чтение данных
       ├── referenceLib.py           — CRUD справочников и связей
       ├── dataLib.py                — CRUD рынков (заглушки)
       ├── userLib.py                — CRUD пользователей
@@ -84,8 +86,16 @@ App.py
 | Функция | Описание |
 |---------|----------|
 | `command_help()` | Выводит список доступных команд через uiLib |
-| `command_list()` | Заглушка (в разработке) — вывод таблицы рынков |
+| `command_list()` | Получает список рынков через marketList и выводит через uiLib |
 | `command_exit()` | Выводит сообщение о завершении, возвращает False |
+
+### BusinessLogic/marketList.py
+
+Бизнес-логика для работы со списком рынков.
+
+| Функция | Описание |
+|---------|----------|
+| `get_all_markets()` | Получает данные о рынках через fileLib.get_markets_base() |
 
 ### UI/uiLib.py
 
@@ -95,6 +105,7 @@ App.py
 |---------|----------|
 | `print_welcome()` | Выводит приветственное сообщение |
 | `print_help()` | Выводит список доступных команд |
+| `print_list(markets)` | Выводит таблицу со списком всех рынков |
 | `print_exit()` | Выводит сообщение о завершении работы |
 
 ### DAL/requiredFiles.py
@@ -129,11 +140,13 @@ CRUD-операции со справочниками (справочные CSV-
 | Функция | Описание |
 |---------|----------|
 | `create_reference(name)` | Создаёт CSV-файл с заголовками Id, Name |
+| `get_reference(name, type)` | Читает справочник в dict {Name: Id} или {market_id: [ref_id, status]} |
 | `create_reference_entry(name, data)` | Добавляет запись [UUID, Name] (файл создаётся автоматически) |
 | `read_reference_entry(name, uid, name)` | Ищет запись по UUID или имени, возвращает (Id, Name) |
 | `update_reference_entry(name, data)` | Обновляет запись по ключу Id |
 | `create_connection_reference(name)` | Создаёт CSV-файл связей (market_id, reference_id, status) |
 | `create_connection_entry(name, mkt, ref, status)` | Добавляет связь (файл создаётся автоматически) |
+| `create_connection_entry_by_list(name, list)` | Батчевая запись списка связей в CSV-файл |
 | `read_connection_entry(name, mkt, ref)` | Ищет статус связи по market_id и reference_id |
 
 ### DAL/fileLib.py
@@ -146,6 +159,7 @@ CRUD-операции со справочниками (справочные CSV-
 | `read_csv()` | Читает Export.csv, создаёт связи, возвращает dict {FMID: {атрибуты}} |
 | `file_status_check()` | Проверяет наличие CSV-файлов из `FILES_TO_CHECK`, возвращает True при необходимости пересоздания |
 | `create_market_base(data)` | Создаёт MARKET_INFO.csv из словаря market_info |
+| `get_markets_base()` | Читает MARKET_INFO.csv и возвращает данные о рынках |
 | `create_user_base()` | Создаёт USER_INFO.csv с заголовками: Id, user_name, password, firstname, lastname, location |
 
 ### DAL/userLib.py
@@ -174,7 +188,10 @@ App.py
          └─ proceed_command()      → BusinessLogic/workflowLib
                  │
                  ├─ 'help'  → commandHandler.command_help()  → UI/uiLib.print_help()
-                 ├─ 'list'  → commandHandler.command_list()  (заглушка)
+                 ├─ 'list'  → commandHandler.command_list()
+                 │              → marketList.get_all_markets()
+                 │                  → DAL/fileLib.get_markets_base()
+                 │              → UI/uiLib.print_list(markets)
                  └─ 'exit'  → commandHandler.command_exit()  → UI/uiLib.print_exit()
 
  file_creation()
@@ -189,12 +206,14 @@ App.py
              ▼
    DAL/fileLib.py                DAL/referenceLib.py          DAL/dataLib.py
     ├─ prepare_ref()             ├─ create_reference()        ├─ create_market()     (заглушка)
-    │   │                        ├─ create_reference_entry()  ├─ update_market()     (заглушка)
-    │   ├── MEDIA.csv            ├─ read_reference_entry()    └─ delete_market()     (заглушка)
-    │   ├── GROCERY_TYPES.csv    ├─ update_reference_entry()
-    │   └── BANKING_INFO.csv     ├─ create_connection_reference()
-    │                            ├─ create_connection_entry()
-    ├─ read_csv()                └─ read_connection_entry()
+    │   │                        ├─ get_reference()           ├─ update_market()     (заглушка)
+    │   ├── MEDIA.csv            ├─ create_reference_entry()  └─ delete_market()     (заглушка)
+    │   ├── GROCERY_TYPES.csv    ├─ read_reference_entry()
+    │   └── BANKING_INFO.csv     ├─ update_reference_entry()
+    │                            ├─ create_connection_reference()
+    ├─ read_csv()                ├─ create_connection_entry()
+    │   │ (кэширование +         ├─ create_connection_entry_by_list()
+    │   │  батчевая запись)      └─ read_connection_entry()
     │   │
     │   ├── MarketXSocialMedia.csv   (market ↔ соцсети)
     │   ├── MarketXGrocery.csv       (market ↔ товары)
@@ -208,6 +227,9 @@ App.py
     │
     ├─ create_market_base()
     │       └── MARKET_INFO.csv (итоговый файл)
+    │
+    ├─ get_markets_base()
+    │       └── чтение MARKET_INFO.csv
     │
     └─ create_user_base()
             └── USER_INFO.csv (файл пользователей)

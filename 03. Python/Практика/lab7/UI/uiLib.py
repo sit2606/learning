@@ -2,10 +2,10 @@
 uiLib — библиотека функций вывода в консоль (UI).
 
 Модуль содержит функции для вывода приветствия, справки
-по командам и сообщения о завершении работы.
+по командам, списка рынков и сообщения о завершении работы.
 
 Использование:
-    from uiLib import print_welcome, print_help, print_exit
+    from uiLib import print_welcome, print_help, print_list, print_exit
 """
 
 
@@ -29,5 +29,6 @@ def print_list(markets):
     print('======--------------------------------======')
     print('Список всех рынков:')
     for market in markets:
-        print(market)
+        formatted_output = str(market) + " | " +
+        print(formatted_output)
     print('======--------------------------------======')

@@ -3,16 +3,17 @@ fileLib — библиотека для инициализации справо�
 
 Модуль содержит:
 - prepare_ref(): инициализация справочников MEDIA, GROCERY_TYPES, BANKING_INFO
-- read_csv(): парсинг CSV-датасета Export.csv и создание связей
+- read_csv(): парсинг CSV-датасета Export.csv с кэшированием и батчевой записью связей
 - file_status_check(): проверка наличия необходимых CSV-файлов
 - create_market_base(): создание итогового CSV-файла MARKET_INFO.csv
+- get_markets_base(): чтение MARKET_INFO.csv
 - create_user_base(): создание CSV-файла пользователей USER_INFO.csv
 
 Операции со справочниками и связями делегируются в referenceLib.
 Все файлы хранятся в папке files/.
 
 Использование:
-    from fileLib import prepare_ref, read_csv, file_status_check, create_market_base, create_user_base
+    from fileLib import prepare_ref, read_csv, file_status_check, create_market_base, get_markets_base, create_user_base
 """
 
 import csv
@@ -221,17 +222,26 @@ def create_user_base():
         print(e)
         print("Error in create_user_base")
 def get_markets_base():
-    _reference_name = 'USER_INFO'
-    field_names = ['Id',
-                   'user_name',
-                   'password',
-                   'firstname',
-                   'lastname',
-                   'location']
+    """
+    Читает CSV-файл MARKET_INFO.csv и возвращает данные о рынках.
+
+    Returns:
+        csv.DictReader: объект чтения CSV с данными о рынках.
+
+    Raises:
+        Exception: при ошибке чтения файла выводит сообщение
+        "Error in get_markets_base" и текст исключения в консоль.
+    """
+    _reference_name = 'MARKET_INFO'
+    market_base = dict()
     try:
         with open(f"files/{_reference_name}.csv", "r", newline="", encoding="utf-8") as file:
             reader = csv.DictReader(file)
-            print(reader)
+            for market_info in reader:
+                market_id = market_info['market_id']
+                market_info.pop('market_id')
+                market_base.update({market_id: market_info})
+        return  market_base
     except Exception as e:
         print(e)
-        print("Error in get_user_base")
+        print("Error in get_markets_base")
