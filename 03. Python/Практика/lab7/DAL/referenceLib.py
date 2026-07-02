@@ -3,12 +3,12 @@ referenceLib — библиотека для управления справоч
 
 Модуль предоставляет CRUD-функции для работы со справочными CSV-файлами
 (references) и связями между рынками и элементами справочников (connections).
-Также содержит get_reference() для чтения справочников в dict и
-create_connection_entry_by_list() для батчевой записи связей.
-Все файлы хранятся в папке files/.
+Также содержит get_reference_with_name_as_key() и get_reference_with_uid_as_key()
+для чтения справочников в dict, и create_connection_entry_by_list() для
+батчевой записи связей. Все файлы хранятся в папке files/.
 
 Использование:
-    from referenceLib import create_reference, get_reference, read_reference_entry
+    from referenceLib import create_reference, get_reference_with_name_as_key, read_reference_entry
 """
 
 import csv
@@ -84,7 +84,25 @@ def get_reference_with_name_as_key(reference_name, reference_type=''):
     except Exception as e:
         print(e)
         print("Error in get_reference")
-def get_reference_with_uid_as_key(reference_name, reference_type=''):
+def get_reference_with_uid_as_key(reference_name, reference_type='Common'):
+    """
+    Читает CSV-файл справочника и возвращает данные в виде dict с Id в качестве ключа.
+
+    Поддерживает два типа чтения:
+    - 'Common': возвращает {Id: Name} (обратный словарь к get_reference_with_name_as_key)
+    - 'Connection': возвращает {market_id: [reference_id, status]} (для MarketX*)
+
+    Args:
+        reference_name (str): Имя справочника (без расширения .csv).
+        reference_type (str): Тип чтения — 'Common' или 'Connection' (по умолчанию 'Common').
+
+    Returns:
+        dict: словарь с данными справочника, или None при ошибке.
+
+    Raises:
+        Exception: при ошибке чтения файла выводит сообщение
+        "Error in get_reference" и текст исключения в консоль.
+    """
 
     _reference_name = reference_name
     reference = dict()

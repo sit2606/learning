@@ -11,13 +11,14 @@ uiLib — библиотека функций вывода в консоль (UI
 
 def print_welcome():
     print('======--------------------------------======')
-    print('Добро пожаловаться в приложение по просмотру')
+    print('Добро пожаловать в приложение для просмотра')
     print('информации о фермерских рынках США')
     print('======--------------------------------======')
 
 def print_help():
     print('Доступные команды:')
-    print('list - выводит таблицу со списком всех рынков')
+    print('list_all - выводит таблицу со списком всех рынков')
+    print('list - выводит таблицу рынков с пагинацией')
     print('help - выводит перечень всех доступных команд')
     print('exit - завершает работу приложения')
 
@@ -25,7 +26,7 @@ def print_exit():
     print('======--------------------------------======')
     print('Программа завершает работу!')
     print('======--------------------------------======')
-def print_list(markets):
+def print_list_all(markets):
     print('======--------------------------------======')
     print('Список всех рынков:')
     for market_id, market_info in markets.items():
@@ -33,4 +34,17 @@ def print_list(markets):
                             ' | ' + market_info['marketname'] +' | '+ market_info['zip'])
         print(formatted_output)
         print('--------------------------------------------')
+    print('======--------------------------------======')
+def print_list(markets, start_pos, step):
+    print('======--------------------------------======')
+    print('Список всех рынков:')
+    header = 'Номер | ID | город | графство | штат | название рынка | п. индекс | '
+    print(header)
+    print('--------------------------------------------')
+    for number  in range(start_pos, start_pos + step):
+        formatted_output = ( str(markets[number]['number']) +  ' | ' +
+                    markets[number]['market_id'] + ' | ' + markets[number]['city'] + ' | ' + markets[number]['county']
+                    + ' | ' + markets[number]['state'] +
+                    ' | ' + markets[number]['marketname']+ ' | ' + markets[number]['zip'] + ' | ')
+        print(formatted_output)
     print('======--------------------------------======')

@@ -60,9 +60,12 @@ def proceed_command(command):
         case 'help':
             uiLib.print_help()
             is_run = commandHandler.command_help()
+        case 'list_all':
+            is_run, market_list = commandHandler.command_list_all()
+            uiLib.print_list_all(market_list)
         case 'list':
-            is_run, market_list = commandHandler.command_list()
-            uiLib.print_list(market_list)
+            is_run, market_list, start_pos, step = commandHandler.command_list()
+            uiLib.print_list(market_list,start_pos, step)
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()

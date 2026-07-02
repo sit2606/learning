@@ -25,14 +25,33 @@ def get_all_markets():
     city_reference = get_reference_with_uid_as_key('CITY', 'Common')
     county_reference = get_reference_with_uid_as_key('COUNTY', 'Common')
     state_reference = get_reference_with_uid_as_key('STATE', 'Common')
+    num  = 1
     for market_id, market_info in market_base.items():
         city = city_reference[market_info['city']]
         county = county_reference[market_info['county']]
         state = state_reference[market_info['state']]
         market_info.update({'city': city, 'county': county, 'state': state})
+        market_info.number({'number': num})
+        num += 1
         market_base.update({market_id: market_info})
     return market_base
-
+def get_all_markets_ordered_by_num():
+    market_base = get_markets_base()
+    city_reference = get_reference_with_uid_as_key('CITY', 'Common')
+    county_reference = get_reference_with_uid_as_key('COUNTY', 'Common')
+    state_reference = get_reference_with_uid_as_key('STATE', 'Common')
+    num  = 1
+    ordered_market_base = {}
+    for market_id, market_info in market_base.items():
+        city = city_reference[market_info['city']]
+        county = county_reference[market_info['county']]
+        state = state_reference[market_info['state']]
+        market_info.update({'city': city, 'county': county, 'state': state})
+        market_info.update({'number': num})
+        market_info.update({'market_id': market_id})
+        ordered_market_base.update({num: market_info})
+        num += 1
+    return ordered_market_base
 
 
 

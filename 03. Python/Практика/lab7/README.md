@@ -101,7 +101,7 @@ commandHandler (BL) → только marketList (BL)                            
 
 | Функция | Описание |
 |---------|----------|
-| `get_all_markets()` | Получает данные о рынках через fileLib.get_markets_base() |
+| `get_all_markets()` | Получает данные о рынках, резолвит ID городов/округов/штатов в имена, возвращает dict |
 
 ### UI/uiLib.py
 
@@ -146,7 +146,8 @@ CRUD-операции со справочниками (справочные CSV-
 | Функция | Описание |
 |---------|----------|
 | `create_reference(name)` | Создаёт CSV-файл с заголовками Id, Name |
-| `get_reference(name, type)` | Читает справочник в dict: `'Common'` → {Name: Id}, `'Connection'` → {market_id: [ref_id, status]} |
+| `get_reference_with_name_as_key(name, type)` | Читает справочник: `'Common'` → {Name: Id}, `'Connection'` → {market_id: [ref_id, status]} |
+| `get_reference_with_uid_as_key(name, type)` | Читает справочник: `'Common'` → {Id: Name}, `'Connection'` → {market_id: [ref_id, status]} |
 | `create_reference_entry(name, data)` | Добавляет запись [UUID, Name] (файл создаётся автоматически) |
 | `read_reference_entry(name, uid, name)` | Ищет запись по UUID или имени, возвращает (Id, Name) |
 | `update_reference_entry(name, data)` | Обновляет запись по ключу Id |
@@ -219,14 +220,15 @@ App.py
              ▼
    DAL/fileLib.py                DAL/referenceLib.py          DAL/dataLib.py
     ├─ prepare_ref()             ├─ create_reference()        ├─ create_market()     (заглушка)
-    │   │                        ├─ get_reference()           ├─ update_market()     (заглушка)
-    │   ├── MEDIA.csv            ├─ create_reference_entry()  └─ delete_market()     (заглушка)
-    │   ├── GROCERY_TYPES.csv    ├─ read_reference_entry()
-    │   └── BANKING_INFO.csv     ├─ update_reference_entry()
-    │                            ├─ create_connection_reference()
-    ├─ read_csv()                ├─ create_connection_entry()
-    │   │ (кэширование +         ├─ create_connection_entry_by_list()
-    │   │  батчевая запись)      └─ read_connection_entry()
+    │   │                        ├─ get_reference_with_name_as_key()  ├─ update_market()     (заглушка)
+    │   ├── MEDIA.csv            ├─ get_reference_with_uid_as_key()   └─ delete_market()     (заглушка)
+    │   ├── GROCERY_TYPES.csv    ├─ create_reference_entry()
+    │   └── BANKING_INFO.csv     ├─ read_reference_entry()
+    │                            ├─ update_reference_entry()
+    ├─ read_csv()                ├─ create_connection_reference()
+    │   │ (кэширование +         ├─ create_connection_entry()
+    │   │  батчевая запись)      ├─ create_connection_entry_by_list()
+    │   │                        └─ read_connection_entry()
     │   │
     │   ├── MarketXSocialMedia.csv   (market ↔ соцсети)
     │   ├── MarketXGrocery.csv       (market ↔ товары)

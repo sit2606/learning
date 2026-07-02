@@ -8,7 +8,7 @@ commandHandler — обработчики команд пользователя.
 Использование:
     from BusinessLogic.commandHandler import command_help, command_list, command_exit
 """
-from BusinessLogic.marketList import get_all_markets
+from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num
 
 
 def command_help():
@@ -16,5 +16,9 @@ def command_help():
 def command_exit():
     return False
 
-def command_list():
+def command_list_all():
     return True, get_all_markets()
+def command_list():
+    start_num = int(input('Введите стартовый номер: ')) or 1
+    step = int(input('Введите  шаг: ')) or 10
+    return True, get_all_markets_ordered_by_num(),start_num,step
