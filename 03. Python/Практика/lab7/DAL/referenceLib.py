@@ -13,6 +13,8 @@ import csv
 import os
 import uuid
 
+from DAL.userLib import field_names
+
 
 def create_reference(reference_name):
     """
@@ -43,6 +45,27 @@ def create_reference(reference_name):
         print(e)
         print("Error in create reference")
 
+def get_reference(reference_name,  reference_type= ''):
+    _reference_name = reference_name
+    reference = dict()
+    try:
+        with open(f"files/{_reference_name}.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            match reference_type:
+                case 'Common':
+                    for i in reader:
+                        reference.update({ i['Name']:i['Id'] })
+                    return  reference
+                case 'Connection':
+                    for i in reader:
+                        reference.update({i['market_id']: [i['reference_id'], i['status'] ]})
+                    return reference
+                case _:
+                    print('Error in get_reference')
+                    print('No reference type provided')
+    except Exception as e:
+        print(e)
+        print("Error in get_reference")
 
 def create_reference_entry(reference_name, data_to_create):
     """
@@ -241,6 +264,18 @@ def create_connection_entry(reference_name, market_id, reference_id, status):
         print("Error in create reference entity")
 
 
+def create_connection_entry_by_list(reference_name, list_entries):
+    _reference_name = reference_name
+    file_path = f"files/{_reference_name}.csv"
+    if not os.path.isfile(file_path):
+        create_connection_reference(reference_name)
+    try:
+        with open(f"files/{_reference_name}.csv", "a", newline="", encoding="utf-8" ) as file:
+            writer = csv.writer(file)
+            writer.writerows(list_entries)
+    except Exception as e:
+        print(e)
+        print("create_connection_entry_by_list")
 def read_connection_entry(reference_name, market_id, reference_id):
     """
     Ищет статус связи между рынком и элементом справочника.
@@ -275,3 +310,4 @@ def read_connection_entry(reference_name, market_id, reference_id):
                     return row["status"]
     except:
         print("Error in read_connection_entry")
+

@@ -17,7 +17,7 @@ fileLib — библиотека для инициализации справо�
 
 import csv
 from DAL import referenceLib, requiredFiles
-from DAL.referenceLib import create_reference_entry
+from DAL.referenceLib import create_reference_entry, get_reference, create_connection_entry_by_list
 import os
 
 REF_LIST = [{'MEDIA': requiredFiles.MEDIA}, {'GROCERY_TYPES': requiredFiles.GROCERY_TYPES},
@@ -83,7 +83,12 @@ def read_csv():
         Выводит в консоль прогресс обработки (оставшееся кол-во строк).
         Файл 'Export.csv' должен находиться в текущей рабочей директории.
     """
-
+    media_reference = get_reference('MEDIA', 'Common')
+    grocery_types = get_reference('GROCERY_TYPES', 'Common')
+    banking_info = get_reference('BANKING_INFO', 'Common')
+    MarketXSocialMedia = []
+    MarketXGrocery = []
+    MarketXBankingInfo = []
     market_info = dict()
     count = 1679
     with open("Export.csv", newline="") as csvfile:
@@ -102,14 +107,14 @@ def read_csv():
                 if key in requiredFiles.TIMESHEET_INFO:
                     market_info[current_id][key.lower()] = value
                 if key in requiredFiles.MEDIA:
-                    reference_id = referenceLib.read_reference_entry('MEDIA', entry_name=key)
-                    referenceLib.create_connection_entry("MarketXSocialMedia", current_id, reference_id[0], value)
+                    reference_id = media_reference[key]
+                    MarketXSocialMedia.append([current_id, reference_id, value])
                 if key in requiredFiles.GROCERY_TYPES:
-                    reference_id = referenceLib.read_reference_entry('GROCERY_TYPES', entry_name=key)
-                    referenceLib.create_connection_entry("MarketXGrocery", current_id, reference_id[0], value)
+                    reference_id = grocery_types[key]
+                    MarketXGrocery.append([current_id, reference_id, value])
                 if key in requiredFiles.BANKING_INFO:
-                    reference_id = referenceLib.read_reference_entry('BANKING_INFO', entry_name=key)
-                    referenceLib.create_connection_entry("MarketXBankingInfo", current_id, reference_id[0], value)
+                    reference_id = banking_info[key]
+                    MarketXBankingInfo.append([current_id, reference_id, value])
                 if key in requiredFiles.LOCATION:
                     reference_id = referenceLib.read_reference_entry(key.upper(), entry_name=value)
                     if reference_id is None:
@@ -118,6 +123,9 @@ def read_csv():
                         market_info[current_id][key.lower()] = reference_id[0]
                     else:
                         market_info[current_id][key.lower()] = reference_id[0]
+        create_connection_entry_by_list('MarketXSocialMedia',MarketXSocialMedia)
+        create_connection_entry_by_list('MarketXGrocery', MarketXGrocery)
+        create_connection_entry_by_list('MarketXBankingInfo', MarketXBankingInfo)
         return market_info
 def file_status_check():
     """

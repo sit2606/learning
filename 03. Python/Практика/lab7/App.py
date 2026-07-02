@@ -9,9 +9,14 @@ App — точка входа приложения для управления �
 """
 
 from DAL import userLib
+from DAL.referenceLib import get_reference
 from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
 
+def testing():
+    x = get_reference('MEDIA', 'Common')
+    z = get_reference('MarketXBankingInfo', 'Connection')
+    print('a')
 
 def user_lib_testing():
     fileLib.create_user_base()
