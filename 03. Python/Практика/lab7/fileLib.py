@@ -1,87 +1,28 @@
 """
-fileLib — библиотека для чтения данных о фермерских рынках.
+fileLib — библиотека для инициализации справочников, парсинга данных, создания MARKET_INFO.csv и USER_INFO.csv.
 
-Модуль парсит CSV-датасет Export.csv, создаёт справочники (MEDIA,
-GROCERY_TYPES, BANKING_INFO, LOCATION) и связывает данные рынков
-с элементами справочников через промежуточные CSV-файлы.
+Модуль содержит:
+- prepare_ref(): инициализация справочников MEDIA, GROCERY_TYPES, BANKING_INFO
+- read_csv(): парсинг CSV-датасета Export.csv и создание связей
+- file_status_check(): проверка наличия необходимых CSV-файлов
+- create_market_base(): создание итогового CSV-файла MARKET_INFO.csv
+- create_user_base(): создание CSV-файла пользователей USER_INFO.csv
+
+Операции со справочниками и связями делегируются в referenceLib.
+Все файлы хранятся в папке files/.
 
 Использование:
-    from fileLib import prepare_ref, read_csv
+    from fileLib import prepare_ref, read_csv, file_status_check, create_market_base, create_user_base
 """
 
 import csv
-import dataLib
-from dataLib import create_reference, create_reference_entry
+import referenceLib
+from referenceLib import create_reference_entry
+import requiredFiles
+import os
 
-# Константы категорий для парсинга Export.csv
-# Каждое множество определяет столбцы CSV-файла, относящиеся к данной категории.
-ref_list = []  # Список справочников для инициализации через prepare_ref()
-MARKET_INFO = {'MarketName', 'street', 'zip'}  # Основная информация о рынке
-
-TIMESHEET_INFO = {'Season1Date',
-                  'Season1Time',
-                  'Season2Date',
-                  'Season2Time',
-                  'Season3Date',
-                  'Season3Time',
-                  'Season4Date',
-                  'Season4Time'}  # Расписание по сезонам (дата + время)
-
-COORDINATES = {'LON', 'LAT'}  # Географические координаты рынка
-
-MEDIA = {
-    'Website',
-    'Facebook',
-    'Twitter',
-    'Youtube',
-    'OtherMedia'
-}  # Ссылки на сайты и соцсети рынка
-
-LOCATION = {
-    'city',
-    'County',
-    'State'
-}  # Местоположение (город, округ, штат)
-
-BANKING_INFO = {'Credit',
-                'WIC',
-                'WICcash',
-                'SFMNP',
-                'SNAP'}  # Принимаемые способы оплаты
-
-GROCERY_TYPES = {'Organic',
-         'Bakedgoods',
-         'Cheese',
-         'Crafts',
-         'Flowers',
-         'Eggs',
-         'Seafood',
-         'Herbs',
-         'Vegetables',
-         'Honey',
-         'Jams',
-         'Maple',
-         'Meat',
-         'Nursery',
-         'Nuts',
-         'Plants',
-         'Poultry',
-         'Prepared',
-         'Soap',
-         'Trees',
-         'Wine',
-         'Coffee',
-         'Beans',
-         'Fruits',
-         'Grains',
-         'Juices',
-         'Mushrooms',
-         'PetFood',
-         'Tofu',
-         'WildHarvested'}  # Типы товаров, реализуемых на рынке
-ref_list.append({'MEDIA': MEDIA})
-ref_list.append({'GROCERY_TYPES': GROCERY_TYPES})
-ref_list.append({'BANKING_INFO': BANKING_INFO})
+REF_LIST = [{'MEDIA': requiredFiles.MEDIA}, {'GROCERY_TYPES': requiredFiles.GROCERY_TYPES},
+            {'BANKING_INFO': requiredFiles.BANKING_INFO}]  # Список справочников для инициализации через prepare_ref()
 
 
 def prepare_ref():
@@ -103,19 +44,18 @@ def prepare_ref():
         # Создаёт файлы MEDIA.csv, GROCERY_TYPES.csv, BANKING_INFO.csv
         # и заполняет их записями
     """
-    for item in ref_list:
+    for item in REF_LIST:
         ref_name = list(item.keys())[0]
-        create_reference(ref_name)
+        referenceLib.create_reference(ref_name)
         list_of_entries = item.get(ref_name)
         for value in list_of_entries:
             create_reference_entry(ref_name, value)
-
 def read_csv():
     """
     Читает CSV-файл 'Export.csv' с данными о фермерских рынках.
 
     Парсит файл построчно, группирует информацию по рынкам (ключ — FMID)
-    в словарь market_info и создаёт связи с справочниками.
+    в словарь market_info и создаёт связи со справочниками.
 
     Обрабатываемые категории:
     - MARKET_INFO → market_info: название, улица, индекс
@@ -151,33 +91,125 @@ def read_csv():
         reader = csv.DictReader(csvfile)
         for row in reader:
             count -= 1
-            print(f'Осталось {count} файлов')
+            print(f'Осталось {count} строк')
             for key, value in row.items():
                 if key == 'FMID':
                     current_id = value
                     market_info[current_id] = dict()
-                if key in MARKET_INFO:
+                if key in requiredFiles.MARKET_INFO:
                     market_info[current_id][key.lower()] = value
-                if key in COORDINATES:
+                if key in requiredFiles.COORDINATES:
                     market_info[current_id][key.lower()] = value
-                if key in TIMESHEET_INFO:
+                if key in requiredFiles.TIMESHEET_INFO:
                     market_info[current_id][key.lower()] = value
-                if key in MEDIA:
-                    reference_id = dataLib.read_reference_entry('MEDIA',entry_name=key)
-                    dataLib.create_connection_entry("MarketXSocialMedia",current_id,reference_id[0], value)
-                if key in GROCERY_TYPES:
-                    reference_id = dataLib.read_reference_entry('GROCERY_TYPES', entry_name=key)
-                    dataLib.create_connection_entry("MarketXGrocery", current_id, reference_id[0], value)
-                if key in BANKING_INFO:
-                    reference_id = dataLib.read_reference_entry('BANKING_INFO', entry_name=key)
-                    dataLib.create_connection_entry("MarketXBankingInfo", current_id, reference_id[0], value)
-                if key in LOCATION:
-                    reference_id = dataLib.read_reference_entry(key.upper(), entry_name=value)
-                    if reference_id == None:
+                if key in requiredFiles.MEDIA:
+                    reference_id = referenceLib.read_reference_entry('MEDIA', entry_name=key)
+                    referenceLib.create_connection_entry("MarketXSocialMedia", current_id, reference_id[0], value)
+                if key in requiredFiles.GROCERY_TYPES:
+                    reference_id = referenceLib.read_reference_entry('GROCERY_TYPES', entry_name=key)
+                    referenceLib.create_connection_entry("MarketXGrocery", current_id, reference_id[0], value)
+                if key in requiredFiles.BANKING_INFO:
+                    reference_id = referenceLib.read_reference_entry('BANKING_INFO', entry_name=key)
+                    referenceLib.create_connection_entry("MarketXBankingInfo", current_id, reference_id[0], value)
+                if key in requiredFiles.LOCATION:
+                    reference_id = referenceLib.read_reference_entry(key.upper(), entry_name=value)
+                    if reference_id is None:
                         create_reference_entry(key.upper(), value)
-                        reference_id = dataLib.read_reference_entry(key.upper(), entry_name=value)
+                        reference_id = referenceLib.read_reference_entry(key.upper(), entry_name=value)
                         market_info[current_id][key.lower()] = reference_id[0]
                     else:
                         market_info[current_id][key.lower()] = reference_id[0]
-        return(market_info)
+        return market_info
+def file_status_check():
+    """
+    Проверяет наличие всех необходимых CSV-файлов в текущей директории.
 
+    Перебирает имена из requiredFiles.FILES_TO_CHECK и проверяет
+    существование каждого файла. Выводит в консоль список отсутствующих файлов.
+
+    Returns:
+        bool: True если хотя бы один файл отсутствует (требуется пересоздание),
+              False если все файлы на месте.
+    """
+    creation_needed = False
+    for file in requiredFiles.FILES_TO_CHECK:
+        file_path = f"files/{file}.csv"
+        if not os.path.isfile(file_path):
+            print(f'No {file}.csv in directory')
+
+            creation_needed = True
+    if creation_needed:
+        print('Files will be recreated from Exports.csv')
+
+    else:
+        print('No recreation needed')
+    return creation_needed
+def create_market_base(market_info):
+    """
+    Создаёт CSV-файл MARKET_INFO.csv с расширенной информацией о рынках.
+
+    Принимает словарь market_info (возвращённый read_csv()) и записывает
+    данные в CSV-файл со структурой: market_id, market_name, street, city,
+    county, state, zip, season1date-time, season2date-time, season3date-time, season4date-time.
+
+    Args:
+        market_info (dict): Словарь {FMID: {атрибуты_рынка}} из read_csv().
+
+    Returns:
+        None
+
+    Raises:
+        Exception: при ошибке записи файла выводит сообщение
+        "Error in create market base" и текст исключения в консоль.
+    """
+    _reference_name = 'MARKET_INFO'
+    field_names = ['market_id',
+                   'marketname',
+                   'street',
+                   'city',
+                   'county',
+                   'state',
+                   'zip',
+                   'season1date',
+                   'season1time',
+                   'season2date',
+                   'season2time',
+                   'season3date',
+                   'season3time',
+                   'season4date',
+                   'season4time']
+    try:
+        with open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=field_names)
+            writer.writeheader()
+            for i in market_info:
+                row = {'market_id':i}
+                row.update(market_info[i])
+                writer.writerow(row)
+    except Exception as e:
+        print(e)
+        print("Error in create market base")
+def create_user_base():
+    """
+    Создаёт CSV-файл USER_INFO.csv с заголовками для хранения данных пользователей.
+
+    Структура файла: Id, user_name, password, firstname, lastname, location.
+
+    Raises:
+        Exception: при ошибке создания файла выводит сообщение
+        "Error in create_user_base" и текст исключения в консоль.
+    """
+    _reference_name = 'USER_INFO'
+    field_names = ['Id',
+                   'user_name',
+                   'password',
+                   'firstname',
+                   'lastname',
+                   'location']
+    try:
+        with open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=field_names)
+            writer.writeheader()
+    except Exception as e:
+        print(e)
+        print("Error in create_user_base")

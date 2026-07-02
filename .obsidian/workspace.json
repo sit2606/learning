@@ -35,12 +35,14 @@
             "id": "fbe5d5530cf68b36",
             "type": "leaf",
             "state": {
-              "type": "excalidraw",
+              "type": "split-diff-view",
               "state": {
-                "file": "03. Python/Практика/lab7/2026-06-29 16.37.43 Функции.md"
+                "aFile": "03. Python/Практика/lab7/App.py",
+                "bFile": "03. Python/Практика/lab7/App.py",
+                "aRef": ""
               },
-              "icon": "excalidraw-icon",
-              "title": "2026-06-29 16.37.43 Функции"
+              "icon": "diff",
+              "title": "Diff: App.py  (Working Tree)"
             }
           }
         ],
@@ -215,7 +217,6 @@
       "command-palette:Открыть палитру команд": false,
       "bases:Создать новую базу": false,
       "obsidian-git:Open Git source control": false,
-      "obsidian-excalidraw-plugin:New drawing": false,
       "sheet-plus:Создать Excel Файл": false,
       "markdown-table-editor:Open Markdown Table Editor": false,
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
@@ -223,6 +224,7 @@
   },
   "active": "fbe5d5530cf68b36",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/2026-06-29 16.37.43 Функции.md",
     "03. Python/Практика/lab7/README.md",
     "03. Python/Практика/lab7/MARKET_INFO.csv",
     "03. Python/Практика/lab7/MarketXBankingInfo.csv",
@@ -235,7 +237,6 @@
     "03. Python/Практика/lab7/MEDIA.csv",
     "03. Python/Практика/lab7/BANKING_INFO.csv",
     "03. Python/Практика/lab7/физическая диаграмма.svg",
-    "03. Python/Практика/lab7/2026-06-29 16.37.43 Функции.md",
     "03. Python/Практика/lab7/2026-06-29 16.10 Пользовательские истории.md",
     "03. Python/Практика/lab7/2026-06-29 16.23.31 сущности.md",
     "03. Python/Практика/lab7/2026-06-29 16.30 Физическая диаграмма.md",

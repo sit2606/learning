@@ -1,35 +1,33 @@
 """
 App — точка входа приложения для управления фермерскими рынками.
 
-Содержит функцию testing() для демонстрации работы библиотек
-dataLib и fileLib, и main() как основную точку запуска.
+Содержит user_lib_testing() для демонстрации CRUD-операций с пользователями
+и main() как основную точку запуска.
 
 Использование:
     python App.py
 """
 
+import dataLib
+import userLib
+from workfowLib import *
 
 
-
-
-def testing():
-    """
-    Демонстрационная функция: полный цикл обработки данных.
-
-    1. Инициализирует справочники (MEDIA, GROCERY_TYPES, BANKING_INFO)
-    2. Читает Export.csv и создаёт связи рынков с справочниками
-    3. Создаёт итоговый файл MARKET_INFO.csv
-    """
-    import fileLib
-    import dataLib
-    fileLib.prepare_ref()
-    dataLib.create_market_base(fileLib.read_csv())
-    print('s')
+def user_lib_testing():
+    fileLib.create_user_base()
+    test_user_uid = userLib.create_user()
+    test_user = userLib.read_user(test_user_uid)
+    test_user['firstname'] = 'TestIngs'
+    userLib.update_user(test_user)
+    test_user_to_delete = userLib.create_user()
+    userLib.create_user()
+    userLib.delete_user(test_user_to_delete)
 def main():
     """Основная функция запуска приложения."""
-    import dataLib
-    # import fileLib
-    import userLib
-    testing()
+    directory_creation()
+    user_lib_testing()
+    file_creation()
+    print('s')
+
 if __name__ == "__main__":
     main()

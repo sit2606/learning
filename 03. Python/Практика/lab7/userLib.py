@@ -1,24 +1,96 @@
 """
 userLib — библиотека для управления пользователями.
 
-Модуль предоставляет CRUD-функции для работы с пользователями.
-Все функции пока находятся в разработке (заглушки).
+Модуль предоставляет CRUD-функции для работы с пользователями
+через CSV-файл files/USER_INFO.csv.
 
 Использование:
-    from userLib import create_user, update_user, delete_user
+    from userLib import create_user, read_user, update_user, delete_user
 """
 
+import csv
+import uuid
 
-def create_user():
-    """Создаёт нового пользователя. Функция в разработке (заглушка)."""
+
+field_names = ['Id',
+               'user_name',
+               'password',
+               'firstname',
+               'lastname',
+               'location']
+DEFAULT_USER = {'Id': 0,
+                'user_name': 'test',
+                'password': '',
+                'firstname': 'test_firstname',
+                'lastname': 'test_lastname',
+                'location': 'test_location'}
+def create_user(user = DEFAULT_USER):
+    _user_to_create = user
+    file_path = "files/USER_INFO.csv"
+    try:
+        with open(file_path, "a", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            uid = uuid.uuid4()
+            writer.writerow([uid, user['user_name'],user['password'], user['firstname'], user['lastname'], user['location']])
+            return str(uid)
+    except Exception as e:
+        print(e)
+        print("Error in create_user")
     pass
 
+def read_user(user_id):
+    try:
+        with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row["Id"] == user_id:
+                    return row
+    except Exception as e:
+        print(e)
+        print("Error in read_user")
 
-def update_user():
-    """Обновляет данные существующего пользователя. Функция в разработке (заглушка)."""
-    pass
+def update_user(user = DEFAULT_USER):
+    _user = user
+    try:
+        with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            new_file = []
+            for row in reader:
+                if _user["Id"] == row["Id"]:
+                    row.update(_user)
+                new_file.append(row)
+        with open(f"files/USER_INFO.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=['Id',
+                   'user_name',
+                   'password',
+                   'firstname',
+                   'lastname',
+                   'location'])
+            writer.writeheader()
+            writer.writerows(new_file)
+    except Exception as e:
+        print(e)
+        print("Error in update_user")
 
-
-def delete_user():
-    """Удаляет пользователя. Функция в разработке (заглушка)."""
-    pass
+def delete_user(user_id):
+    _user_id = user_id
+    try:
+        with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            new_file = []
+            for row in reader:
+                if _user_id == row["Id"]:
+                    continue
+                new_file.append(row)
+        with open(f"files/USER_INFO.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=['Id',
+                   'user_name',
+                   'password',
+                   'firstname',
+                   'lastname',
+                   'location'])
+            writer.writeheader()
+            writer.writerows(new_file)
+    except Exception as e:
+        print(e)
+        print("Error in delete_user")
