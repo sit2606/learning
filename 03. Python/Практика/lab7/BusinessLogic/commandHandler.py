@@ -6,7 +6,7 @@ commandHandler — обработчики команд пользователя.
 Вызывается из workflowLib.proceed_command().
 
 Использование:
-    from BusinessLogic.commandHandler import command_help, command_list_all, command_list, command_exit
+    from BusinessLogic.commandHandler import command_help, command_list_all, command_list, command_order, command_exit
 """
 from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column
 

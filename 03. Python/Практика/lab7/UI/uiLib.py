@@ -2,11 +2,11 @@
 uiLib — библиотека функций вывода в консоль (UI).
 
 Модуль содержит функции для вывода приветствия, справки
-по командам, списков рынков (полный и с пагинацией)
+по командам, списков рынков (полный, с пагинацией, отсортированный)
 и сообщения о завершении работы.
 
 Использование:
-    from uiLib import print_welcome, print_help, print_list_all, print_list, print_exit
+    from uiLib import print_welcome, print_help, print_list_all, print_list, print_list_ordered, print_exit
 """
 
 

@@ -2,10 +2,11 @@
 marketList — бизнес-логика для работы со списком рынков.
 
 Модуль предоставляет функции для получения данных о фермерских рынках
-из CSV-файла MARKET_INFO.csv с резолвингом ID в имена городов/округов/штатов.
+из CSV-файла MARKET_INFO.csv с резолвингом ID в имена городов/округов/штатов,
+сортировкой по номеру и по колонке.
 
 Использование:
-    from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num
+    from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column
 """
 
 from DAL.fileLib import get_markets_base
@@ -62,6 +63,15 @@ def get_all_markets_ordered_by_num():
         num += 1
     return ordered_market_base
 def get_all_markets_ordered_by_column():
+    """
+    Получает данные о всех фермерских рынках, отсортированные по полю County.
+
+    Сначала получает все рынки через get_all_markets(), затем сортирует
+    по алфавиту по названию округа (County).
+
+    Returns:
+        dict: словарь {market_id: {атрибуты_рынка}}, отсортированный по County.
+    """
     market_base = get_all_markets()
     sorting_base = {}
     for market_id, market_info in market_base.items():
