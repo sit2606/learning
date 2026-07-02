@@ -18,7 +18,7 @@ fileLib — библиотека для инициализации справо�
 
 import csv
 from DAL import referenceLib, requiredFiles
-from DAL.referenceLib import create_reference_entry, get_reference, create_connection_entry_by_list
+from DAL.referenceLib import create_reference_entry, get_reference_with_name_as_key, create_connection_entry_by_list
 import os
 
 REF_LIST = [{'MEDIA': requiredFiles.MEDIA}, {'GROCERY_TYPES': requiredFiles.GROCERY_TYPES},
@@ -84,9 +84,9 @@ def read_csv():
         Выводит в консоль прогресс обработки (оставшееся кол-во строк).
         Файл 'Export.csv' должен находиться в текущей рабочей директории.
     """
-    media_reference = get_reference('MEDIA', 'Common')
-    grocery_types = get_reference('GROCERY_TYPES', 'Common')
-    banking_info = get_reference('BANKING_INFO', 'Common')
+    media_reference = get_reference_with_name_as_key('MEDIA', 'Common')
+    grocery_types = get_reference_with_name_as_key('GROCERY_TYPES', 'Common')
+    banking_info = get_reference_with_name_as_key('BANKING_INFO', 'Common')
     MarketXSocialMedia = []
     MarketXGrocery = []
     MarketXBankingInfo = []

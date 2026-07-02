@@ -15,8 +15,6 @@ import csv
 import os
 import uuid
 
-from DAL.userLib import field_names
-
 
 def create_reference(reference_name):
     """
@@ -47,7 +45,25 @@ def create_reference(reference_name):
         print(e)
         print("Error in create reference")
 
-def get_reference(reference_name,  reference_type= ''):
+def get_reference_with_name_as_key(reference_name, reference_type=''):
+    """
+    Читает CSV-файл справочника и возвращает данные в виде dict.
+
+    Поддерживает два типа чтения:
+    - 'Common': возвращает {Name: Id} (для справочников MEDIA, GROCERY_TYPES и т.д.)
+    - 'Connection': возвращает {market_id: [reference_id, status]} (для MarketX*)
+
+    Args:
+        reference_name (str): Имя справочника (без расширения .csv).
+        reference_type (str): Тип чтения — 'Common' или 'Connection'.
+
+    Returns:
+        dict: словарь с данными справочника, или None при ошибке.
+
+    Raises:
+        Exception: при ошибке чтения файла выводит сообщение
+        "Error in get_reference" и текст исключения в консоль.
+    """
     _reference_name = reference_name
     reference = dict()
     try:
@@ -68,7 +84,28 @@ def get_reference(reference_name,  reference_type= ''):
     except Exception as e:
         print(e)
         print("Error in get_reference")
+def get_reference_with_uid_as_key(reference_name, reference_type=''):
 
+    _reference_name = reference_name
+    reference = dict()
+    try:
+        with open(f"files/{_reference_name}.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            match reference_type:
+                case 'Common':
+                    for i in reader:
+                        reference.update({ i['Id']: i['Name'] })
+                    return  reference
+                case 'Connection':
+                    for i in reader:
+                        reference.update({i['market_id']: [i['reference_id'], i['status'] ]})
+                    return reference
+                case _:
+                    print('Error in get_reference')
+                    print('No reference type provided')
+    except Exception as e:
+        print(e)
+        print("Error in get_reference")
 def create_reference_entry(reference_name, data_to_create):
     """
     Добавляет новую запись в справочник.

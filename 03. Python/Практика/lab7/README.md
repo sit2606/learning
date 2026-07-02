@@ -44,8 +44,8 @@ App.py
  ├── UI/uiLib.py                    — приветствие, справка, список рынков, выход
  │
  ├── BusinessLogic/
- │    ├── workflowLib.py            — оркестрация, командный цикл
- │    ├── commandHandler.py         — обработчики команд
+ │    ├── workflowLib.py            — оркестрация, командный цикл, вызов UI
+ │    ├── commandHandler.py         — обработчики команд (только данные, без UI)
  │    └── marketList.py             — бизнес-логика списка рынков
  │
  └── DAL/
@@ -57,6 +57,12 @@ App.py
 ```
 
 Зависимости: `App.py` → `BusinessLogic` + `UI` → `DAL`
+
+```
+workflowLib (BL) → commandHandler (BL) → marketList (BL) → fileLib (DAL)  ✓
+workflowLib (BL) → uiLib (UI)                                                  ✓
+commandHandler (BL) → только marketList (BL)                                   ✓
+```
 
 ## Модули
 
@@ -70,24 +76,24 @@ App.py
 
 ### BusinessLogic/workflowLib.py
 
-Оркестрация рабочего процесса и обработка пользовательских команд.
+Оркестрация рабочего процесса, обработка пользовательских команд и вывод в консоль.
 
 | Функция | Описание |
 |---------|----------|
 | `directory_creation()` | Создаёт папку `files/` для хранения CSV-файлов |
 | `file_creation()` | Проверяет файлы через `file_status_check()`, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv и USER_INFO.csv |
 | `get_command()` | Считывает команду пользователя из stdin |
-| `proceed_command(command)` | Обрабатывает команду (help/list/exit), возвращает True для продолжения, False для выхода |
+| `proceed_command(command)` | Обрабатывает команду (help/list/exit), вызывает commandHandler для бизнес-логики и uiLib для вывода |
 
 ### BusinessLogic/commandHandler.py
 
-Обработчики команд пользователя.
+Обработчики команд. Возвращают данные для вывода, не зависят от UI.
 
-| Функция | Описание |
-|---------|----------|
-| `command_help()` | Выводит список доступных команд через uiLib |
-| `command_list()` | Получает список рынков через marketList и выводит через uiLib |
-| `command_exit()` | Выводит сообщение о завершении, возвращает False |
+| Функция | Возвращает | Описание |
+|---------|------------|----------|
+| `command_help()` | `True` | Подтверждение продолжения работы |
+| `command_list()` | `(True, markets)` | Кортеж (статус, данные о рынках) |
+| `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/marketList.py
 
@@ -140,7 +146,7 @@ CRUD-операции со справочниками (справочные CSV-
 | Функция | Описание |
 |---------|----------|
 | `create_reference(name)` | Создаёт CSV-файл с заголовками Id, Name |
-| `get_reference(name, type)` | Читает справочник в dict {Name: Id} или {market_id: [ref_id, status]} |
+| `get_reference(name, type)` | Читает справочник в dict: `'Common'` → {Name: Id}, `'Connection'` → {market_id: [ref_id, status]} |
 | `create_reference_entry(name, data)` | Добавляет запись [UUID, Name] (файл создаётся автоматически) |
 | `read_reference_entry(name, uid, name)` | Ищет запись по UUID или имени, возвращает (Id, Name) |
 | `update_reference_entry(name, data)` | Обновляет запись по ключу Id |
@@ -187,12 +193,19 @@ App.py
          ├─ get_command()          → BusinessLogic/workflowLib
          └─ proceed_command()      → BusinessLogic/workflowLib
                  │
-                 ├─ 'help'  → commandHandler.command_help()  → UI/uiLib.print_help()
-                 ├─ 'list'  → commandHandler.command_list()
-                 │              → marketList.get_all_markets()
-                 │                  → DAL/fileLib.get_markets_base()
-                 │              → UI/uiLib.print_list(markets)
-                 └─ 'exit'  → commandHandler.command_exit()  → UI/uiLib.print_exit()
+                 ├─ 'help'  → workflowLib
+                 │              → commandHandler.command_help()  → return True
+                 │              → uiLib.print_help()
+                 │
+                 ├─ 'list'  → workflowLib
+                 │              → commandHandler.command_list()  → return (True, markets)
+                 │                  → marketList.get_all_markets()
+                 │                      → DAL/fileLib.get_markets_base()
+                 │              → uiLib.print_list(markets)
+                 │
+                 └─ 'exit'  → workflowLib
+                                → commandHandler.command_exit()  → return False
+                                → uiLib.print_exit()
 
  file_creation()
          │

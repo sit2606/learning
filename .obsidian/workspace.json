@@ -11,10 +11,14 @@
             "id": "1f5346464920e1a6",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "03. Python/Практика/lab7/README.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "Новая вкладка"
+              "title": "README"
             }
           }
         ]
@@ -193,8 +197,9 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "37833373d3a8017d",
+  "active": "1f5346464920e1a6",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/README.md",
     "03. Python/Практика/lab7/BusinessLogic/marketList.py~",
     "03. Python/Практика/lab7/DAL/fileLib.py~",
     "03. Python/Практика/lab7/DAL/userLib.py~",
@@ -206,8 +211,6 @@
     "03. Python/Практика/lab7/files/STATE.csv",
     "03. Python/Практика/lab7/files/COUNTY.csv",
     "03. Python/Практика/lab7/files/CITY.csv",
-    "03. Python/Практика/lab7/files/GROCERY_TYPES.csv",
-    "03. Python/Практика/lab7/README.md",
     "03. Python/Практика/lab7/документация/2026-06-29 16.10 Пользовательские истории.md",
     "03. Python/Практика/lab7/документация/физическая диаграмма.svg",
     "03. Python/Практика/lab7/документация/2026-06-29 16.37.43 Функции.md",

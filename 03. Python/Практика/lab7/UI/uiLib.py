@@ -28,7 +28,9 @@ def print_exit():
 def print_list(markets):
     print('======--------------------------------======')
     print('Список всех рынков:')
-    for market in markets:
-        formatted_output = str(market) + " | " +
+    for market_id, market_info in markets.items():
+        formatted_output = (str(market_id) + ' | ' +  market_info['city'] + ' | ' + market_info['county'] + ' | ' + market_info['state'] +
+                            ' | ' + market_info['marketname'] +' | '+ market_info['zip'])
         print(formatted_output)
+        print('--------------------------------------------')
     print('======--------------------------------======')
