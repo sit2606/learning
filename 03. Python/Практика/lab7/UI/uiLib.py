@@ -2,10 +2,11 @@
 uiLib — библиотека функций вывода в консоль (UI).
 
 Модуль содержит функции для вывода приветствия, справки
-по командам, списка рынков и сообщения о завершении работы.
+по командам, списков рынков (полный и с пагинацией)
+и сообщения о завершении работы.
 
 Использование:
-    from uiLib import print_welcome, print_help, print_list, print_exit
+    from uiLib import print_welcome, print_help, print_list_all, print_list, print_exit
 """
 
 
@@ -20,6 +21,7 @@ def print_help():
     print('list_all - выводит таблицу со списком всех рынков')
     print('list - выводит таблицу рынков с пагинацией')
     print('help - выводит перечень всех доступных команд')
+    print('order - выводит таблицу рынков отсортированных по колонке')
     print('exit - завершает работу приложения')
 
 def print_exit():
@@ -46,5 +48,18 @@ def print_list(markets, start_pos, step):
                     markets[number]['market_id'] + ' | ' + markets[number]['city'] + ' | ' + markets[number]['county']
                     + ' | ' + markets[number]['state'] +
                     ' | ' + markets[number]['marketname']+ ' | ' + markets[number]['zip'] + ' | ')
+        print(formatted_output)
+    print('======--------------------------------======')
+def print_list_ordered(markets):
+    print('======--------------------------------======')
+    print('Список всех рынков (сортированный):')
+    header = 'Номер | ID | город | графство | штат | название рынка | п. индекс | '
+    print(header)
+    print('--------------------------------------------')
+    for market_id, market_info in markets.items():
+        formatted_output = ( ' | ' + str(market_info['number']) + ' | ' +
+                    str(market_id) + ' | ' + market_info['city'] + ' | ' + market_info['county'] + ' | ' + market_info[
+                'state'] +
+                    ' | ' + market_info['marketname'] + ' | ' + market_info['zip'])
         print(formatted_output)
     print('======--------------------------------======')

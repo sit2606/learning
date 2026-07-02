@@ -11,7 +11,7 @@ lab7/
 ├── App.py                          # Точка входа приложения
 ├── BusinessLogic/                  # Слой бизнес-логики
 │   ├── workflowLib.py              # Оркестрация процесса и обработка команд
-│   ├── commandHandler.py           # Обработчики команд (help, list, exit)
+│   ├── commandHandler.py           # Обработчики команд (help, list, list_all, exit)
 │   └── marketList.py               # Бизнес-логика получения списка рынков
 ├── DAL/                            # Слой доступа к данным (Data Access Layer)
 │   ├── fileLib.py                  # Парсинг Export.csv, инициализация справочников
@@ -83,7 +83,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `directory_creation()` | Создаёт папку `files/` для хранения CSV-файлов |
 | `file_creation()` | Проверяет файлы через `file_status_check()`, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv и USER_INFO.csv |
 | `get_command()` | Считывает команду пользователя из stdin |
-| `proceed_command(command)` | Обрабатывает команду (help/list/exit), вызывает commandHandler для бизнес-логики и uiLib для вывода |
+| `proceed_command(command)` | Обрабатывает команду (help/list/list_all/exit), вызывает commandHandler для бизнес-логики и uiLib для вывода |
 
 ### BusinessLogic/commandHandler.py
 
@@ -92,7 +92,8 @@ commandHandler (BL) → только marketList (BL)                            
 | Функция | Возвращает | Описание |
 |---------|------------|----------|
 | `command_help()` | `True` | Подтверждение продолжения работы |
-| `command_list()` | `(True, markets)` | Кортеж (статус, данные о рынках) |
+| `command_list_all()` | `(True, markets)` | Кортеж (статус, все рынки) |
+| `command_list()` | `(True, markets, start, step)` | Кортеж (статус, рынки с нумерацией, стартовая позиция, шаг) — запрашивает у пользователя |
 | `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/marketList.py
@@ -101,7 +102,8 @@ commandHandler (BL) → только marketList (BL)                            
 
 | Функция | Описание |
 |---------|----------|
-| `get_all_markets()` | Получает данные о рынках, резолвит ID городов/округов/штатов в имена, возвращает dict |
+| `get_all_markets()` | Получает данные о рынках (ключ — market_id), резолвит ID городов/округов/штатов в имена |
+| `get_all_markets_ordered_by_num()` | То же, но ключ — порядковый номер (для пагинации) |
 
 ### UI/uiLib.py
 
@@ -111,7 +113,8 @@ commandHandler (BL) → только marketList (BL)                            
 |---------|----------|
 | `print_welcome()` | Выводит приветственное сообщение |
 | `print_help()` | Выводит список доступных команд |
-| `print_list(markets)` | Выводит таблицу со списком всех рынков |
+| `print_list_all(markets)` | Выводит таблицу со списком всех рынков |
+| `print_list(markets, start_pos, step)` | Выводит таблицу рынков с пагинацией (от start_pos, step штук) |
 | `print_exit()` | Выводит сообщение о завершении работы |
 
 ### DAL/requiredFiles.py
@@ -194,19 +197,25 @@ App.py
          ├─ get_command()          → BusinessLogic/workflowLib
          └─ proceed_command()      → BusinessLogic/workflowLib
                  │
-                 ├─ 'help'  → workflowLib
-                 │              → commandHandler.command_help()  → return True
-                 │              → uiLib.print_help()
+                 ├─ 'help'     → workflowLib
+                 │                 → commandHandler.command_help()  → return True
+                 │                 → uiLib.print_help()
                  │
-                 ├─ 'list'  → workflowLib
-                 │              → commandHandler.command_list()  → return (True, markets)
-                 │                  → marketList.get_all_markets()
-                 │                      → DAL/fileLib.get_markets_base()
-                 │              → uiLib.print_list(markets)
+                 ├─ 'list_all' → workflowLib
+                 │                 → commandHandler.command_list_all()  → return (True, markets)
+                 │                     → marketList.get_all_markets()
+                 │                         → DAL/fileLib.get_markets_base()
+                 │                 → uiLib.print_list_all(markets)
                  │
-                 └─ 'exit'  → workflowLib
-                                → commandHandler.command_exit()  → return False
-                                → uiLib.print_exit()
+                 ├─ 'list'     → workflowLib
+                 │                 → commandHandler.command_list()  → return (True, markets, start, step)
+                 │                     → marketList.get_all_markets_ordered_by_num()
+                 │                         → DAL/fileLib.get_markets_base()
+                 │                 → uiLib.print_list(markets, start, step)
+                 │
+                 └─ 'exit'     → workflowLib
+                                    → commandHandler.command_exit()  → return False
+                                    → uiLib.print_exit()
 
  file_creation()
          │
