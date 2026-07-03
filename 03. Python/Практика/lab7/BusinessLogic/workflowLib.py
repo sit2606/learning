@@ -9,6 +9,7 @@ workflowLib — модуль оркестрации рабочего проце�
     from BusinessLogic.workflowLib import directory_creation, file_creation, get_command, proceed_command
 """
 import os
+from multiprocessing import context
 
 from BusinessLogic import commandHandler
 from DAL import fileLib
@@ -52,7 +53,7 @@ def file_creation():
         print('User base successfully created...')
 
 def get_command():
-    command = input('Пожалуйста, введите команду: ')
+    command = input('Пожалуйста, введите команду: ').strip()
     return command
 def proceed_command(command):
     is_run = True
@@ -62,14 +63,37 @@ def proceed_command(command):
             is_run = commandHandler.command_help()
         case 'list_all':
             is_run, market_list = commandHandler.command_list_all()
-            uiLib.print_list_all(market_list)
+            if market_list is None:
+                print('Ошибка. Попробуйте ещё раз')
+            else:
+                uiLib.print_list_all(market_list)
         case 'list':
             is_run, market_list, start_pos, step = commandHandler.command_list()
-            uiLib.print_list(market_list,start_pos, step)
+            if market_list is None:
+                print('Ошибка. Попробуйте ещё раз')
+            else:
+                uiLib.print_list(markets_for_show= market_list,start_pos=start_pos, step= step)
         case 'order':
-            is_run, market_list = commandHandler.command_order()
-            uiLib.print_list_ordered(market_list)
+            uiLib.print_ordered_instruction()
+            is_run, market_list, column, order = commandHandler.command_order()
+            if market_list is None:
+                print('Ошибка. Попробуйте ещё раз')
+            else:
+                ordered_list, position, step = uiLib.print_list(markets_for_show=market_list, column_name= column)
+                is_continue = True
+                while is_continue:
+                    continue_command = input('Желаете продолжить? Введите \'y\' для продолжения, или \'n\' для завершения: ')
+                    match continue_command:
+                        case 'y':
+                            ordered_list, position, step = uiLib.print_list(markets_for_show=ordered_list, column_name= column,
+                                                                            step= step,start_pos=position)
+                        case 'n':
+                            is_continue = False
+                        case _:
+                            print('Ошибка ввода')
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()
+        case _:
+            print('Такой команды нет. Введите help, чтобы вывести список всех команд')
     return is_run

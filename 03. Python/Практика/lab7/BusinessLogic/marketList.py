@@ -33,6 +33,7 @@ def get_all_markets():
         state = state_reference[market_info['state']]
         market_info.update({'city': city, 'county': county, 'state': state})
         market_info.update({'number': num})
+        market_info.update({'market_id': market_id})
         num += 1
         market_base.update({market_id: market_info})
     return market_base
@@ -62,7 +63,7 @@ def get_all_markets_ordered_by_num():
         ordered_market_base.update({num: market_info})
         num += 1
     return ordered_market_base
-def get_all_markets_ordered_by_column():
+def get_all_markets_ordered_by_column(column_number, order = False):
     """
     Получает данные о всех фермерских рынках, отсортированные по полю County.
 
@@ -72,15 +73,30 @@ def get_all_markets_ordered_by_column():
     Returns:
         dict: словарь {market_id: {атрибуты_рынка}}, отсортированный по County.
     """
-    market_base = get_all_markets()
+    columns = {1 : 'number',
+               2 : 'market_id',
+               3 : 'city',
+               4 : 'county',
+               5 : 'state',
+               6 : 'marketname',
+               7 : 'zip'
+               }
+    match order:
+        case 'a':
+            order = False
+        case 'd':
+            order = True
+    market_base = get_all_markets_ordered_by_num()
     sorting_base = {}
     for market_id, market_info in market_base.items():
-        sorting_base.update({market_id: market_info['county'] })
-    sorted_items = sorted(sorting_base.items(), key=lambda x: x[1])
+        sorting_base.update({market_id: market_info[columns[column_number]] })
+    sorted_items = sorted(sorting_base.items(), key=lambda x: x[1], reverse=order)
     ordered_market_base = dict()
     for item_id in sorted_items:
         ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
-    return ordered_market_base
-
-
-
+    return ordered_market_base, columns[column_number]
+def prepare_ordered_list(markets):
+    markets_for_show = dict()
+    for index, (key, value) in enumerate(markets.items(), start = 1):
+        markets_for_show.update({index: value})
+    return markets_for_show

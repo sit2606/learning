@@ -148,7 +148,7 @@ def create_reference_entry(reference_name, data_to_create):
         # Создаёт categories.csv (если нет) и добавляет строку [UUID, 'Овощи']
     """
     _reference_name = reference_name
-    _data_to_create = data_to_create
+    _data_to_create = data_to_create.strip().capitalize()
     file_path = f"files/{_reference_name}.csv"
     if not os.path.isfile(file_path):
         create_reference(reference_name)

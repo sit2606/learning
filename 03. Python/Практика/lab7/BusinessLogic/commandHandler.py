@@ -8,7 +8,8 @@ commandHandler — обработчики команд пользователя.
 Использование:
     from BusinessLogic.commandHandler import command_help, command_list_all, command_list, command_order, command_exit
 """
-from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column
+from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column,\
+    prepare_ordered_list
 
 
 def command_help():
@@ -23,5 +24,8 @@ def command_list():
     step = int(input('Введите  шаг: ')) or 10
     return True, get_all_markets_ordered_by_num(),start_num,step
 def command_order():
-    print('Вывод сортированного списка (по полю County)')
-    return True, get_all_markets_ordered_by_column()
+    column = int(input('Введите номер колонки, по которой вы хотите отсортировать список: '))
+    order = input('Введите порядок сортировки d - от большего к меньшему, a - от меньшего к большему: ')
+    markets , column = get_all_markets_ordered_by_column(column, order)
+    markets = prepare_ordered_list(markets)
+    return True, markets, column, order

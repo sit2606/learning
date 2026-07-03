@@ -14,7 +14,6 @@ from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
 
 def testing():
-    x = get_all_markets_ordered_by_column()
     print('a')
 
 def user_lib_testing():
