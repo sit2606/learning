@@ -13,13 +13,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "03. Python/Практика/lab7/UI/columnToRu.py",
-                "bFile": "03. Python/Практика/lab7/UI/columnToRu.py",
-                "aRef": "HEAD",
-                "bRef": ""
+                "aFile": "03. Python/Практика/lab7/App.py",
+                "bFile": "03. Python/Практика/lab7/App.py",
+                "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: columnToRu.py  (Index)"
+              "title": "Diff: App.py  (Working Tree)"
             }
           }
         ]
@@ -200,12 +199,12 @@
   },
   "active": "1f5346464920e1a6",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/README.md",
+    "03. Python/Содержание курса.md",
     "03. Python/Практика/lab5/README.md",
     "03. Python/Практика/lab5/out.gif",
     "test.png",
     "README.md",
-    "03. Python/Содержание курса.md",
-    "03. Python/Практика/lab7/README.md",
     "03. Python/Практика/lab7/files/BANKING_INFO.csv",
     "03. Python/Практика/lab7/BusinessLogic/commandHandler.py~",
     "03. Python/Практика/lab7/BusinessLogic/marketList.py~",

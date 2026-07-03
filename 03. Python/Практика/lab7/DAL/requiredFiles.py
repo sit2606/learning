@@ -1,5 +1,15 @@
-# Константы категорий для парсинга Export.csv
-# Каждое множество определяет столбцы CSV-файла, относящиеся к данной категории.
+"""
+requiredFiles — константы категорий для парсинга Export.csv и список файлов для проверки.
+
+Модуль содержит множества столбцов CSV-файла, сгруппированные по категориям:
+- MARKET_INFO, COORDINATES, TIMESHEET_INFO — основная информация о рынках
+- MEDIA, LOCATION, BANKING_INFO, GROCERY_TYPES — справочники
+
+Также содержит FILES_TO_CHECK — множество имён CSV-файлов для проверки наличия.
+
+Использование:
+    from DAL.requiredFiles import MARKET_INFO, MEDIA, FILES_TO_CHECK
+"""
 
 
 MARKET_INFO = {'MarketName', 'street', 'zip'}  # Основная информация о рынке

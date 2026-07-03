@@ -4,8 +4,14 @@ userLib — библиотека для управления пользоват�
 Модуль предоставляет CRUD-функции для работы с пользователями
 через CSV-файл files/USER_INFO.csv.
 
+Функции:
+- create_user(): добавляет пользователя, возвращает UUID
+- read_user(user_id): читает пользователя по UUID
+- update_user(user): обновляет данные пользователя
+- delete_user(user_id): удаляет пользователя по UUID
+
 Использование:
-    from userLib import create_user, read_user, update_user, delete_user
+    from DAL.userLib import create_user, read_user, update_user, delete_user
 """
 
 import csv

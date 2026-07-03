@@ -3,12 +3,19 @@ referenceLib — библиотека для управления справоч
 
 Модуль предоставляет CRUD-функции для работы со справочными CSV-файлами
 (references) и связями между рынками и элементами справочников (connections).
-Также содержит get_reference_with_name_as_key() и get_reference_with_uid_as_key()
-для чтения справочников в dict, и create_connection_entry_by_list() для
-батчевой записи связей. Все файлы хранятся в папке files/.
+
+Основные функции:
+- create_reference / create_reference_entry: создание справочников
+- read_reference_entry / update_reference_entry: чтение и обновление записей
+- get_reference_with_name_as_key / get_reference_with_uid_as_key: чтение в dict
+- create_connection_reference / create_connection_entry: создание связей
+- create_connection_entry_by_list: батчевая запись связей
+- read_connection_entry: чтение связей
+
+Все файлы хранятся в папке files/.
 
 Использование:
-    from referenceLib import create_reference, get_reference_with_name_as_key, read_reference_entry
+    from DAL.referenceLib import create_reference, read_reference_entry
 """
 
 import csv
@@ -128,24 +135,23 @@ def create_reference_entry(reference_name, data_to_create):
     """
     Добавляет новую запись в справочник.
 
-    Если CSV-файл справочника не существует, создаёт его автоматически
-    через create_reference(). Затем генерирует UUID и записывает
-    новую строку [Id, Name] в файл.
+    Если CSV-файл не существует, создаёт его автоматически.
+    Значение обрабатывается: strip() + capitalize().
+    Генерирует UUID и записывает строку [Id, Name] в файл.
 
     Args:
         reference_name (str): Имя справочника (без расширения .csv).
-        data_to_create (str): Значение для поля 'Name' новой записи.
+        data_to_create (str): Значение для поля 'Name'.
 
     Returns:
         None
 
     Raises:
-        Exception: при ошибке записи файла выводит сообщение
-        "Error in create_reference_entry" и текст исключения в консоль.
+        Exception: при ошибке выводит "Error in create_reference_entry".
 
     Example:
-        >>> create_reference_entry('categories', 'Овощи')
-        # Создаёт categories.csv (если нет) и добавляет строку [UUID, 'Овощи']
+        >>> create_reference_entry('CITY', 'moscow')
+        # Создаёт files/CITY.csv и добавляет [UUID, 'Moscow']
     """
     _reference_name = reference_name
     _data_to_create = data_to_create.strip().capitalize()

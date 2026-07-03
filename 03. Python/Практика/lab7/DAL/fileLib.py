@@ -1,19 +1,18 @@
 """
-fileLib — библиотека для инициализации справочников, парсинга данных, создания MARKET_INFO.csv и USER_INFO.csv.
+fileLib — библиотека для инициализации данных и парсинга CSV.
 
-Модуль содержит:
-- prepare_ref(): инициализация справочников MEDIA, GROCERY_TYPES, BANKING_INFO
-- read_csv(): парсинг CSV-датасета Export.csv с кэшированием и батчевой записью связей
-- file_status_check(): проверка наличия необходимых CSV-файлов
-- create_market_base(): создание итогового CSV-файла MARKET_INFO.csv
-- get_markets_base(): чтение MARKET_INFO.csv
-- create_user_base(): создание CSV-файла пользователей USER_INFO.csv
+Модуль предоставляет функции для:
+- Инициализации справочников (MEDIA, GROCERY_TYPES, BANKING_INFO)
+- Парсинга Export.csv с батчевой записью связей
+- Проверки наличия необходимых файлов
+- Создания и чтения MARKET_INFO.csv
+- Создания USER_INFO.csv
 
-Операции со справочниками и связями делегируются в referenceLib.
+Операции со справочниками делегируются в referenceLib.
 Все файлы хранятся в папке files/.
 
 Использование:
-    from fileLib import prepare_ref, read_csv, file_status_check, create_market_base, get_markets_base, create_user_base
+    from DAL.fileLib import prepare_ref, read_csv, file_status_check
 """
 
 import csv

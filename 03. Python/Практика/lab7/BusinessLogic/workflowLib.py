@@ -1,12 +1,16 @@
 """
-workflowLib — модуль оркестрации рабочего процесса и обработки команд.
+workflowLib — модуль оркестрации рабочего процесса.
 
-Связывает создание директории для файлов, проверку наличия файлов,
-инициализацию справочников, парсинг данных, обработку пользовательских
-команд и вывод результатов в консоль.
+Основные функции:
+- directory_creation(): создание папки files/
+- file_creation(): проверка и пересоздание CSV-файлов
+- get_command(): ввод команды от пользователя
+- proceed_command(command): маршрутизация и выполнение команды
+
+Связывает DAL, BusinessLogic и UI в единый конвейер.
 
 Использование:
-    from BusinessLogic.workflowLib import directory_creation, file_creation, get_command, proceed_command
+    from BusinessLogic.workflowLib import directory_creation, file_creation, proceed_command
 """
 import os
 from multiprocessing import context

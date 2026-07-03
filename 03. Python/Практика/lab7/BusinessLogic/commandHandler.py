@@ -1,12 +1,18 @@
 """
 commandHandler — обработчики команд пользователя.
 
-Модуль содержит функции-обработчики для каждой поддерживаемой команды.
+Модуль содержит функции-обработчики для каждой команды:
+- command_help(): справка
+- command_exit(): выход
+- command_list_all(): список всех рынков
+- command_list(): список с пагинацией
+- command_order(): сортировка по колонке
+
 Каждая функция возвращает данные для вывода (не зависит от UI).
 Вызывается из workflowLib.proceed_command().
 
 Использование:
-    from BusinessLogic.commandHandler import command_help, command_list_all, command_list, command_order, command_exit
+    from BusinessLogic.commandHandler import command_help, command_list_all
 """
 from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column,\
     prepare_ordered_list
