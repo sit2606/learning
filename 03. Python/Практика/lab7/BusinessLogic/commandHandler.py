@@ -14,8 +14,8 @@ commandHandler — обработчики команд пользователя.
 Использование:
     from BusinessLogic.commandHandler import command_help, command_list_all
 """
-from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column,\
-    prepare_ordered_list
+from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column, \
+    prepare_ordered_list, get_market_by_id
 
 
 def command_help():
@@ -35,3 +35,12 @@ def command_order():
     markets , column = get_all_markets_ordered_by_column(column, order)
     markets = prepare_ordered_list(markets)
     return True, markets, column, order
+
+
+def command_show(market_id):
+    market_info = get_market_by_id(market_id)
+    if market_info == None:
+        print('Ошибка в ID, попробуйте ещё раз')
+        return True
+    else:
+    return None

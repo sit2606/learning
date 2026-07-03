@@ -13,7 +13,7 @@ marketList — бизнес-логика для работы со списком
     from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num
 """
 
-from DAL.fileLib import get_markets_base
+from DAL.fileLib import get_raw_markets_from_file
 from DAL.referenceLib import  get_reference_with_uid_as_key
 
 
@@ -26,7 +26,7 @@ def get_all_markets():
     Returns:
         csv.DictReader: объект чтения CSV с данными о рынках.
     """
-    market_base = get_markets_base()
+    market_base = get_raw_markets_from_file()
     city_reference = get_reference_with_uid_as_key('CITY', 'Common')
     county_reference = get_reference_with_uid_as_key('COUNTY', 'Common')
     state_reference = get_reference_with_uid_as_key('STATE', 'Common')
@@ -51,7 +51,7 @@ def get_all_markets_ordered_by_num():
     Returns:
         dict: словарь {номер: {атрибуты_рынка, number, market_id}}.
     """
-    market_base = get_markets_base()
+    market_base = get_raw_markets_from_file()
     city_reference = get_reference_with_uid_as_key('CITY', 'Common')
     county_reference = get_reference_with_uid_as_key('COUNTY', 'Common')
     state_reference = get_reference_with_uid_as_key('STATE', 'Common')
@@ -104,3 +104,10 @@ def prepare_ordered_list(markets):
     for index, (key, value) in enumerate(markets.items(), start = 1):
         markets_for_show.update({index: value})
     return markets_for_show
+def get_market_by_id(market_id):
+    market_base = get_all_markets()
+    try:
+        market_info = {market_id: market_base[str(market_id)]}
+    except KeyError:
+        return None
+    pass

@@ -77,6 +77,17 @@ def proceed_command(command):
                 print('Ошибка. Попробуйте ещё раз')
             else:
                 uiLib.print_list(markets_for_show= market_list,start_pos=start_pos, step= step)
+                is_continue = True
+                while is_continue:
+                    continue_command = input('Желаете продолжить? Введите \'y\' для продолжения, или \'n\' для завершения: ')
+                    match continue_command:
+                        case 'y':
+                            market_list, start_pos, step = uiLib.print_list(markets_for_show=market_list,
+                                                                            step= step,start_pos=start_pos)
+                        case 'n':
+                            is_continue = False
+                        case _:
+                            print('Ошибка ввода')
         case 'order':
             uiLib.print_ordered_instruction()
             is_run, market_list, column, order = commandHandler.command_order()
@@ -95,6 +106,13 @@ def proceed_command(command):
                             is_continue = False
                         case _:
                             print('Ошибка ввода')
+        case 'show':
+            try:
+                market_id = int(input('Введите ID рынка: '))
+                is_run = commandHandler.command_show(market_id)
+                print('s')
+            except ValueError:
+                print('Пожалуйста, введите число.')
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()

@@ -220,7 +220,7 @@ def create_user_base():
     except Exception as e:
         print(e)
         print("Error in create_user_base")
-def get_markets_base():
+def get_raw_markets_from_file():
     """
     Читает CSV-файл MARKET_INFO.csv и возвращает данные о рынках.
 
@@ -243,4 +243,4 @@ def get_markets_base():
         return  market_base
     except Exception as e:
         print(e)
-        print("Error in get_markets_base")
+        print("Error in get_raw_markets_from_file")
