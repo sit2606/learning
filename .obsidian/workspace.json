@@ -11,14 +11,14 @@
             "id": "de67b6eb198c269f",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "03. Python/Практика/lab7/README.md",
-                "bFile": "03. Python/Практика/lab7/README.md",
-                "aRef": ""
+                "file": "03. Python/2026-07-01 Python  Лекция 9.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: README  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "2026-07-01 Python  Лекция 9"
             }
           }
         ]
@@ -197,8 +197,9 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "de67b6eb198c269f",
+  "active": "37833373d3a8017d",
   "lastOpenFiles": [
+    "03. Python/2026-07-01 Python  Лекция 9.md",
     "03. Python/Практика/lab7/README.md",
     "03. Python/Практика/lab7/requirements.txt",
     "README.md",
