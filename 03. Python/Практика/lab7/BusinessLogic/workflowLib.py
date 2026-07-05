@@ -19,7 +19,10 @@ workflowLib — модуль оркестрации рабочего проце�
     from BusinessLogic.workflowLib import directory_creation, file_creation, proceed_command
 """
 import os
+import uuid
 from multiprocessing import context
+
+import bcrypt
 
 from BusinessLogic import commandHandler
 from DAL import fileLib
@@ -122,6 +125,11 @@ def proceed_command(command):
                 uiLib.print_detailed_market_info(market_info)
             except ValueError:
                 print('Пожалуйста, введите число.')
+        case 'register':
+            is_run = commandHandler.register_user()
+
+        case 'login':
+            is_run = commandHandler.login_user()
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()

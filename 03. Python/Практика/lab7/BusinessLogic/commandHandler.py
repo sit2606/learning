@@ -15,8 +15,15 @@ commandHandler — обработчики команд пользователя.
 Использование:
     from BusinessLogic.commandHandler import command_help, command_list_all
 """
+import uuid
+
+import bcrypt
+import getpass
+
 from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id
+from DAL import userLib
+from DAL.userLib import get_user_by_username
 
 
 def command_help():
@@ -73,3 +80,49 @@ def command_show(market_id):
         return True
     else:
         return True, market_info
+
+
+def register_user():
+
+    registration_process = True
+    while registration_process:
+        user_name = input('Введите ваш логин: ')
+        match user_name:
+            case 'stop':
+                return True
+            case _:
+                user = get_user_by_username(user_name)
+                if user is not None:
+                    print('Пожалуйста, введите другой username или введите stop для завершения регистрации')
+                else:
+                    user = {}
+                    user.update({'user_name': user_name})
+                    user_password = getpass.getpass("Введите ваш пароль: ")
+                    password_bytes = user_password.encode('utf-8')
+                    salt = bcrypt.gensalt(rounds=12)
+                    hashed_password = bcrypt.hashpw(password_bytes, salt)
+                    user_password = hashed_password.decode('utf-8')
+                    user.update({'password': user_password})
+                    user_firstname = input('Введите Ваше имя ')
+                    user.update({'firstname': user_firstname})
+                    user_lastname = input('Введите Вашу фамилию ')
+                    user.update({'lastname': user_lastname})
+                    user.update({'location': 'test_location'})
+                    userLib.create_user(user)
+                    print('Регистрация успешна! Добро пожаловать!')
+                    return True
+
+
+def login_user():
+    user = {}
+    user_name = input('Введите ваш логин: ')
+    user.update({'user_name': user_name})
+    user_password = getpass.getpass("Введите ваш пароль: ")
+    password_bytes = user_password.encode('utf-8')
+    user_in_base = get_user_by_username(user_name)
+    is_valid = bcrypt.checkpw(password_bytes, user_in_base['password'].encode('utf-8'))
+    if is_valid:
+        print('Добро пожаловать!')
+    else:
+        print('Неверный пароль. Попробуйте ещё раз')
+    return True

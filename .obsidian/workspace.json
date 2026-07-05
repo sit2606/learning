@@ -13,12 +13,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "03. Python/Практика/lab7/App.py",
-                "bFile": "03. Python/Практика/lab7/App.py",
+                "aFile": "03. Python/Практика/lab7/UI/uiLib.py",
+                "bFile": "03. Python/Практика/lab7/UI/uiLib.py",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: App.py  (Working Tree)"
+              "title": "Diff: uiLib.py  (Working Tree)"
             }
           }
         ]
@@ -200,18 +200,18 @@
   },
   "active": "37833373d3a8017d",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/BusinessLogic/workflowLib.py~",
+    "03. Python/Практика/lab7/BusinessLogic/commandHandler.py~",
+    "03. Python/Практика/lab7/DAL/userLib.py~",
     "03. Python/Практика/lab7/UI/uiLib.py~",
     "03. Python/Практика/lab7/DAL/requiredFiles.py~",
-    "03. Python/Практика/lab7/BusinessLogic/commandHandler.py~",
     "03. Python/2026-06-04 Python (базовый) Лекция 3.md",
-    "03. Python/Практика/lab7/BusinessLogic/workflowLib.py~",
     "03. Python/Практика/lab7/files/Reference_Base.csv",
     "03. Python/Практика/lab7/files/USER_INFO.csv",
     "03. Python/Практика/lab7/files/STATE.csv",
     "03. Python/Практика/lab7/files/MEDIA.csv",
     "03. Python/Практика/lab7/files/MarketXSocialMedia.csv",
     "03. Python/Практика/lab7/files/MarketXGrocery.csv",
-    "03. Python/Практика/lab7/files/MarketXBankingInfo.csv",
     "03. Python/Практика/lab7/CONTRIBUTING.md",
     "03. Python/Практика/lab7/README.md",
     "03. Python/Содержание курса.md",

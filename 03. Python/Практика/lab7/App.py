@@ -10,6 +10,8 @@ App — точка входа приложения для управления �
 Использование:
     python App.py
 """
+import csv
+
 from BusinessLogic.marketList import get_all_markets_ordered_by_column, get_market_by_id
 from DAL import userLib
 from DAL.fileLib import create_reference_base
@@ -29,10 +31,9 @@ def testing():
     - get_reference_with_uid_as_key() — чтение справочника по Id
     - get_market_by_id() — получение данных рынка по Id
     """
-    create_reference_base()
-    s = get_all_connections_by_market_id('MarketXBankingInfo', 1000021)
-    z = get_reference_with_uid_as_key('MarketXBankingInfo', 'Connection')
-    get_market_by_id(1000021)
+    from DAL import userLib
+    user_1 = userLib.get_user_by_username('asd')
+    user_2 = userLib.get_user_by_username()
     print('a')
 
 
@@ -43,14 +44,22 @@ def user_lib_testing():
     Создаёт, читает, обновляет и удаляет тестовых пользователей
     для проверки работы userLib.
     """
-    fileLib.create_user_base()
-    test_user_uid = userLib.create_user()
-    test_user = userLib.read_user(test_user_uid)
-    test_user['firstname'] = 'TestIngs'
-    userLib.update_user(test_user)
-    test_user_to_delete = userLib.create_user()
-    userLib.create_user()
-    userLib.delete_user(test_user_to_delete)
+    with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        len = 0
+        for row in reader:
+            len += 1
+        if len > 1:
+            pass
+        else:
+            fileLib.create_user_base()
+            test_user_uid = userLib.create_user()
+            test_user = userLib.read_user(test_user_uid)
+            test_user['firstname'] = 'TestIngs'
+            userLib.update_user(test_user)
+            test_user_to_delete = userLib.create_user()
+            userLib.create_user()
+            userLib.delete_user(test_user_to_delete)
 
 
 def main():

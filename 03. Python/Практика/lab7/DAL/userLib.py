@@ -42,7 +42,6 @@ def create_user(user = DEFAULT_USER):
     except Exception as e:
         print(e)
         print("Error in create_user")
-    pass
 
 def read_user(user_id):
     try:
@@ -54,7 +53,16 @@ def read_user(user_id):
     except Exception as e:
         print(e)
         print("Error in read_user")
-
+def get_user_by_username(username = None):
+    try:
+        with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
+            user_base = csv.DictReader(file)
+            for user in user_base:
+                if user["user_name"] == username:
+                    return user
+    except Exception as e:
+        print(e)
+        print("Error in read_user")
 def update_user(user = DEFAULT_USER):
     _user = user
     try:
