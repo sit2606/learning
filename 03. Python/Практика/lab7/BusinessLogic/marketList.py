@@ -8,9 +8,10 @@ marketList — бизнес-логика для работы со списком
 - get_all_markets_ordered_by_num(): с порядковой нумерацией
 - get_all_markets_ordered_by_column(col, order): сортировка по колонке
 - prepare_ordered_list(markets): переиндексация для пагинации
+- get_market_by_id(market_id): получение одного рынка по Id
 
 Использование:
-    from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num
+    from BusinessLogic.marketList import get_all_markets, get_market_by_id
 """
 
 from DAL.fileLib import get_raw_markets_from_file
@@ -21,10 +22,11 @@ def get_all_markets():
     """
     Получает данные о всех фермерских рынках.
 
-    Вызывает fileLib.get_markets_base() для чтения MARKET_INFO.csv.
+    Читает MARKET_INFO.csv, резолвит ID городов/округов/штатов в имена,
+    добавляет порядковый номер и market_id.
 
     Returns:
-        csv.DictReader: объект чтения CSV с данными о рынках.
+        dict: словарь {market_id: {атрибуты_рынка, number, city, county, state}}.
     """
     market_base = get_raw_markets_from_file()
     city_reference = get_reference_with_uid_as_key('CITY', 'Common')
@@ -100,11 +102,26 @@ def get_all_markets_ordered_by_column(column_number, order = False):
         ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
     return ordered_market_base, columns[column_number]
 def prepare_ordered_list(markets):
+    """Переиндексация dict с 1 для корректной пагинации."""
     markets_for_show = dict()
     for index, (key, value) in enumerate(markets.items(), start = 1):
         markets_for_show.update({index: value})
     return markets_for_show
+
+
 def get_market_by_id(market_id):
+    """
+    Получает данные одного рынка по его Id.
+
+    Читает все рынки, находит нужный по Id, получает связанные
+    данные из MarketXBankingInfo, MarketXGrocery, MarketXSocialMedia.
+
+    Args:
+        market_id: Идентификатор рынка.
+
+    Returns:
+        dict: {market_id: {атрибуты_рынка}} или None если не найден.
+    """
     market_base = get_all_markets()
     _market_id = market_id
     try:

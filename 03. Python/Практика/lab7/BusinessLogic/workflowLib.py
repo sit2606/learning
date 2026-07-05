@@ -7,7 +7,13 @@ workflowLib — модуль оркестрации рабочего проце�
 - get_command(): ввод команды от пользователя
 - proceed_command(command): маршрутизация и выполнение команды
 
-Связывает DAL, BusinessLogic и UI в единый конвейер.
+Поддерживаемые команды:
+- help — справка
+- list_all — все рынки
+- list — список с пагинацией
+- order — сортировка по колонке
+- show — данные одного рынка по Id
+- exit — выход
 
 Использование:
     from BusinessLogic.workflowLib import directory_creation, file_creation, proceed_command
@@ -37,12 +43,13 @@ def directory_creation():
         print("Error in directory_creation")
 def file_creation():
     """
-    Проверяет наличие необходимых CSV-файлов и пересоздаёт данные при необходимости.
+    Проверяет наличие CSV-файлов и пересоздаёт данные при необходимости.
 
-    1. Вызывает fileLib.file_status_check() для проверки наличия файлов
-    2. Если файлы отсутствуют — инициализирует справочники через fileLib.prepare_ref()
-    3. Читает Export.csv и создаёт MARKET_INFO.csv через fileLib.create_market_base()
-    4. Создаёт USER_INFO.csv через fileLib.create_user_base()
+    1. file_status_check() — проверка наличия файлов
+    2. prepare_ref() — инициализация справочников MEDIA, GROCERY_TYPES, BANKING_INFO
+    3. create_market_base(read_csv()) — парсинг Export.csv и создание MARKET_INFO.csv
+    4. create_user_base() — создание USER_INFO.csv
+    5. create_reference_base() — создание итогового справочника
     """
     if fileLib.file_status_check():
         print('Recreation in progress...')

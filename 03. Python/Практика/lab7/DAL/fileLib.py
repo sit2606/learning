@@ -7,12 +7,13 @@ fileLib — библиотека для инициализации данных 
 - Проверки наличия необходимых файлов
 - Создания и чтения MARKET_INFO.csv
 - Создания USER_INFO.csv
+- Создания Reference_Base.csv (итоговый справочник всех справочников)
 
 Операции со справочниками делегируются в referenceLib.
 Все файлы хранятся в папке files/.
 
 Использование:
-    from DAL.fileLib import prepare_ref, read_csv, file_status_check
+    from DAL.fileLib import prepare_ref, read_csv, file_status_check, create_reference_base
 """
 
 import csv
@@ -227,11 +228,11 @@ def get_raw_markets_from_file():
     Читает CSV-файл MARKET_INFO.csv и возвращает данные о рынках.
 
     Returns:
-        csv.DictReader: объект чтения CSV с данными о рынках.
+        dict: словарь {market_id: {атрибуты_рынка}}.
 
     Raises:
         Exception: при ошибке чтения файла выводит сообщение
-        "Error in get_markets_base" и текст исключения в консоль.
+        "Error in get_raw_markets_from_file".
     """
     _reference_name = 'MARKET_INFO'
     market_base = dict()
@@ -246,7 +247,18 @@ def get_raw_markets_from_file():
     except Exception as e:
         print(e)
         print("Error in get_raw_markets_from_file")
+
+
 def create_reference_base():
+    """
+    Создаёт CSV-файл Reference_Base.csv со списком всех справочников.
+
+    Файл содержит заголовки: ID, Reference_Name.
+    Записывает имя каждого справочника из FILES_TO_CHECK с уникальным UUID.
+
+    Raises:
+        Exception: при ошибке выводит "Error in create_reference_base".
+    """
     try:
         with open(f"files/{'Reference_Base'}.csv", "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=['ID','Reference_Name'])

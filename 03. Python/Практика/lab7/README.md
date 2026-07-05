@@ -87,9 +87,17 @@ commandHandler (BL) → только marketList (BL)                            
 | Функция | Описание |
 |---------|----------|
 | `directory_creation()` | Создаёт папку `files/` для хранения CSV-файлов |
-| `file_creation()` | Проверяет файлы через `file_status_check()`, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv и USER_INFO.csv |
+| `file_creation()` | Проверяет файлы, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv, USER_INFO.csv, Reference_Base.csv |
 | `get_command()` | Считывает команду пользователя из stdin |
-| `proceed_command(command)` | Обрабатывает команду (help/list/list_all/order/exit), вызывает commandHandler для бизнес-логики и uiLib для вывода |
+| `proceed_command(command)` | Обрабатывает команду (help/list/list_all/order/show/exit) |
+
+Поддерживаемые команды:
+- `help` — справка
+- `list_all` — все рынки
+- `list` — список с пагинацией
+- `order` — сортировка по колонке
+- `show` — данные одного рынка по Id
+- `exit` — выход
 
 ### BusinessLogic/commandHandler.py
 
@@ -99,8 +107,9 @@ commandHandler (BL) → только marketList (BL)                            
 |---------|------------|----------|
 | `command_help()` | `True` | Подтверждение продолжения работы |
 | `command_list_all()` | `(True, markets)` | Кортеж (статус, все рынки) |
-| `command_list()` | `(True, markets, start, step)` | Кортеж (статус, рынки с нумерацией, стартовая позиция, шаг) — запрашивает у пользователя |
-| `command_order()` | `(True, markets)` | Кортеж (статус, рынки отсортированные по County) |
+| `command_list()` | `(True, markets, start, step)` | Кортеж (статус, рынки с нумерацией, старт, шаг) |
+| `command_order()` | `(True, markets, col, order)` | Кортеж (статус, рынки, колонка, порядок) |
+| `command_show(market_id)` | `None` или `True` | Данные рынка или ошибка |
 | `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/marketList.py
@@ -109,10 +118,11 @@ commandHandler (BL) → только marketList (BL)                            
 
 | Функция | Описание |
 |---------|----------|
-| `get_all_markets()` | Получает данные о рынках (ключ — market_id), резолвит ID городов/округов/штатов в имена |
+| `get_all_markets()` | Получает данные о рынках (ключ — market_id), резолвит ID → имена |
 | `get_all_markets_ordered_by_num()` | То же, но ключ — порядковый номер (для пагинации) |
-| `get_all_markets_ordered_by_column(col, order)` | Сортировка по любой колонке (1-7), order: 'a'/ 'd' |
-| `prepare_ordered_list(markets)` | Переиндексация dict с 1 для корректной пагинации |
+| `get_all_markets_ordered_by_column(col, order)` | Сортировка по колонке (1-7), order: 'a'/ 'd' |
+| `prepare_ordered_list(markets)` | Переиндексация dict с 1 для пагинации |
+| `get_market_by_id(market_id)` | Получение данных одного рынка по Id |
 
 ### UI/uiLib.py
 
@@ -169,33 +179,36 @@ CRUD-операции с фермерскими рынками (все функ�
 
 ### DAL/referenceLib.py
 
-CRUD-операции со справочниками (справочные CSV-файлы) и связями между рынками и справочниками.
+CRUD-операции со справочниками и связями.
 
 | Функция | Описание |
 |---------|----------|
 | `create_reference(name)` | Создаёт CSV-файл с заголовками Id, Name |
-| `get_reference_with_name_as_key(name, type)` | Читает справочник: `'Common'` → {Name: Id}, `'Connection'` → {market_id: [ref_id, status]} |
-| `get_reference_with_uid_as_key(name, type)` | Читает справочник: `'Common'` → {Id: Name}, `'Connection'` → {market_id: [ref_id, status]} |
-| `create_reference_entry(name, data)` | Добавляет запись [UUID, Name] (файл создаётся автоматически) |
+| `get_reference_with_name_as_key(name, type)` | Читает справочник: Common → {Name: Id}, Connection → {market_id: [ref_id, status]} |
+| `get_reference_with_uid_as_key(name, type)` | Читает справочник: Common → {Id: Name}, Connection → {market_id: [ref_id, status]} |
+| `create_reference_entry(name, data)` | Добавляет запись [UUID, Name] (автосоздание файла) |
 | `read_reference_entry(name, uid, name)` | Ищет запись по UUID или имени, возвращает (Id, Name) |
 | `update_reference_entry(name, data)` | Обновляет запись по ключу Id |
-| `create_connection_reference(name)` | Создаёт CSV-файл связей (market_id, reference_id, status) |
-| `create_connection_entry(name, mkt, ref, status)` | Добавляет связь (файл создаётся автоматически) |
-| `create_connection_entry_by_list(name, list)` | Батчевая запись списка связей в CSV-файл |
+| `create_connection_reference(name)` | Создаёт CSV-файл связей |
+| `create_connection_entry(name, mkt, ref, status)` | Добавляет связь (автосоздание файла) |
+| `create_connection_entry_by_list(name, list)` | Батчевая запись списка связей |
 | `read_connection_entry(name, mkt, ref)` | Ищет статус связи по market_id и reference_id |
+| `get_all_connections_by_market_id(name, mkt_id)` | Все связи для рынка → {market_id: {ref_id: status}} |
+| `humanize_reference(ref)` | Заглушка для преобразования ID → имя |
 
 ### DAL/fileLib.py
 
-Инициализация справочников, парсинг Export.csv, проверка наличия файлов, создание MARKET_INFO.csv и USER_INFO.csv.
+Инициализация справочников, парсинг Export.csv, проверка файлов, создание CSV.
 
 | Функция | Описание |
 |---------|----------|
 | `prepare_ref()` | Инициализирует справочники MEDIA, GROCERY_TYPES, BANKING_INFO |
 | `read_csv()` | Читает Export.csv, создаёт связи, возвращает dict {FMID: {атрибуты}} |
-| `file_status_check()` | Проверяет наличие CSV-файлов из `FILES_TO_CHECK`, возвращает True при необходимости пересоздания |
+| `file_status_check()` | Проверяет наличие CSV-файлов из FILES_TO_CHECK |
 | `create_market_base(data)` | Создаёт MARKET_INFO.csv из словаря market_info |
-| `get_markets_base()` | Читает MARKET_INFO.csv и возвращает данные о рынках |
-| `create_user_base()` | Создаёт USER_INFO.csv с заголовками: Id, user_name, password, firstname, lastname, location |
+| `get_raw_markets_from_file()` | Читает MARKET_INFO.csv, возвращает dict {market_id: {атрибуты}} |
+| `create_user_base()` | Создаёт USER_INFO.csv |
+| `create_reference_base()` | Создаёт Reference_Base.csv со списком всех справочников |
 
 ### DAL/userLib.py
 
@@ -214,82 +227,43 @@ CRUD-операции с пользователями через CSV-файл fi
 
 ```
 App.py
- ├─ directory_creation()           → files/
- ├─ user_lib_testing()             → DAL/userLib (CRUD) → files/USER_INFO.csv
- ├─ print_welcome()                → UI/uiLib
+ ├─ testing()                        → тестирование новых функций
+ ├─ directory_creation()             → files/
+ ├─ user_lib_testing()               → DAL/userLib (CRUD) → files/USER_INFO.csv
+ ├─ print_welcome()                  → UI/uiLib
  └─ цикл команд:
          │
-         ├─ get_command()          → BusinessLogic/workflowLib
-         └─ proceed_command()      → BusinessLogic/workflowLib
+         ├─ get_command()            → BusinessLogic/workflowLib
+         └─ proceed_command()        → BusinessLogic/workflowLib
                  │
-                 ├─ 'help'     → workflowLib
-                 │                 → commandHandler.command_help()  → return True
+                 ├─ 'help'     → commandHandler.command_help() → True
                  │                 → uiLib.print_help()
                  │
-                 ├─ 'list_all' → workflowLib
-                 │                 → commandHandler.command_list_all()  → return (True, markets)
-                 │                     → marketList.get_all_markets()
-                 │                         → DAL/fileLib.get_markets_base()
+                 ├─ 'list_all' → commandHandler.command_list_all() → (True, markets)
+                 │                 → marketList.get_all_markets()
                  │                 → uiLib.print_list_all(markets)
                  │
-                 ├─ 'list'     → workflowLib
-                 │                 → commandHandler.command_list()  → return (True, markets, start, step)
-                 │                     → marketList.get_all_markets_ordered_by_num()
-                 │                         → DAL/fileLib.get_markets_base()
+                 ├─ 'list'     → commandHandler.command_list() → (True, markets, start, step)
+                 │                 → marketList.get_all_markets_ordered_by_num()
                  │                 → uiLib.print_list(markets, start, step)
                  │
-                 ├─ 'order'    → workflowLib
-                 │                 → commandHandler.command_order()  → return (True, markets)
-                 │                     → marketList.get_all_markets_ordered_by_column()
-                 │                         → marketList.get_all_markets()
-                 │                 → uiLib.print_list_ordered(markets)
+                 ├─ 'order'    → commandHandler.command_order() → (True, markets, col, order)
+                 │                 → marketList.get_all_markets_ordered_by_column()
+                 │                 → uiLib.print_list(markets, col_name)
                  │
-                 └─ 'exit'     → workflowLib
-                                    → commandHandler.command_exit()  → return False
-                                    → uiLib.print_exit()
+                 ├─ 'show'     → commandHandler.command_show(market_id) → None/True
+                 │                 → marketList.get_market_by_id(market_id)
+                 │
+                 └─ 'exit'     → commandHandler.command_exit() → False
+                                   → uiLib.print_exit()
 
  file_creation()
          │
-         ├─ DAL/fileLib.file_status_check()  ← DAL/requiredFiles.FILES_TO_CHECK
-         │       │
-         │       └─ (если файлы отсутствуют)
-         │
-         ▼
-   DAL/requiredFiles.py (константы категорий)
-             │
-             ▼
-   DAL/fileLib.py                DAL/referenceLib.py          DAL/dataLib.py
-    ├─ prepare_ref()             ├─ create_reference()        ├─ create_market()     (заглушка)
-    │   │                        ├─ get_reference_with_name_as_key()  ├─ update_market()     (заглушка)
-    │   ├── MEDIA.csv            ├─ get_reference_with_uid_as_key()   └─ delete_market()     (заглушка)
-    │   ├── GROCERY_TYPES.csv    ├─ create_reference_entry()
-    │   └── BANKING_INFO.csv     ├─ read_reference_entry()
-    │                            ├─ update_reference_entry()
-    ├─ read_csv()                ├─ create_connection_reference()
-    │   │ (кэширование +         ├─ create_connection_entry()
-    │   │  батчевая запись)      ├─ create_connection_entry_by_list()
-    │   │                        └─ read_connection_entry()
-    │   │
-    │   ├── MarketXSocialMedia.csv   (market ↔ соцсети)
-    │   ├── MarketXGrocery.csv       (market ↔ товары)
-    │   ├── MarketXBankingInfo.csv   (market ↔ оплата)
-    │   ├── CITY.csv                 (market ↔ город)
-    │   ├── COUNTY.csv               (market ↔ округ)
-    │   └── STATE.csv                (market ↔ штат)
-    │
-    ├─ file_status_check()
-    │       └── (проверка наличия файлов из FILES_TO_CHECK)
-    │
-    ├─ create_market_base()
-    │       └── MARKET_INFO.csv (итоговый файл)
-    │
-    ├─ get_markets_base()
-    │       └── чтение MARKET_INFO.csv
-    │
-    └─ create_user_base()
-            └── USER_INFO.csv (файл пользователей)
-
-    Все CSV-файлы хранятся в папке files/
+         ├─ file_status_check()     ← FILES_TO_CHECK
+         ├─ prepare_ref()           → MEDIA.csv, GROCERY_TYPES.csv, BANKING_INFO.csv
+         ├─ create_market_base()    → MARKET_INFO.csv
+         ├─ create_user_base()      → USER_INFO.csv
+         └─ create_reference_base() → Reference_Base.csv
 ```
 
 ## Требования

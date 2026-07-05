@@ -73,6 +73,14 @@ COLUMNS = {
 }
 ```
 
+### Пример: команда show
+
+Команда `show` выводит данные одного рынка по Id:
+
+1. `commandHandler.command_show(market_id)` — получает данные через `get_market_by_id()`
+2. `workflowLib.proceed_command('show')` — запрашивает Id у пользователя, вызывает обработчик
+3. `uiLib.print_help()` — добавлена строка `show - выводит подробную информацию о рынке по ID`
+
 ---
 
 ## Добавление новой колонки в Export.csv
@@ -216,6 +224,47 @@ FILES_TO_CHECK = {
 }
 ```
 
+### Шаг 4: Обновить Reference_Base.csv
+
+Файл создается автоматически через `create_reference_base()` при пересоздании данных.
+
+---
+
+## Добавление нового метода в referenceLib
+
+### Шаг 1: Создать функцию
+
+```python
+# DAL/referenceLib.py
+
+def new_method(reference_name, params):
+    """
+    Описание метода.
+
+    Args:
+        reference_name (str): Имя справочника.
+        params: Параметры.
+
+    Returns:
+        Тип возвращаемого значения.
+    """
+    # Реализация
+```
+
+### Шаг 2: Обновить модульный docstring
+
+Добавьте описание в документацию модуля:
+
+```python
+"""
+referenceLib — библиотека для управления справочниками и связями.
+
+Основные функции:
+- ...
+- new_method(): описание нового метода
+"""
+```
+
 ---
 
 ## Структура данных
@@ -274,3 +323,5 @@ pytest test_*.py -v
 | `FileNotFoundError` | Файл не создан | Проверить FILES_TO_CHECK и REF_LIST |
 | `NoneType` в read_csv | Справочник не инициализирован | Вызвать prepare_ref() перед read_csv() |
 | Дубли в связях | Повторный вызов read_csv | Очищать файлы перед пересозданием |
+| `KeyError` в get_market_by_id | Рынок не найден в MARKET_INFO.csv | Проверить market_id, пересоздать файлы |
+| `Error in create_reference_base` | Папка files/ не создана | Вызвать directory_creation() перед file_creation() |

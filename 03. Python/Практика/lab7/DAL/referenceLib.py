@@ -10,12 +10,12 @@ referenceLib — библиотека для управления справоч
 - get_reference_with_name_as_key / get_reference_with_uid_as_key: чтение в dict
 - create_connection_reference / create_connection_entry: создание связей
 - create_connection_entry_by_list: батчевая запись связей
-- read_connection_entry: чтение связей
+- read_connection_entry / get_all_connections_by_market_id: чтение связей
 
 Все файлы хранятся в папке files/.
 
 Использование:
-    from DAL.referenceLib import create_reference, read_reference_entry
+    from DAL.referenceLib import create_reference, read_reference_entry, get_all_connections_by_market_id
 """
 
 import csv
@@ -389,6 +389,16 @@ def read_connection_entry(reference_name, market_id, reference_id):
         print("Error in read_connection_entry")
 
 def get_all_connections_by_market_id(reference_name, market_id):
+    """
+    Получает все связи для указанного рынка из CSV-файла связей.
+
+    Args:
+        reference_name (str): Имя файла связи (без расширения .csv).
+        market_id: Идентификатор рынка.
+
+    Returns:
+        dict: {market_id: {reference_id: status, ...}} или None при ошибке.
+    """
     _reference_name = reference_name
     _market_id = str(market_id)
     connections_dict = {}
@@ -403,4 +413,13 @@ def get_all_connections_by_market_id(reference_name, market_id):
         print("Error in read_connection_entry")
 
 def humanize_reference(reference):
+    """
+    Преобразует ID справочника в читаемое имя (заглушка).
+
+    Args:
+        reference: Идентификатор справочника.
+
+    Returns:
+        Заглушка — пока не реализована.
+    """
     pass
