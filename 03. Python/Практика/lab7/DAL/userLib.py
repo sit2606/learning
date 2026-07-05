@@ -7,11 +7,12 @@ userLib — библиотека для управления пользоват�
 Функции:
 - create_user(): добавляет пользователя, возвращает UUID
 - read_user(user_id): читает пользователя по UUID
+- get_user_by_username(username): читает пользователя по логину
 - update_user(user): обновляет данные пользователя
 - delete_user(user_id): удаляет пользователя по UUID
 
 Использование:
-    from DAL.userLib import create_user, read_user, update_user, delete_user
+    from DAL.userLib import create_user, read_user, get_user_by_username
 """
 
 import csv
@@ -53,7 +54,16 @@ def read_user(user_id):
     except Exception as e:
         print(e)
         print("Error in read_user")
-def get_user_by_username(username = None):
+def get_user_by_username(username=None):
+    """
+    Читает пользователя по логину (user_name).
+
+    Args:
+        username (str): Логин пользователя.
+
+    Returns:
+        dict: данные пользователя или None если не найден.
+    """
     try:
         with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
             user_base = csv.DictReader(file)

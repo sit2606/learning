@@ -8,6 +8,8 @@ commandHandler — обработчики команд пользователя.
 - command_list(): список с пагинацией
 - command_order(): сортировка по колонке
 - command_show(market_id): показ данных одного рынка
+- register_user(): регистрация нового пользователя
+- login_user(): авторизация пользователя
 
 Каждая функция возвращает данные для вывода (не зависит от UI).
 Вызывается из workflowLib.proceed_command().
@@ -83,7 +85,15 @@ def command_show(market_id):
 
 
 def register_user():
+    """
+    Регистрация нового пользователя.
 
+    Запрашивает логин, пароль (хешируется через bcrypt), имя и фамилию.
+    Проверяет уникальность логина. Ввод 'stop' отменяет регистрацию.
+
+    Returns:
+        True — после успешной регистрации или отмены.
+    """
     registration_process = True
     while registration_process:
         user_name = input('Введите ваш логин: ')
@@ -114,6 +124,14 @@ def register_user():
 
 
 def login_user():
+    """
+    Авторизация пользователя.
+
+    Запрашивает логин и пароль, проверяет через bcrypt.
+
+    Returns:
+        True — всегда (для продолжения работы).
+    """
     user = {}
     user_name = input('Введите ваш логин: ')
     user.update({'user_name': user_name})

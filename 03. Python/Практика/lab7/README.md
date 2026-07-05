@@ -71,8 +71,8 @@ commandHandler (BL) → только marketList (BL)                            
 
 Точка входа. Содержит:
 - `main()` — основная функция запуска
-- `user_lib_testing()` — демонстрация CRUD-операций с пользователями (создание, чтение, обновление, удаление)
-- `testing()` — заглушка для тестирования
+- `user_lib_testing()` — проверка наличия пользователей, создание тестовых при необходимости
+- `testing()` — заглушка для тестирования (закомментирована в main)
 
 Порядок выполнения `main()`:
 1. `directory_creation()` — создаёт папку `files/`
@@ -89,7 +89,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `directory_creation()` | Создаёт папку `files/` для хранения CSV-файлов |
 | `file_creation()` | Проверяет файлы, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv, USER_INFO.csv, Reference_Base.csv |
 | `get_command()` | Считывает команду пользователя из stdin |
-| `proceed_command(command)` | Обрабатывает команду (help/list/list_all/order/show/exit) |
+| `proceed_command(command)` | Обрабатывает команду (help/list/list_all/order/show/register/login/exit) |
 
 Поддерживаемые команды:
 - `help` — справка
@@ -97,6 +97,8 @@ commandHandler (BL) → только marketList (BL)                            
 - `list` — список с пагинацией
 - `order` — сортировка по колонке
 - `show` — данные одного рынка по Id
+- `register` — регистрация пользователя
+- `login` — авторизация пользователя
 - `exit` — выход
 
 ### BusinessLogic/commandHandler.py
@@ -110,6 +112,8 @@ commandHandler (BL) → только marketList (BL)                            
 | `command_list()` | `(True, markets, start, step)` | Кортеж (статус, рынки с нумерацией, старт, шаг) |
 | `command_order()` | `(True, markets, col, order)` | Кортеж (статус, рынки, колонка, порядок) |
 | `command_show(market_id)` | `(True, market_info)` или `True` | Данные рынка или ошибка |
+| `register_user()` | `True` | Регистрация нового пользователя (логин, пароль, имя, фамилия) |
+| `login_user()` | `True` | Авторизация пользователя (логин, пароль) |
 | `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/marketList.py
@@ -221,6 +225,7 @@ CRUD-операции с пользователями через CSV-файл fi
 | `DEFAULT_USER` | Значения по умолчанию для нового пользователя |
 | `create_user(user)` | Создаёт пользователя, возвращает UUID |
 | `read_user(user_id)` | Читает пользователя по Id, возвращает dict |
+| `get_user_by_username(username)` | Читает пользователя по логину, возвращает dict или None |
 | `update_user(user)` | Обновляет данные пользователя по Id |
 | `delete_user(user_id)` | Удаляет пользователя по Id |
 
