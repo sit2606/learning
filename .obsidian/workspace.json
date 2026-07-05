@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "2fef2ab851044d9b",
+        "id": "7bcfd6865bc8a301",
         "type": "tabs",
         "children": [
           {
-            "id": "1f5346464920e1a6",
+            "id": "de67b6eb198c269f",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "03. Python/Практика/lab7/UI/uiLib.py",
-                "bFile": "03. Python/Практика/lab7/UI/uiLib.py",
+                "aFile": "03. Python/Практика/lab7/README.md",
+                "bFile": "03. Python/Практика/lab7/README.md",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: uiLib.py  (Working Tree)"
+              "title": "Diff: README  (Working Tree)"
             }
           }
         ]
@@ -74,8 +74,7 @@
               "title": "Закладки"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -198,8 +197,11 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "37833373d3a8017d",
+  "active": "de67b6eb198c269f",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/README.md",
+    "03. Python/Практика/lab7/requirements.txt",
+    "README.md",
     "03. Python/Практика/lab7/BusinessLogic/workflowLib.py~",
     "03. Python/Практика/lab7/BusinessLogic/commandHandler.py~",
     "03. Python/Практика/lab7/DAL/userLib.py~",
@@ -210,15 +212,11 @@
     "03. Python/Практика/lab7/files/USER_INFO.csv",
     "03. Python/Практика/lab7/files/STATE.csv",
     "03. Python/Практика/lab7/files/MEDIA.csv",
-    "03. Python/Практика/lab7/files/MarketXSocialMedia.csv",
-    "03. Python/Практика/lab7/files/MarketXGrocery.csv",
     "03. Python/Практика/lab7/CONTRIBUTING.md",
-    "03. Python/Практика/lab7/README.md",
     "03. Python/Содержание курса.md",
     "03. Python/Практика/lab5/README.md",
     "03. Python/Практика/lab5/out.gif",
     "test.png",
-    "README.md",
     "02. Введение в базы данных/2026-05-12 Первое занятие.md",
     "03. Python/Практика/lab7/документация/2026-06-29 16.10 Пользовательские истории.md",
     "03. Python/Практика/lab7/документация/физическая диаграмма.svg",
