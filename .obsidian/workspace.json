@@ -198,8 +198,11 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "1f5346464920e1a6",
+  "active": "37833373d3a8017d",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/UI/uiLib.py~",
+    "03. Python/Практика/lab7/DAL/requiredFiles.py~",
+    "03. Python/Практика/lab7/BusinessLogic/commandHandler.py~",
     "03. Python/2026-06-04 Python (базовый) Лекция 3.md",
     "03. Python/Практика/lab7/BusinessLogic/workflowLib.py~",
     "03. Python/Практика/lab7/files/Reference_Base.csv",
@@ -209,8 +212,6 @@
     "03. Python/Практика/lab7/files/MarketXSocialMedia.csv",
     "03. Python/Практика/lab7/files/MarketXGrocery.csv",
     "03. Python/Практика/lab7/files/MarketXBankingInfo.csv",
-    "03. Python/Практика/lab7/files/MARKET_INFO.csv",
-    "03. Python/Практика/lab7/files/GROCERY_TYPES.csv",
     "03. Python/Практика/lab7/CONTRIBUTING.md",
     "03. Python/Практика/lab7/README.md",
     "03. Python/Содержание курса.md",
@@ -244,7 +245,6 @@
     "01. Технологии программирования/Практика/2026-04-15 18.58 Функциональные требования.md",
     "01. Технологии программирования/Практика/2026-04-30 Диаграмма классов.md",
     "01. Технологии программирования/Практика/2026-04-22 22.49 Модель предметной области.md",
-    "01. Технологии программирования/Практика/2026-04-25 Практика, переделка функции.md",
-    "03. Python/Практика/lab4_4.md"
+    "01. Технологии программирования/Практика/2026-04-25 Практика, переделка функции.md"
   ]
 }

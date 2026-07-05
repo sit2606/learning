@@ -65,7 +65,7 @@ def main():
     4. file_creation() — проверка и инициализация CSV-файлов
     5. Цикл команд: приветствие, чтение и обработка команд
     """
-    testing()
+    #testing()
     directory_creation()
     user_lib_testing()
     file_creation()

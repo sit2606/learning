@@ -126,10 +126,32 @@ def get_market_by_id(market_id):
     _market_id = market_id
     try:
         market_info = {market_id: market_base[str(_market_id)]}
-        MarketXBankingInfo = get_all_connections_by_market_id('MarketXBankingInfo', _market_id )
-        MarketXGrocery = get_all_connections_by_market_id('MarketXGrocery', _market_id )
-        MarketXSocialMedia = get_all_connections_by_market_id('MarketXSocialMedia', _market_id )
-
+        market_x_banking_info = get_all_connections_by_market_id('MarketXBankingInfo', _market_id )
+        market_x_grocery = get_all_connections_by_market_id('MarketXGrocery', _market_id )
+        market_x_social_media = get_all_connections_by_market_id('MarketXSocialMedia', _market_id )
+        banking_reference = get_reference_with_uid_as_key("BANKING_INFO", "Common")
+        grocery_reference = get_reference_with_uid_as_key("GROCERY_TYPES", "Common")
+        media_reference = get_reference_with_uid_as_key("MEDIA", "Common")
+        bank_info = {}
+        grocery_info = {}
+        media_info = {}
+        market_info.update({'basic_info': market_info[_market_id]})
+        for item in market_x_social_media[str(_market_id)]:
+            name = media_reference[str(item)]
+            status = market_x_social_media[str(_market_id)][str(item)]
+            media_info.update({name: status})
+        market_info.update({'media_info': media_info})
+        for item in market_x_banking_info[str(_market_id)]:
+            name = banking_reference[str(item)]
+            status = market_x_banking_info[str(_market_id)][str(item)]
+            bank_info.update({name: status})
+        market_info.update({'bank_info': bank_info})
+        for item in market_x_grocery[str(_market_id)]:
+            name = grocery_reference[str(item)]
+            status = market_x_grocery[str(_market_id)][str(item)]
+            grocery_info.update({name: status})
+        market_info.update({'grocery_info': grocery_info})
+        market_info.pop(_market_id)
         return market_info
     except KeyError:
         return None

@@ -118,8 +118,8 @@ def proceed_command(command):
         case 'show':
             try:
                 market_id = int(input('Введите ID рынка: '))
-                is_run = commandHandler.command_show(market_id)
-                print('s')
+                is_run, market_info = commandHandler.command_show(market_id)
+                uiLib.print_detailed_market_info(market_info)
             except ValueError:
                 print('Пожалуйста, введите число.')
         case 'exit':

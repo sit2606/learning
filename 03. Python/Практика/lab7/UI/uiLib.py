@@ -81,3 +81,38 @@ def print_ordered_instruction():
     print('название рынка - 6')
     print('п. индекс - 7')
     print('======--------------------------------======')
+
+
+def print_detailed_market_info(market_info):
+    print('======--------------------------------======')
+    print('Основная информация')
+    print('ID - ' + market_info['basic_info']['market_id'])
+    print('Название рынка: ' + market_info['basic_info']['marketname'])
+    address_string = market_info['basic_info']['street'] + ', ' + market_info['basic_info']['city'] + ', '+ market_info['basic_info']['county'] + ', ' +  market_info['basic_info']['state'] + ', ' +  market_info['basic_info']['zip'] + '. '
+    print('Адрес: ' + address_string)
+    print('Рабочие часы: ')
+    print('======--------------------------------======')
+    print(market_info['basic_info']['season1date'])
+    print(market_info['basic_info']['season1time'])
+    print('======--------------------------------======')
+    print(market_info['basic_info']['season2date'])
+    print(market_info['basic_info']['season2time'])
+    print('======--------------------------------======')
+    print(market_info['basic_info']['season3date'])
+    print(market_info['basic_info']['season3time'])
+    print('======--------------------------------======')
+    print(market_info['basic_info']['season4date'])
+    print(market_info['basic_info']['season4time'])
+    print('======--------------------------------======')
+    print('Способы связи ')
+    for media_name, method_status in market_info['media_info'].items():
+        print(media_name + ' - ' + method_status)
+    print('======--------------------------------======')
+    print('Методы оплаты \n(y - если метод поддерживается,\n n - если метод не поддерживается)')
+    for method_name, method_status in market_info['bank_info'].items():
+        print(method_name + ' - ' + method_status )
+    print('======--------------------------------======')
+    print('Продаваемые товары \n(y - если товар продаётся,\n n - если товар не продаётся)')
+    for grocery_name, method_status in market_info['grocery_info'].items():
+        print(grocery_name + ' - ' + method_status)
+    return None

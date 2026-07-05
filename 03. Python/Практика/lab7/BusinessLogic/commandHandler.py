@@ -72,5 +72,4 @@ def command_show(market_id):
         print('Ошибка в ID, попробуйте ещё раз')
         return True
     else:
-        print('s')
-    return None
+        return True, market_info
