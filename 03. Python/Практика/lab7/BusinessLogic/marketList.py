@@ -111,16 +111,21 @@ def prepare_ordered_list(markets):
 
 def get_market_by_id(market_id):
     """
-    Получает данные одного рынка по его Id.
+    Получает подробные данные одного рынка по Id.
 
-    Читает все рынки, находит нужный по Id, получает связанные
-    данные из MarketXBankingInfo, MarketXGrocery, MarketXSocialMedia.
+    Формирует структуру:
+    {
+        'basic_info': {market_id, marketname, street, city, county, state, zip, season*},
+        'media_info': {имя_соцсети: url, ...},
+        'bank_info': {способ_оплаты: да/нет, ...},
+        'grocery_info': {тип_товара: да/нет, ...}
+    }
 
     Args:
         market_id: Идентификатор рынка.
 
     Returns:
-        dict: {market_id: {атрибуты_рынка}} или None если не найден.
+        dict: структура с данными рынка или None если не найден.
     """
     market_base = get_all_markets()
     _market_id = market_id

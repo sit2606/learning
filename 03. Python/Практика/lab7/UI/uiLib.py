@@ -9,9 +9,10 @@ uiLib — библиотека функций вывода в консоль.
 - print_list(markets, start, step): список с пагинацией
 - print_ordered_instruction(): инструкция по сортировке
 - print_exit(): сообщение о завершении
+- print_detailed_market_info(market_info): подробная информация о рынке
 
 Использование:
-    from UI.uiLib import print_welcome, print_help, print_list
+    from UI.uiLib import print_welcome, print_help, print_list, print_detailed_market_info
 """
 
 

@@ -109,7 +109,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `command_list_all()` | `(True, markets)` | Кортеж (статус, все рынки) |
 | `command_list()` | `(True, markets, start, step)` | Кортеж (статус, рынки с нумерацией, старт, шаг) |
 | `command_order()` | `(True, markets, col, order)` | Кортеж (статус, рынки, колонка, порядок) |
-| `command_show(market_id)` | `None` или `True` | Данные рынка или ошибка |
+| `command_show(market_id)` | `(True, market_info)` или `True` | Данные рынка или ошибка |
 | `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/marketList.py
@@ -122,7 +122,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `get_all_markets_ordered_by_num()` | То же, но ключ — порядковый номер (для пагинации) |
 | `get_all_markets_ordered_by_column(col, order)` | Сортировка по колонке (1-7), order: 'a'/ 'd' |
 | `prepare_ordered_list(markets)` | Переиндексация dict с 1 для пагинации |
-| `get_market_by_id(market_id)` | Получение данных одного рынка по Id |
+| `get_market_by_id(market_id)` | Получение подробных данных рынка: basic_info, media_info, bank_info, grocery_info |
 
 ### UI/uiLib.py
 
@@ -137,6 +137,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `print_list(markets, start_pos, step, column_name)` | Выводит таблицу с пагинацией и опциональной сортировкой |
 | `print_ordered_instruction()` | Выводит инструкцию по выбору колонки для сортировки |
 | `print_exit()` | Выводит сообщение о завершении работы |
+| `print_detailed_market_info(market_info)` | Выводит подробную информацию о рынке (адрес, расписание, соцсети, оплата, товары) |
 
 ### UI/columnToRu.py
 

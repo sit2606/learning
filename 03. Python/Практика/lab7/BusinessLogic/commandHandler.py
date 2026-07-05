@@ -64,8 +64,8 @@ def command_show(market_id):
         market_id: Идентификатор рынка.
 
     Returns:
-        None при успехе (данные выводятся в консоль),
-        True при ошибке (для продолжения работы).
+        (True, market_info) — кортеж (статус, данные рынка),
+        True — при ошибке (рынок не найден).
     """
     market_info = get_market_by_id(market_id)
     if market_info is None:
