@@ -388,3 +388,19 @@ def read_connection_entry(reference_name, market_id, reference_id):
     except:
         print("Error in read_connection_entry")
 
+def get_all_connections_by_market_id(reference_name, market_id):
+    _reference_name = reference_name
+    _market_id = str(market_id)
+    connections_dict = {}
+    try:
+        with open(f"files/{_reference_name}.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row["market_id"] == _market_id:
+                    connections_dict.update( {row["reference_id"]: row["status"]})
+            return {_market_id : connections_dict}
+    except:
+        print("Error in read_connection_entry")
+
+def humanize_reference(reference):
+    pass

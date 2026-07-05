@@ -16,6 +16,8 @@ fileLib — библиотека для инициализации данных 
 """
 
 import csv
+import uuid
+
 from DAL import referenceLib, requiredFiles
 from DAL.referenceLib import create_reference_entry, get_reference_with_name_as_key, create_connection_entry_by_list
 import os
@@ -244,3 +246,14 @@ def get_raw_markets_from_file():
     except Exception as e:
         print(e)
         print("Error in get_raw_markets_from_file")
+def create_reference_base():
+    try:
+        with open(f"files/{'Reference_Base'}.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=['ID','Reference_Name'])
+            writer.writeheader()
+            for reference_name in requiredFiles.FILES_TO_CHECK:
+                uid = uuid.uuid4()
+                writer.writerow({'ID': uid, 'Reference_Name': reference_name})
+    except Exception as e:
+        print(e)
+        print("Error in create_reference_base")

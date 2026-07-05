@@ -55,6 +55,8 @@ def file_creation():
         print('User base recreation in progress...')
         fileLib.create_user_base()
         print('User base successfully created...')
+        fileLib.create_reference_base()
+        print('Reference base successfully created...')
 
 def get_command():
     command = input('Пожалуйста, введите команду: ').strip()

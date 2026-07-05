@@ -14,7 +14,7 @@ marketList — бизнес-логика для работы со списком
 """
 
 from DAL.fileLib import get_raw_markets_from_file
-from DAL.referenceLib import  get_reference_with_uid_as_key
+from DAL.referenceLib import get_reference_with_uid_as_key, get_all_connections_by_market_id
 
 
 def get_all_markets():
@@ -106,8 +106,13 @@ def prepare_ordered_list(markets):
     return markets_for_show
 def get_market_by_id(market_id):
     market_base = get_all_markets()
+    _market_id = market_id
     try:
-        market_info = {market_id: market_base[str(market_id)]}
+        market_info = {market_id: market_base[str(_market_id)]}
+        MarketXBankingInfo = get_all_connections_by_market_id('MarketXBankingInfo', _market_id )
+        MarketXGrocery = get_all_connections_by_market_id('MarketXGrocery', _market_id )
+        MarketXSocialMedia = get_all_connections_by_market_id('MarketXSocialMedia', _market_id )
+
+        return market_info
     except KeyError:
         return None
-    pass
