@@ -11,14 +11,14 @@
             "id": "de67b6eb198c269f",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "03. Python/2026-07-02 Python  Лекция 10.md",
-                "mode": "source",
-                "source": false
+                "aFile": ".obsidian/community-plugins.json",
+                "bFile": ".obsidian/community-plugins.json",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "2026-07-02 Python  Лекция 10"
+              "icon": "diff",
+              "title": "Diff: community-plugins.json  (Working Tree)"
             }
           }
         ]
@@ -197,10 +197,17 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "de67b6eb198c269f",
+  "active": "37833373d3a8017d",
   "lastOpenFiles": [
-    "03. Python/2026-07-01 Python  Лекция 9.md",
+    "03. Python/Практика/lab7/DAL/requiredFiles.py",
+    "03. Python/Практика/lab7/DAL/referenceLib.py",
+    "03. Python/Практика/lab7/DAL/dataLib.py",
+    "03. Python/Практика/lab4_3.py",
+    "03. Python/Практика/lab4_3.md",
+    "03. Python/Практика/lab4_4.py",
+    "03. Python/Практика/lab7/App.py",
     "03. Python/2026-07-02 Python  Лекция 10.md",
+    "03. Python/2026-07-01 Python  Лекция 9.md",
     "03. Python/Практика/lab7/README.md",
     "03. Python/Практика/lab7/requirements.txt",
     "README.md",
@@ -208,12 +215,7 @@
     "03. Python/Практика/lab7/BusinessLogic/commandHandler.py~",
     "03. Python/Практика/lab7/DAL/userLib.py~",
     "03. Python/Практика/lab7/UI/uiLib.py~",
-    "03. Python/Практика/lab7/DAL/requiredFiles.py~",
     "03. Python/2026-06-04 Python (базовый) Лекция 3.md",
-    "03. Python/Практика/lab7/files/Reference_Base.csv",
-    "03. Python/Практика/lab7/files/USER_INFO.csv",
-    "03. Python/Практика/lab7/files/STATE.csv",
-    "03. Python/Практика/lab7/files/MEDIA.csv",
     "03. Python/Практика/lab7/CONTRIBUTING.md",
     "03. Python/Содержание курса.md",
     "03. Python/Практика/lab5/README.md",
@@ -242,8 +244,6 @@
     "01. Технологии программирования/Практика/2026-04-30 Диаграмма последовательности.md",
     "01. Технологии программирования/Практика/2026-05-05 Диаграмма состояний.md",
     "01. Технологии программирования/Практика/2026-05-05 Диаграмма деятельности.md",
-    "01. Технологии программирования/Практика/2026-04-15 18.58 Функциональные требования.md",
-    "01. Технологии программирования/Практика/2026-04-30 Диаграмма классов.md",
-    "01. Технологии программирования/Практика/2026-04-22 22.49 Модель предметной области.md"
+    "01. Технологии программирования/Практика/2026-04-15 18.58 Функциональные требования.md"
   ]
 }
