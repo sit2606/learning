@@ -7,6 +7,7 @@ fileLib — библиотека для инициализации данных 
 - Проверки наличия необходимых файлов
 - Создания и чтения MARKET_INFO.csv
 - Создания USER_INFO.csv
+- Создания REVIEWS.csv
 - Создания Reference_Base.csv (итоговый справочник всех справочников)
 
 Операции со справочниками делегируются в referenceLib.
@@ -272,6 +273,15 @@ def create_reference_base():
         print(e)
         print("Error in create_reference_base")
 def create_review_base():
+    """
+    Создаёт CSV-файл REVIEWS.csv с заголовками для хранения отзывов.
+
+    Структура файла: Id, review_date, user_id, market_id, review_text, score.
+
+    Raises:
+        Exception: при ошибке создания файла выводит сообщение
+        "Error in create_review_base" и текст исключения в консоль.
+    """
     _reference_name = 'REVIEWS'
     field_names = ['Id',
                    'review_date',

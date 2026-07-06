@@ -3,7 +3,7 @@ uiLib — библиотека функций вывода в консоль.
 
 Модуль содержит функции для отображения:
 - print_welcome(): приветствие
-- print_help(): справка по командам (help, list_all, list, show, order, register, exit)
+- print_help(): справка по командам (help, list_all, list, show, order, register, login, logout, review, exit)
 - print_table_header(): шапка таблицы
 - print_list_all(markets): полный список рынков
 - print_list(markets, start, step): список с пагинацией

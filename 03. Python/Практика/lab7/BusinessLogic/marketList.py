@@ -9,6 +9,8 @@ marketList — бизнес-логика для работы со списком
 - get_all_markets_ordered_by_column(col, order): сортировка по колонке
 - prepare_ordered_list(markets): переиндексация для пагинации
 - get_market_by_id(market_id): получение одного рынка по Id
+- get_market_references(market_id): получение связей рынка со справочниками
+- update_market_info(market_info): обновление данных рынка
 
 Использование:
     from BusinessLogic.marketList import get_all_markets, get_market_by_id
@@ -22,6 +24,16 @@ from DAL.referenceLib import get_reference_with_uid_as_key, get_all_connections_
 
 
 def get_market_references(market_id):
+    """
+    Получает все связи рынка со справочниками (банки, товары, соцсети).
+
+    Args:
+        market_id: Идентификатор рынка.
+
+    Returns:
+        tuple: (market_x_banking_info, market_x_grocery, market_x_social_media) —
+               три словаря со связями рынка.
+    """
     _market_id = market_id
     market_x_banking_info = get_all_connections_by_market_id('MarketXBankingInfo', _market_id)
     market_x_grocery = get_all_connections_by_market_id('MarketXGrocery', _market_id)
@@ -94,7 +106,8 @@ def get_all_markets_ordered_by_column(column_number, order = False):
                4 : 'county',
                5 : 'state',
                6 : 'marketname',
-               7 : 'zip'
+               7 : 'zip',
+               8 : 'score'
                }
     match order:
         case 'a':
@@ -167,6 +180,16 @@ def get_market_by_id(market_id):
         return None
 
 def update_market_info(market_info):
+    """
+    Обновляет данные рынка в MARKET_INFO.csv.
+
+    Конвертирует имена городов/округов/штатов обратно в UUID
+    и вызывает update_market() из dataLib.
+
+    Args:
+        market_info (dict): Словарь с данными рынка, содержащий
+            'basic_info' с полями market_id, city, county, state и др.
+    """
     _market_id = market_info['basic_info']['market_id']
     for key, value in market_info['basic_info'].items():
         if key == 'city':

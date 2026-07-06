@@ -1,8 +1,10 @@
 """
 dataLib — библиотека для управления данными о фермерских рынках.
 
-Модуль предоставляет заглушки для CRUD-операций с рынками
-(create_market, update_market, delete_market). Функции в разработке.
+Модуль предоставляет функции для CRUD-операций с рынками:
+- create_market(): создание нового рынка (в разработке)
+- update_market(data_to_update): обновление данных рынка
+- delete_market(): удаление рынка (в разработке)
 
 Использование:
     from dataLib import create_market, update_market, delete_market
@@ -20,6 +22,19 @@ def create_market():
 
 
 def update_market(data_to_update):
+    """
+    Обновляет данные о фермерском рынке в MARKET_INFO.csv.
+
+    Читает файл, находит запись по market_id, обновляет поля
+    и перезаписывает файл.
+
+    Args:
+        data_to_update (dict): Словарь с обновляемыми данными.
+            Обязательное поле: market_id.
+
+    Raises:
+        Exception: при ошибке выводит сообщение "Error in update_market".
+    """
     _data_to_update = data_to_update
     field_names = ['market_id',
                    'marketname',
