@@ -13,12 +13,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": ".obsidian/community-plugins.json",
-                "bFile": ".obsidian/community-plugins.json",
+                "aFile": "03. Python/Практика/lab5/lab5.py",
+                "bFile": "03. Python/Практика/lab5/lab5.py",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: community-plugins.json  (Working Tree)"
+              "title": "Diff: lab5.py  (Working Tree)"
             }
           }
         ]
@@ -197,11 +197,13 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "37833373d3a8017d",
+  "active": "de67b6eb198c269f",
   "lastOpenFiles": [
-    "03. Python/Практика/lab7/DAL/requiredFiles.py",
+    "03. Python/Практика/lab7/DAL/userLib.py",
     "03. Python/Практика/lab7/DAL/referenceLib.py",
     "03. Python/Практика/lab7/DAL/dataLib.py",
+    "03. Python/Практика/lab7/DAL/fileLib.py",
+    "03. Python/Практика/lab7/DAL/requiredFiles.py",
     "03. Python/Практика/lab4_3.py",
     "03. Python/Практика/lab4_3.md",
     "03. Python/Практика/lab4_4.py",
@@ -213,8 +215,6 @@
     "README.md",
     "03. Python/Практика/lab7/BusinessLogic/workflowLib.py~",
     "03. Python/Практика/lab7/BusinessLogic/commandHandler.py~",
-    "03. Python/Практика/lab7/DAL/userLib.py~",
-    "03. Python/Практика/lab7/UI/uiLib.py~",
     "03. Python/2026-06-04 Python (базовый) Лекция 3.md",
     "03. Python/Практика/lab7/CONTRIBUTING.md",
     "03. Python/Содержание курса.md",

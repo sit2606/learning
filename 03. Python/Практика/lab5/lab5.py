@@ -17,7 +17,8 @@
 3. Вычисляет заданное количество поколений, применяя правила игры «Жизнь».
 4. Отрисовывает каждое поколение с координатной сеткой и номером текущего поколения.
 5. Сохраняет итоговое состояние симуляции в файл 'sim_results.txt' через fileLib.
-6. Сохраняет последовательность кадров в анимированный GIF-файл 'out.gif'.
+6. Сохраняет каждое поколение  как отдельный PNG-файл (формат: "Gen {номер_поколения}.png")
+7. Сохраняет последовательность кадров в анимированный GIF-файл 'out.gif'.
 
 Зависимости:
     - Grid: модуль для отрисовки сетки, координат и номеров поколений.
@@ -70,4 +71,9 @@ for index,item in enumerate(sim_results):
     img = draw_generation_count(img, index)
     images.append(img)
 im1 = Image.new("RGBA", (INPUT_LENGTH + INPUT_STEP*4, INPUT_WIDTH + INPUT_STEP*4), (255, 255, 255))
+x = 0
+for i in images:
+    im_name = "Gen " + str(x)
+    i.save(f"{im_name}.png")
+    x += 1
 im1.save("out.gif", save_all=True, append_images=images, duration=100, loop=0)
