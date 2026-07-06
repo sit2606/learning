@@ -30,6 +30,8 @@ import bcrypt
 
 from BusinessLogic import commandHandler
 from DAL import fileLib
+from DAL.reviewLib import get_review_by_market_id
+from DAL.userLib import get_user_by_uid
 from UI import uiLib
 
 
@@ -75,10 +77,15 @@ def file_creation():
         fileLib.create_review_base()
         print('Review base successfully created...')
 
-def get_command():
+def get_command(user):
     """Считывает команду пользователя из stdin."""
-    command = input('Пожалуйста, введите команду: ').strip()
-    return command
+    if user is None:
+        print('Часть функций недоступна, неавторизованным пользователям.\nИспользуйте `login` чтобы войти')
+        command = input('Пожалуйста, введите команду: ').strip()
+        return command
+    else:
+        command = input(f'Привет, {str(user['firstname'])}! \nПожалуйста, введите команду: ').strip()
+        return command
 def proceed_command(command, user):
     """
     Обрабатывает команду пользователя и возвращает состояние сессии.
@@ -140,6 +147,17 @@ def proceed_command(command, user):
             try:
                 is_run, market_info = commandHandler.command_show()
                 uiLib.print_detailed_market_info(market_info)
+                should_continue = input('Если хотите увидеть отзывы на рынок, введите `y`\n'
+                                        'Если хотите вернуться к вводу команд, нажмите Enter\n')
+                match should_continue:
+                    case 'y':
+                        reviews = get_review_by_market_id(market_info["basic_info"]["market_id"])
+                        for review in reviews:
+                            user = get_user_by_uid(review["user_id"])
+                            review.update({"user_name": user["firstname"] + " " + user["lastname"]})
+                        uiLib.print_market_reviews(reviews, market_info['basic_info']['score'])
+                    case  _:
+                        return is_run
             except ValueError:
                 print('Пожалуйста, введите число.')
         case 'register':

@@ -120,3 +120,15 @@ def print_detailed_market_info(market_info):
     for grocery_name, method_status in market_info['grocery_info'].items():
         print(grocery_name + ' - ' + method_status)
     return None
+
+
+def print_market_reviews(reviews, average_score):
+    print('======--------------------------------======')
+    print(f'На основании {len(reviews)} отзывов средняя оценка рынка:  {average_score}')
+    for review in reviews:
+        print('======--------------------------------======')
+        print(f'Автор рецензии {review["user_name"]}')
+        print(f'Оценка: {review["score"]}')
+        print(f'Текст рецензии')
+        print(review['review_text'])
+    return None

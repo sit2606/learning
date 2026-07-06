@@ -13,11 +13,20 @@ marketList — бизнес-логика для работы со списком
 Использование:
     from BusinessLogic.marketList import get_all_markets, get_market_by_id
 """
+import csv
 
+from DAL.dataLib import update_market
 from DAL.fileLib import get_raw_markets_from_file
-from DAL.referenceLib import get_reference_with_uid_as_key, get_all_connections_by_market_id
+from DAL.referenceLib import get_reference_with_uid_as_key, get_all_connections_by_market_id, \
+    get_reference_with_name_as_key
 
 
+def get_market_references(market_id):
+    _market_id = market_id
+    market_x_banking_info = get_all_connections_by_market_id('MarketXBankingInfo', _market_id)
+    market_x_grocery = get_all_connections_by_market_id('MarketXGrocery', _market_id)
+    market_x_social_media = get_all_connections_by_market_id('MarketXSocialMedia', _market_id)
+    return market_x_banking_info,market_x_grocery,market_x_social_media
 def get_all_markets():
     """
     Получает данные о всех фермерских рынках.
@@ -107,8 +116,6 @@ def prepare_ordered_list(markets):
     for index, (key, value) in enumerate(markets.items(), start = 1):
         markets_for_show.update({index: value})
     return markets_for_show
-
-
 def get_market_by_id(market_id):
     """
     Получает подробные данные одного рынка по Id.
@@ -131,9 +138,7 @@ def get_market_by_id(market_id):
     _market_id = market_id
     try:
         market_info = {market_id: market_base[str(_market_id)]}
-        market_x_banking_info = get_all_connections_by_market_id('MarketXBankingInfo', _market_id )
-        market_x_grocery = get_all_connections_by_market_id('MarketXGrocery', _market_id )
-        market_x_social_media = get_all_connections_by_market_id('MarketXSocialMedia', _market_id )
+        market_x_banking_info, market_x_grocery , market_x_social_media  = get_market_references(_market_id)
         banking_reference = get_reference_with_uid_as_key("BANKING_INFO", "Common")
         grocery_reference = get_reference_with_uid_as_key("GROCERY_TYPES", "Common")
         media_reference = get_reference_with_uid_as_key("MEDIA", "Common")
@@ -160,3 +165,18 @@ def get_market_by_id(market_id):
         return market_info
     except KeyError:
         return None
+
+def update_market_info(market_info):
+    _market_id = market_info['basic_info']['market_id']
+    for key, value in market_info['basic_info'].items():
+        if key == 'city':
+            city_uid = get_reference_with_name_as_key("CITY", 'Common')
+            market_info['basic_info'].update({"city": city_uid[value]})
+        if key == 'county':
+            county_uid = get_reference_with_name_as_key("COUNTY", 'Common')
+            market_info['basic_info'].update({"county": county_uid[value]})
+        if key == 'state':
+            state_uid = get_reference_with_name_as_key("STATE", 'Common')
+            market_info['basic_info'].update({"state": state_uid[value]})
+    market_info['basic_info'].pop('number')
+    update_market(market_info['basic_info'])

@@ -121,11 +121,12 @@ def read_csv():
                 if key in requiredFiles.LOCATION:
                     reference_id = referenceLib.read_reference_entry(key.upper(), entry_name=value)
                     if reference_id is None:
-                        create_reference_entry(key.upper(), value)
+                        create_reference_entry(key.upper().strip(), value)
                         reference_id = referenceLib.read_reference_entry(key.upper(), entry_name=value)
                         market_info[current_id][key.lower()] = reference_id[0]
                     else:
                         market_info[current_id][key.lower()] = reference_id[0]
+                market_info[current_id]['score'] = None
         create_connection_entry_by_list('MarketXSocialMedia',MarketXSocialMedia)
         create_connection_entry_by_list('MarketXGrocery', MarketXGrocery)
         create_connection_entry_by_list('MarketXBankingInfo', MarketXBankingInfo)
@@ -187,7 +188,8 @@ def create_market_base(market_info):
                    'season3date',
                    'season3time',
                    'season4date',
-                   'season4time']
+                   'season4time',
+                   'score']
     try:
         with open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=field_names)

@@ -13,13 +13,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "03. Python/Практика/lab7/DAL/reviewLib.py",
-                "bFile": "03. Python/Практика/lab7/DAL/reviewLib.py",
-                "aRef": "HEAD",
-                "bRef": ""
+                "aFile": "03. Python/Практика/lab7/BusinessLogic/commandHandler.py",
+                "bFile": "03. Python/Практика/lab7/BusinessLogic/commandHandler.py",
+                "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: reviewLib.py  (Index)"
+              "title": "Diff: commandHandler.py  (Working Tree)"
             }
           }
         ]
@@ -200,8 +199,9 @@
   },
   "active": "37833373d3a8017d",
   "lastOpenFiles": [
-    "03. Python/Практика/lab7/документация/Изменения после 2026-06-29.md",
-    "03. Python/Практика/lab7/документация/2026-06-29 16.30 Физическая диаграмма.md",
+    "03. Python/Практика/lab7/DAL/userLib.py~",
+    "03. Python/Практика/lab7/UI/uiLib.py~",
+    "03. Python/Практика/lab7/BusinessLogic/workflowLib.py~",
     "03. Python/Практика/lab7/files/REVIEWS.csv",
     "03. Python/Практика/lab7/files/Reference_Base.csv",
     "03. Python/Практика/lab7/files/USER_INFO.csv",
@@ -210,8 +210,8 @@
     "03. Python/Практика/lab7/files/MarketXGrocery.csv",
     "03. Python/Практика/lab7/files/MarketXSocialMedia.csv",
     "03. Python/Практика/lab7/files/STATE.csv",
-    "03. Python/Практика/lab7/files/COUNTY.csv",
-    "03. Python/Практика/lab7/files/CITY.csv",
+    "03. Python/Практика/lab7/документация/Изменения после 2026-06-29.md",
+    "03. Python/Практика/lab7/документация/2026-06-29 16.30 Физическая диаграмма.md",
     "03. Python/Практика/lab7/документация/2026-06-29 16.23.31 сущности.md",
     "03. Python/Практика/lab4_3.md",
     "03. Python/2026-07-02 Python  Лекция 10.md",
@@ -244,7 +244,6 @@
     "01. Технологии программирования/Практика/2026-04-21 Сценарий и диаграмма вариантов использования.md",
     "01. Технологии программирования/Практика/2026-04-30 Диаграмма последовательности.md",
     "01. Технологии программирования/Практика/2026-05-05 Диаграмма состояний.md",
-    "01. Технологии программирования/Практика/2026-05-05 Диаграмма деятельности.md",
-    "01. Технологии программирования/Практика/2026-04-15 18.58 Функциональные требования.md"
+    "01. Технологии программирования/Практика/2026-05-05 Диаграмма деятельности.md"
   ]
 }

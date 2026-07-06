@@ -411,15 +411,3 @@ def get_all_connections_by_market_id(reference_name, market_id):
             return {_market_id : connections_dict}
     except:
         print("Error in read_connection_entry")
-
-def humanize_reference(reference):
-    """
-    Преобразует ID справочника в читаемое имя (заглушка).
-
-    Args:
-        reference: Идентификатор справочника.
-
-    Returns:
-        Заглушка — пока не реализована.
-    """
-    pass

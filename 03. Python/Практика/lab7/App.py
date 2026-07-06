@@ -80,7 +80,7 @@ def main():
     print_welcome()
     user = None
     while run_app:
-        command = get_command()
+        command = get_command(user)
         run_app, user = proceed_command(command, user)
 
 

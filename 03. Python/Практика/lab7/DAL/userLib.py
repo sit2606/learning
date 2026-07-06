@@ -54,6 +54,16 @@ def read_user(user_id):
     except Exception as e:
         print(e)
         print("Error in read_user")
+def get_user_by_uid(uid=None):
+    try:
+        with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
+            user_base = csv.DictReader(file)
+            for user in user_base:
+                if user["Id"] == uid:
+                    return user
+    except Exception as e:
+        print(e)
+        print("Error in get_user_by_uid")
 def get_user_by_username(username=None):
     """
     Читает пользователя по логину (user_name).
@@ -72,7 +82,7 @@ def get_user_by_username(username=None):
                     return user
     except Exception as e:
         print(e)
-        print("Error in read_user")
+        print("Error in get_user_by_username")
 def update_user(user = DEFAULT_USER):
     _user = user
     try:

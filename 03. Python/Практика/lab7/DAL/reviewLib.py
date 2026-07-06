@@ -18,6 +18,11 @@ reviewLib — библиотека для работы с отзывами о ф
     from DAL.reviewLib import create_review, read_review, calculate_score
 """
 import csv
+from statistics import mean
+
+from BusinessLogic.marketList import get_market_by_id, update_market_info
+
+
 def create_review(review):
     """
     Добавляет отзыв в файл REVIEWS.csv.
@@ -45,7 +50,7 @@ def create_review(review):
     except Exception as e:
         print(e)
         print("Error in create_review")
-def read_review(market_id):
+def get_review_by_market_id(market_id):
     """
     Читает отзывы для указанного рынка из файла REVIEWS.csv.
 
@@ -58,8 +63,11 @@ def read_review(market_id):
     file_path = f"files/{"REVIEWS"}.csv"
     with open(file_path, "r", newline="", encoding="utf-8") as file:
         reader = csv.DictReader(file)
-        for i in reader:
-            print('s')
+        review_list = []
+        for review in reader:
+            if review['market_id'] == market_id:
+                review_list.append(review)
+        return review_list
 def calculate_score(market_id):
     """
     Рассчитывает среднюю оценку рынка на основе отзывов.
@@ -70,4 +78,12 @@ def calculate_score(market_id):
     Returns:
         Средняя оценка (float) или None (в разработке).
     """
-    pass
+    reviews = get_review_by_market_id(market_id)
+    score = []
+    for review in reviews:
+        score.append(float(review['score']))
+    score = mean(score)
+    market_info = get_market_by_id(market_id)
+    market_info['basic_info'].update({'score': score})
+    update_market_info(market_info)
+    return market_info

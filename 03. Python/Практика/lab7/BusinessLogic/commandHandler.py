@@ -29,7 +29,7 @@ import getpass
 from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id
 from DAL import userLib
-from DAL.reviewLib import create_review
+from DAL.reviewLib import create_review, get_review_by_market_id, calculate_score
 from DAL.userLib import get_user_by_username
 
 
@@ -123,6 +123,7 @@ def register_user():
                     user.update({'lastname': user_lastname})
                     user.update({'location': 'test_location'})
                     userLib.create_user(user)
+                    user = get_user_by_username(user_name)
                     print('Регистрация успешна! Добро пожаловать!')
                     return True, user
 def login_user(user):
@@ -221,6 +222,8 @@ def add_review(user):
                                 review['review_text'] = review_text
                                 review['score'] = score
                                 create_review(review)
+                                print('Оценка успешно добавлена!')
+                                calculate_score(market_info['basic_info']['market_id'])
                                 return True, user
                             except ValueError:
                                 print('Оценка должна быть целым, положительным числом. Попробуйте снова')
