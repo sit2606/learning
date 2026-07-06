@@ -7,6 +7,7 @@ marketList — бизнес-логика для работы со списком
 - get_all_markets(): все рынки с резолвингом ID → имена
 - get_all_markets_ordered_by_num(): с порядковой нумерацией
 - get_all_markets_ordered_by_column(col, order): сортировка по колонке
+- get_all_markets_filtered_by_column(col): фильтрация по колонке (по алфавиту)
 - prepare_ordered_list(markets): переиндексация для пагинации
 - get_market_by_id(market_id): получение одного рынка по Id
 - get_market_references(market_id): получение связей рынка со справочниками
@@ -15,7 +16,6 @@ marketList — бизнес-логика для работы со списком
 Использование:
     from BusinessLogic.marketList import get_all_markets, get_market_by_id
 """
-import csv
 
 from DAL.dataLib import update_market
 from DAL.fileLib import get_raw_markets_from_file
@@ -92,13 +92,17 @@ def get_all_markets_ordered_by_num():
     return ordered_market_base
 def get_all_markets_ordered_by_column(column_number, order = False):
     """
-    Получает данные о всех фермерских рынках, отсортированные по полю County.
+    Получает данные о всех фермерских рынках, отсортированные по указанной колонке.
 
-    Сначала получает все рынки через get_all_markets(), затем сортирует
-    по алфавиту по названию округа (County).
+    Поддерживаемые колонки: 1-номер, 2-ID, 3-город, 4-графство,
+    5-штат, 6-название, 7-индекс, 8-ср. оценка.
+
+    Args:
+        column_number (int): номер колонки для сортировки (1-8).
+        order (str): 'a' — по возрастанию, 'd' — по убыванию.
 
     Returns:
-        dict: словарь {market_id: {атрибуты_рынка}}, отсортированный по County.
+        tuple: (dict_рынков, имя_колонки) — отсортированный словарь и имя колонки.
     """
     columns = {1 : 'number',
                2 : 'market_id',
@@ -205,6 +209,17 @@ def update_market_info(market_info):
     update_market(market_info['basic_info'])
 
 def get_all_markets_filtered_by_column(column_number):
+    """
+    Получает данные о всех фермерских рынках, отсортированные по алфавиту по колонке.
+
+    Аналог get_all_markets_ordered_by_column, но всегда сортирует по возрастанию.
+
+    Args:
+        column_number (int): номер колонки для фильтрации (1-8).
+
+    Returns:
+        tuple: (dict_рынков, имя_колонки) — отсортированный словарь и имя колонки.
+    """
     columns = {1: 'number',
                2: 'market_id',
                3: 'city',

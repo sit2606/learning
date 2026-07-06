@@ -3,8 +3,8 @@ reviewLib — библиотека для работы с отзывами о ф
 
 Основные функции:
 - create_review(review): добавление отзыва в CSV-файл
-- read_review(market_id): чтение отзывов по ID рынка
-- calculate_score(market_id): расчёт средней оценки рынка
+- get_review_by_market_id(market_id): чтение отзывов по ID рынка
+- calculate_score(market_id): расчёт средней оценки рынка и обновление MARKET_INFO.csv
 
 Структура CSV REVIEWS.csv:
 - Id: UUID отзыва
@@ -15,7 +15,7 @@ reviewLib — библиотека для работы с отзывами о ф
 - score: оценка от 1 до 5
 
 Использование:
-    from DAL.reviewLib import create_review, read_review, calculate_score
+    from DAL.reviewLib import create_review, get_review_by_market_id, calculate_score
 """
 import csv
 from statistics import mean
@@ -58,7 +58,8 @@ def get_review_by_market_id(market_id):
         market_id: ID рынка для фильтрации отзывов.
 
     Returns:
-        Список отзывов (в разработке — пока только выводит в консоль).
+        list: список словарей с отзывами, где каждый словарь содержит
+              поля Id, review_date, user_id, market_id, review_text, score.
     """
     file_path = f"files/{"REVIEWS"}.csv"
     with open(file_path, "r", newline="", encoding="utf-8") as file:
@@ -70,13 +71,13 @@ def get_review_by_market_id(market_id):
         return review_list
 def calculate_score(market_id):
     """
-    Рассчитывает среднюю оценку рынка на основе отзывов.
+    Рассчитывает среднюю оценку рынка на основе отзывов и обновляет MARKET_INFO.csv.
 
     Args:
         market_id: ID рынка.
 
     Returns:
-        Средняя оценка (float) или None (в разработке).
+        dict: обновлённые данные рынка (market_info) с полем score.
     """
     reviews = get_review_by_market_id(market_id)
     score = []

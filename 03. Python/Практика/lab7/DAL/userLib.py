@@ -5,8 +5,9 @@ userLib — библиотека для управления пользоват�
 через CSV-файл files/USER_INFO.csv.
 
 Функции:
-- create_user(): добавляет пользователя, возвращает UUID
+- create_user(user): добавляет пользователя, возвращает UUID
 - read_user(user_id): читает пользователя по UUID
+- get_user_by_uid(uid): читает пользователя по UUID (альтернатива read_user)
 - get_user_by_username(username): читает пользователя по логину
 - update_user(user): обновляет данные пользователя
 - delete_user(user_id): удаляет пользователя по UUID
@@ -32,6 +33,17 @@ DEFAULT_USER = {'Id': None,
                 'lastname': 'test_lastname',
                 'location': 'test_location'}
 def create_user(user = DEFAULT_USER):
+    """
+    Создаёт нового пользователя и добавляет в USER_INFO.csv.
+
+    Args:
+        user (dict): Словарь с данными пользователя. Обязательные ключи:
+            user_name, password, firstname, lastname, location.
+            По умолчанию используется DEFAULT_USER.
+
+    Returns:
+        str: UUID созданного пользователя.
+    """
     _user_to_create = user
     file_path = "files/USER_INFO.csv"
     try:
@@ -45,6 +57,16 @@ def create_user(user = DEFAULT_USER):
         print("Error in create_user")
 
 def read_user(user_id):
+    """
+    Читает данные пользователя по UUID.
+
+    Args:
+        user_id (str): UUID пользователя.
+
+    Returns:
+        dict: данные пользователя (Id, user_name, password, firstname, lastname, location)
+              или None если не найден.
+    """
     try:
         with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
             reader = csv.DictReader(file)
@@ -54,16 +76,6 @@ def read_user(user_id):
     except Exception as e:
         print(e)
         print("Error in read_user")
-def get_user_by_uid(uid=None):
-    try:
-        with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
-            user_base = csv.DictReader(file)
-            for user in user_base:
-                if user["Id"] == uid:
-                    return user
-    except Exception as e:
-        print(e)
-        print("Error in get_user_by_uid")
 def get_user_by_username(username=None):
     """
     Читает пользователя по логину (user_name).
@@ -84,6 +96,14 @@ def get_user_by_username(username=None):
         print(e)
         print("Error in get_user_by_username")
 def update_user(user = DEFAULT_USER):
+    """
+    Обновляет данные пользователя в USER_INFO.csv.
+
+    Находит запись по полю Id и обновляет её значениями из user.
+
+    Args:
+        user (dict): Словарь с обновляемыми данными. Обязательное поле: Id.
+    """
     _user = user
     try:
         with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
@@ -107,6 +127,12 @@ def update_user(user = DEFAULT_USER):
         print("Error in update_user")
 
 def delete_user(user_id):
+    """
+    Удаляет пользователя из USER_INFO.csv по UUID.
+
+    Args:
+        user_id (str): UUID пользователя для удаления.
+    """
     _user_id = user_id
     try:
         with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:

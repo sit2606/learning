@@ -12,6 +12,7 @@ commandHandler — обработчики команд пользователя.
 - login_user(user): авторизация пользователя
 - logout_user(user): выход из системы
 - add_review(user): добавление отзыва на рынок
+- show_filtered(): фильтрация рынков по колонке
 
 Каждая функция возвращает кортеж (статус, данные) для передачи в UI.
 Вызывается из workflowLib.proceed_command().
@@ -27,9 +28,9 @@ import bcrypt
 import getpass
 
 from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column, \
-    prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
+    prepare_ordered_list, get_market_by_id
 from DAL import userLib
-from DAL.reviewLib import create_review, get_review_by_market_id, calculate_score
+from DAL.reviewLib import create_review, calculate_score
 from DAL.userLib import get_user_by_username
 
 
@@ -172,9 +173,13 @@ def logout_user(user):
     Returns:
         (True, None) — всегда сбрасывает пользователя.
     """
-    user = None
-    print('Вы успешно вышли из системы')
-    return True, user
+    if user is None:
+        print('Чтобы выйти, нужно войти')
+        return True, None
+    else:
+        user = None
+        print('Вы успешно вышли из системы')
+        return True, user
 
 
 def add_review(user):
@@ -234,6 +239,12 @@ def add_review(user):
 
 
 def show_filtered():
+    """
+    Запрашивает у пользователя номер колонки и возвращает отфильтрованный список.
+
+    Returns:
+        (True, dict_рынков, номер_колонки) — кортеж (статус, рынки, колонка).
+    """
     column = int(input('Введите номер колонки, по которой вы хотите отфильтровать список список: '))
     markets = prepare_ordered_list(markets)
     return True, markets, column

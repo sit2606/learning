@@ -12,11 +12,7 @@ App — точка входа приложения для управления �
 """
 import csv
 
-from BusinessLogic.marketList import get_all_markets_ordered_by_column, get_market_by_id
 from DAL import userLib
-from DAL.fileLib import create_reference_base
-from DAL.referenceLib import get_reference_with_name_as_key, get_all_connections_by_market_id, \
-    get_reference_with_uid_as_key
 from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
 

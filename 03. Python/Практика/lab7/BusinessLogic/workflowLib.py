@@ -4,7 +4,7 @@ workflowLib — модуль оркестрации рабочего проце�
 Основные функции:
 - directory_creation(): создание папки files/
 - file_creation(): проверка и пересоздание CSV-файлов
-- get_command(): ввод команды от пользователя
+- get_command(user): ввод команды от пользователя (с приветствием для авторизованных)
 - proceed_command(command, user): маршрутизация и выполнение команды
 
 Поддерживаемые команды:
@@ -12,7 +12,8 @@ workflowLib — модуль оркестрации рабочего проце�
 - list_all — все рынки
 - list — список с пагинацией
 - order — сортировка по колонке
-- show — данные одного рынка по Id
+- show — данные одного рынка по Id (с просмотром отзывов)
+- filter — фильтрация рынков по колонке
 - register — регистрация пользователя
 - login — авторизация пользователя
 - logout — выход из системы
@@ -23,15 +24,11 @@ workflowLib — модуль оркестрации рабочего проце�
     from BusinessLogic.workflowLib import directory_creation, file_creation, proceed_command
 """
 import os
-import uuid
-from multiprocessing import context
-
-import bcrypt
 
 from BusinessLogic import commandHandler
 from DAL import fileLib
 from DAL.reviewLib import get_review_by_market_id
-from DAL.userLib import get_user_by_uid
+from DAL.userLib import get_user_by_uid, read_user
 from UI import uiLib
 
 
@@ -78,7 +75,18 @@ def file_creation():
         print('Review base successfully created...')
 
 def get_command(user):
-    """Считывает команду пользователя из stdin."""
+    """
+    Считывает команду пользователя из stdin.
+
+    Если пользователь авторизован — выводит приветствие с именем.
+    Если не авторизован — выводит предупреждение о недоступных функциях.
+
+    Args:
+        user: Текущий авторизованный пользователь или None.
+
+    Returns:
+        str: введённая пользователем команда.
+    """
     if user is None:
         print('Часть функций недоступна, неавторизованным пользователям.\nИспользуйте `login` чтобы войти')
         command = input('Пожалуйста, введите команду: ').strip()
@@ -153,7 +161,7 @@ def proceed_command(command, user):
                     case 'y':
                         reviews = get_review_by_market_id(market_info["basic_info"]["market_id"])
                         for review in reviews:
-                            user = get_user_by_uid(review["user_id"])
+                            user = read_user(review["user_id"])
                             review.update({"user_name": user["firstname"] + " " + user["lastname"]})
                         uiLib.print_market_reviews(reviews, market_info['basic_info']['score'])
                     case  _:

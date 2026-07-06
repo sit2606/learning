@@ -3,13 +3,14 @@ uiLib — библиотека функций вывода в консоль.
 
 Модуль содержит функции для отображения:
 - print_welcome(): приветствие
-- print_help(): справка по командам (help, list_all, list, show, order, register, login, logout, review, exit)
+- print_help(): справка по командам
 - print_table_header(): шапка таблицы
+- print_header_numbers(): нумерация колонок для сортировки/фильтрации
 - print_list_all(markets): полный список рынков
 - print_list(markets, start, step): список с пагинацией
-- print_ordered_instruction(): инструкция по сортировке
 - print_exit(): сообщение о завершении
 - print_detailed_market_info(market_info): подробная информация о рынке
+- print_market_reviews(reviews, average_score): вывод отзывов о рынке
 
 Использование:
     from UI.uiLib import print_welcome, print_help, print_list, print_detailed_market_info
@@ -79,6 +80,7 @@ def print_list(markets_for_show, start_pos= 1, step = 10, column_name = None):
         print('Список закончился')
     return markets_for_show,end_pos,step
 def print_header_numbers():
+    """Выводит шапку таблицы с номерами колонок для сортировки и фильтрации."""
     print('======--------------------------------======')
     print_table_header()
     print('Номер - 1')
@@ -126,6 +128,13 @@ def print_detailed_market_info(market_info):
 
 
 def print_market_reviews(reviews, average_score):
+    """
+    Выводит список отзывов о рынке и среднюю оценку.
+
+    Args:
+        reviews (list): Список словарей с отзывами (user_name, score, review_text).
+        average_score (float): Средняя оценка рынка.
+    """
     print('======--------------------------------======')
     if len(reviews) == 1:
         print(f'На основании {len(reviews)} отзыва средняя оценка рынка:  {average_score}')

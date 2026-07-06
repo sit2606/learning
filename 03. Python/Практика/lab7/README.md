@@ -80,9 +80,9 @@ commandHandler (BL) → только marketList (BL)                            
 
 Порядок выполнения `main()`:
 1. `directory_creation()` — создаёт папку `files/`
-2. `user_lib_testing()` — тестирование CRUD пользователей
-3. `file_creation()` — проверка и инициализация CSV-файлов
-4. Цикл команд: вывод приветствия, чтение и обработка команд
+2. `file_creation()` — проверка и инициализация CSV-файлов
+3. `user_lib_testing()` — тестирование CRUD пользователей
+4. Цикл команд: вывод приветствия, чтение и обработка команд с отслеживанием сессии (user)
 
 ### BusinessLogic/workflowLib.py
 
@@ -92,15 +92,16 @@ commandHandler (BL) → только marketList (BL)                            
 |---------|----------|
 | `directory_creation()` | Создаёт папку `files/` для хранения CSV-файлов |
 | `file_creation()` | Проверяет файлы, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv, USER_INFO.csv, Reference_Base.csv, REVIEWS.csv |
-| `get_command()` | Считывает команду пользователя из stdin |
-| `proceed_command(command, user)` | Обрабатывает команду (help/list/list_all/order/show/register/login/logout/review/exit) |
+| `get_command(user)` | Считывает команду пользователя из stdin (с приветствием для авторизованных) |
+| `proceed_command(command, user)` | Обрабатывает команду (help/list/list_all/order/show/filter/register/login/logout/review/exit) |
 
 Поддерживаемые команды:
 - `help` — справка
 - `list_all` — все рынки
 - `list` — список с пагинацией
 - `order` — сортировка по колонке
-- `show` — данные одного рынка по Id
+- `show` — данные одного рынка по Id (с просмотром отзывов)
+- `filter` — фильтрация рынков по колонке
 - `register` — регистрация пользователя
 - `login` — авторизация пользователя
 - `logout` — выход из системы
@@ -122,6 +123,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `login_user(user)` | `(True, user)` или `(True, None)` | Авторизация пользователя |
 | `logout_user(user)` | `(True, None)` | Выход из системы |
 | `add_review(user)` | `(True, user)` | Добавление отзыва на рынок |
+| `show_filtered()` | `(True, markets, col)` | Фильтрация рынков по колонке |
 | `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/marketList.py
@@ -132,7 +134,8 @@ commandHandler (BL) → только marketList (BL)                            
 |---------|----------|
 | `get_all_markets()` | Получает данные о рынках (ключ — market_id), резолвит ID → имена |
 | `get_all_markets_ordered_by_num()` | То же, но ключ — порядковый номер (для пагинации) |
-| `get_all_markets_ordered_by_column(col, order)` | Сортировка по колонке (1-7), order: 'a'/ 'd' |
+| `get_all_markets_ordered_by_column(col, order)` | Сортировка по колонке (1-8), order: 'a'/'d' |
+| `get_all_markets_filtered_by_column(col)` | Фильтрация по колонке (1-8), по алфавиту |
 | `prepare_ordered_list(markets)` | Переиндексация dict с 1 для пагинации |
 | `get_market_by_id(market_id)` | Получение подробных данных рынка: basic_info, media_info, bank_info, grocery_info |
 
@@ -145,11 +148,12 @@ commandHandler (BL) → только marketList (BL)                            
 | `print_welcome()` | Выводит приветственное сообщение |
 | `print_help()` | Выводит список доступных команд |
 | `print_table_header()` | Выводит шапку таблицы (русские названия колонок) |
+| `print_header_numbers()` | Выводит нумерацию колонок для сортировки/фильтрации |
 | `print_list_all(markets)` | Выводит таблицу со списком всех рынков |
 | `print_list(markets, start_pos, step, column_name)` | Выводит таблицу с пагинацией и опциональной сортировкой |
-| `print_ordered_instruction()` | Выводит инструкцию по выбору колонки для сортировки |
 | `print_exit()` | Выводит сообщение о завершении работы |
 | `print_detailed_market_info(market_info)` | Выводит подробную информацию о рынке (адрес, расписание, соцсети, оплата, товары) |
+| `print_market_reviews(reviews, average_score)` | Выводит список отзывов о рынке и среднюю оценку |
 
 ### UI/columnToRu.py
 
@@ -164,6 +168,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `state` | штат |
 | `marketname` | название рынка |
 | `zip` | п. индекс |
+| `score` | ср. оценка |
 
 ### DAL/requiredFiles.py
 
@@ -182,12 +187,12 @@ commandHandler (BL) → только marketList (BL)                            
 
 ### DAL/dataLib.py
 
-CRUD-операции с фермерскими рынками (все функции — заглушки в разработке).
+CRUD-операции с фермерскими рынками.
 
 | Функция | Описание |
 |---------|----------|
 | `create_market()` | Заглушка (в разработке) |
-| `update_market()` | Заглушка (в разработке) |
+| `update_market(data)` | Обновляет данные рынка в MARKET_INFO.csv по market_id |
 | `delete_market()` | Заглушка (в разработке) |
 
 ### DAL/referenceLib.py
@@ -221,6 +226,7 @@ CRUD-операции со справочниками и связями.
 | `create_market_base(data)` | Создаёт MARKET_INFO.csv из словаря market_info |
 | `get_raw_markets_from_file()` | Читает MARKET_INFO.csv, возвращает dict {market_id: {атрибуты}} |
 | `create_user_base()` | Создаёт USER_INFO.csv |
+| `create_review_base()` | Создаёт REVIEWS.csv |
 | `create_reference_base()` | Создаёт Reference_Base.csv со списком всех справочников |
 
 ### DAL/userLib.py
@@ -233,6 +239,7 @@ CRUD-операции с пользователями через CSV-файл fi
 | `DEFAULT_USER` | Значения по умолчанию для нового пользователя |
 | `create_user(user)` | Создаёт пользователя, возвращает UUID |
 | `read_user(user_id)` | Читает пользователя по Id, возвращает dict |
+| `get_user_by_uid(uid)` | Читает пользователя по UUID (альтернатива read_user) |
 | `get_user_by_username(username)` | Читает пользователя по логину, возвращает dict или None |
 | `update_user(user)` | Обновляет данные пользователя по Id |
 | `delete_user(user_id)` | Удаляет пользователя по Id |
@@ -244,8 +251,8 @@ CRUD-операции с отзывами о фермерских рынках �
 | Функция | Описание |
 |---------|----------|
 | `create_review(review)` | Добавляет отзыв в файл REVIEWS.csv |
-| `read_review(market_id)` | Читает отзывы для указанного рынка (в разработке) |
-| `calculate_score(market_id)` | Рассчитывает среднюю оценку рынка (в разработке) |
+| `get_review_by_market_id(market_id)` | Читает отзывы для указанного рынка, возвращает list |
+| `calculate_score(market_id)` | Рассчитывает среднюю оценку и обновляет MARKET_INFO.csv |
 
 Структура CSV REVIEWS.csv:
 - `Id` — UUID отзыва
@@ -286,6 +293,10 @@ App.py
                  │
                  ├─ 'show'     → commandHandler.command_show() → (True, market_info)
                  │                 → marketList.get_market_by_id(market_id)
+                 │                 → (опционально) get_review_by_market_id() → print_market_reviews()
+                 │
+                 ├─ 'filter'   → commandHandler.show_filtered() → (True, markets, col)
+                 │                 → marketList.get_all_markets_filtered_by_column()
                  │
                  ├─ 'register' → commandHandler.register_user() → (True, user)
                  │
