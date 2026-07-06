@@ -17,12 +17,12 @@ def command_new_command():
 
 ### Шаг 2: Добавить маршрутизацию в workflowLib.py
 
-Добавьте новую ветку в `match` внутри `proceed_command()`:
+Добавьте новую ветку в `match` внутри `proceed_command()`. Функция принимает `command` и `user`:
 
 ```python
 # BusinessLogic/workflowLib.py
 
-def proceed_command(command):
+def proceed_command(command, user):
     is_run = True
     match command:
         # ... существующие команды ...
@@ -33,7 +33,7 @@ def proceed_command(command):
             else:
                 uiLib.print_new_command(data)
         # ...
-    return is_run
+    return is_run, user
 ```
 
 ### Шаг 3: Добавить функцию вывода в uiLib.py
@@ -77,9 +77,9 @@ COLUMNS = {
 
 Команда `show` выводит данные одного рынка по Id:
 
-1. `commandHandler.command_show(market_id)` — получает данные через `get_market_by_id()`
-2. `workflowLib.proceed_command('show')` — запрашивает Id у пользователя, вызывает обработчик
-3. `uiLib.print_help()` — добавлена строка `show - выводит подробную информацию о рынке по ID`
+1. `commandHandler.command_show()` — запрашивает ID у пользователя, получает данные через `get_market_by_id()`
+2. `workflowLib.proceed_command('show', user)` — вызывает обработчик
+3. `uiLib.print_detailed_market_info(market_info)` — выводит подробную информацию
 
 ---
 
@@ -267,6 +267,135 @@ referenceLib — библиотека для управления справоч
 
 ---
 
+## Добавление нового типа сущности (например, отзывы)
+
+### Шаг 1: Создать модуль в DAL/
+
+Создайте файл `DAL/newEntityLib.py` с функциями CRUD:
+
+```python
+# DAL/newEntityLib.py
+
+"""
+newEntityLib — библиотека для работы с новыми сущностями.
+
+Основные функции:
+- create_entity(entity): добавление сущности
+- read_entity(id): чтение сущности
+- update_entity(entity): обновление сущности
+- delete_entity(id): удаление сущности
+"""
+import csv
+
+def create_entity(entity):
+    """Добавляет сущность в CSV-файл."""
+    field_names = ['Id', 'field1', 'field2']
+    file_path = "files/NEW_ENTITY.csv"
+    try:
+        with open(file_path, "a", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=field_names)
+            writer.writerow(entity)
+    except Exception as e:
+        print(e)
+        print("Error in create_entity")
+```
+
+### Шаг 2: Добавить создание CSV-файла в fileLib.py
+
+```python
+# DAL/fileLib.py
+
+def create_new_entity_base():
+    """Создаёт CSV-файл для новых сущностей."""
+    _reference_name = 'NEW_ENTITY'
+    field_names = ['Id', 'field1', 'field2']
+    try:
+        with open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=field_names)
+            writer.writeheader()
+    except Exception as e:
+        print(e)
+        print("Error in create_new_entity_base")
+```
+
+### Шаг 3: Добавить в requiredFiles.py
+
+```python
+# DAL/requiredFiles.py
+
+FILES_TO_CHECK = {
+    # ... существующие файлы ...
+    'NEW_ENTITY'
+}
+```
+
+### Шаг 4: Вызвать создание в workflowLib.py
+
+```python
+# BusinessLogic/workflowLib.py
+
+def file_creation():
+    # ... существующий код ...
+    fileLib.create_new_entity_base()
+    print('New entity base successfully created...')
+```
+
+### Шаг 5: Создать обработчик в commandHandler.py
+
+```python
+# BusinessLogic/commandHandler.py
+
+def add_entity(user):
+    """
+    Добавление новой сущности.
+
+    Args:
+        user: Текущий авторизованный пользователь или None.
+
+    Returns:
+        (True, user) — после успешного добавления.
+    """
+    if user is None:
+        print('Требуется авторизация.')
+        return True, user
+
+    entity = {}
+    entity['Id'] = str(uuid.uuid4())
+    entity['field1'] = input('Введите field1: ')
+    entity['field2'] = input('Введите field2: ')
+
+    from DAL.newEntityLib import create_entity
+    create_entity(entity)
+    print('Сущность успешно добавлена!')
+    return True, user
+```
+
+### Шаг 6: Добавить команду в workflowLib.py
+
+```python
+# BusinessLogic/workflowLib.py
+
+def proceed_command(command, user):
+    # ... существующий код ...
+    match command:
+        # ... существующие команды ...
+        case 'new_entity':
+            is_run, user = commandHandler.add_entity(user)
+        # ...
+```
+
+### Шаг 7: Обновить справку в uiLib.py
+
+```python
+# UI/uiLib.py
+
+def print_help():
+    # ... существующий код ...
+    print('new_entity - описание новой команды')
+```
+
+---
+
 ## Структура данных
 
 ### CSV-файлы справочников (Id, Name)
@@ -311,6 +440,42 @@ python
 ```bash
 pip install pytest
 pytest test_*.py -v
+```
+
+---
+
+## Система сессий (авторизация)
+
+Приложение поддерживает отслеживание текущего пользователя через объект `user`:
+
+- `user = None` — пользователь не авторизован
+- `user = {...}` — словарь с данными пользователя (Id, user_name, firstname,lastname, location)
+
+### Поток авторизации
+
+1. **Регистрация** (`register`) — создаёт пользователя, возвращает `user`
+2. **Вход** (`login`) — проверяет логин/пароль, возвращает `user` или `None`
+3. **Выход** (`logout`) — сбрасывает `user` в `None`
+
+### Передача user между функциями
+
+Все функции обработки команд принимают и возвращают `user`:
+
+```python
+# commandHandler.py
+def add_review(user):
+    if user is None:
+        print('Требуется авторизация.')
+        return True, user
+    # ... работа с user ...
+    return True, user
+
+# workflowLib.py
+def proceed_command(command, user):
+    match command:
+        case 'review':
+            is_run, user = commandHandler.add_review(user)
+    return is_run, user
 ```
 
 ---

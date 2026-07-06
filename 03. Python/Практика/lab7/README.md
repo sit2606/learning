@@ -11,13 +11,14 @@ lab7/
 ├── App.py                          # Точка входа приложения
 ├── BusinessLogic/                  # Слой бизнес-логики
 │   ├── workflowLib.py              # Оркестрация процесса и обработка команд
-│   ├── commandHandler.py           # Обработчики команд (help, list, list_all, order, exit)
+│   ├── commandHandler.py           # Обработчики команд
 │   └── marketList.py               # Бизнес-логика получения списка рынков
 ├── DAL/                            # Слой доступа к данным (Data Access Layer)
 │   ├── fileLib.py                  # Парсинг Export.csv, инициализация справочников
 │   ├── referenceLib.py             # CRUD-операции со справочниками и связями
 │   ├── dataLib.py                  # CRUD-операции с рынками (заглушки)
 │   ├── userLib.py                  # CRUD-операции с пользователями
+│   ├── reviewLib.py                # CRUD-операции с отзывами
 │   └── requiredFiles.py            # Константы категорий и список файлов
 ├── UI/                             # Слой интерфейса пользователя
 │   ├── uiLib.py                    # Функции вывода в консоль
@@ -26,6 +27,8 @@ lab7/
 ├── документация/                   # Диаграммы и пользовательские истории
 ├── .gitignore                      # Исключения Git
 ├── README.md                       # Документация
+├── CONTRIBUTING.md                 # Руководство разработчика
+├── requirements.txt                # Зависимости проекта
 └── Export.csv                      # Исходный датасет (не включён)
 ```
 
@@ -54,6 +57,7 @@ App.py
       ├── referenceLib.py           — CRUD справочников и связей
       ├── dataLib.py                — CRUD рынков (заглушки)
       ├── userLib.py                — CRUD пользователей
+      ├── reviewLib.py              — CRUD отзывов
       └── requiredFiles.py          — константы
 ```
 
@@ -87,9 +91,9 @@ commandHandler (BL) → только marketList (BL)                            
 | Функция | Описание |
 |---------|----------|
 | `directory_creation()` | Создаёт папку `files/` для хранения CSV-файлов |
-| `file_creation()` | Проверяет файлы, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv, USER_INFO.csv, Reference_Base.csv |
+| `file_creation()` | Проверяет файлы, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv, USER_INFO.csv, Reference_Base.csv, REVIEWS.csv |
 | `get_command()` | Считывает команду пользователя из stdin |
-| `proceed_command(command)` | Обрабатывает команду (help/list/list_all/order/show/register/login/exit) |
+| `proceed_command(command, user)` | Обрабатывает команду (help/list/list_all/order/show/register/login/logout/review/exit) |
 
 Поддерживаемые команды:
 - `help` — справка
@@ -99,6 +103,8 @@ commandHandler (BL) → только marketList (BL)                            
 - `show` — данные одного рынка по Id
 - `register` — регистрация пользователя
 - `login` — авторизация пользователя
+- `logout` — выход из системы
+- `review` — добавление отзыва на рынок
 - `exit` — выход
 
 ### BusinessLogic/commandHandler.py
@@ -111,9 +117,11 @@ commandHandler (BL) → только marketList (BL)                            
 | `command_list_all()` | `(True, markets)` | Кортеж (статус, все рынки) |
 | `command_list()` | `(True, markets, start, step)` | Кортеж (статус, рынки с нумерацией, старт, шаг) |
 | `command_order()` | `(True, markets, col, order)` | Кортеж (статус, рынки, колонка, порядок) |
-| `command_show(market_id)` | `(True, market_info)` или `True` | Данные рынка или ошибка |
-| `register_user()` | `True` | Регистрация нового пользователя (логин, пароль, имя, фамилия) |
-| `login_user()` | `True` | Авторизация пользователя (логин, пароль) |
+| `command_show()` | `(True, market_info)` или `(True, None)` | Данные рынка или ошибка |
+| `register_user()` | `(True, user)` или `(True, None)` | Регистрация нового пользователя |
+| `login_user(user)` | `(True, user)` или `(True, None)` | Авторизация пользователя |
+| `logout_user(user)` | `(True, None)` | Выход из системы |
+| `add_review(user)` | `(True, user)` | Добавление отзыва на рынок |
 | `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/marketList.py
@@ -229,18 +237,37 @@ CRUD-операции с пользователями через CSV-файл fi
 | `update_user(user)` | Обновляет данные пользователя по Id |
 | `delete_user(user_id)` | Удаляет пользователя по Id |
 
+### DAL/reviewLib.py
+
+CRUD-операции с отзывами о фермерских рынках через CSV-файл files/REVIEWS.csv.
+
+| Функция | Описание |
+|---------|----------|
+| `create_review(review)` | Добавляет отзыв в файл REVIEWS.csv |
+| `read_review(market_id)` | Читает отзывы для указанного рынка (в разработке) |
+| `calculate_score(market_id)` | Рассчитывает среднюю оценку рынка (в разработке) |
+
+Структура CSV REVIEWS.csv:
+- `Id` — UUID отзыва
+- `review_date` — дата и время создания
+- `user_id` — ID пользователя
+- `market_id` — ID рынка
+- `review_text` — текст отзыва
+- `score` — оценка от 1 до 5
+
 ## Схема данных
 
 ```
 App.py
  ├─ testing()                        → тестирование новых функций
  ├─ directory_creation()             → files/
+ ├─ file_creation()                  → CSV-файлы (MARKET_INFO, USER_INFO, Reference_Base, REVIEWS)
  ├─ user_lib_testing()               → DAL/userLib (CRUD) → files/USER_INFO.csv
  ├─ print_welcome()                  → UI/uiLib
- └─ цикл команд:
+ └─ цикл команд (с user = None):
          │
          ├─ get_command()            → BusinessLogic/workflowLib
-         └─ proceed_command()        → BusinessLogic/workflowLib
+         └─ proceed_command(cmd, user) → BusinessLogic/workflowLib
                  │
                  ├─ 'help'     → commandHandler.command_help() → True
                  │                 → uiLib.print_help()
@@ -257,8 +284,17 @@ App.py
                  │                 → marketList.get_all_markets_ordered_by_column()
                  │                 → uiLib.print_list(markets, col_name)
                  │
-                 ├─ 'show'     → commandHandler.command_show(market_id) → None/True
+                 ├─ 'show'     → commandHandler.command_show() → (True, market_info)
                  │                 → marketList.get_market_by_id(market_id)
+                 │
+                 ├─ 'register' → commandHandler.register_user() → (True, user)
+                 │
+                 ├─ 'login'    → commandHandler.login_user(user) → (True, user)
+                 │
+                 ├─ 'logout'   → commandHandler.logout_user(user) → (True, None)
+                 │
+                 ├─ 'review'   → commandHandler.add_review(user) → (True, user)
+                 │                 → reviewLib.create_review(review)
                  │
                  └─ 'exit'     → commandHandler.command_exit() → False
                                    → uiLib.print_exit()
@@ -269,7 +305,8 @@ App.py
          ├─ prepare_ref()           → MEDIA.csv, GROCERY_TYPES.csv, BANKING_INFO.csv
          ├─ create_market_base()    → MARKET_INFO.csv
          ├─ create_user_base()      → USER_INFO.csv
-         └─ create_reference_base() → Reference_Base.csv
+         ├─ create_reference_base() → Reference_Base.csv
+         └─ create_review_base()    → REVIEWS.csv
 ```
 
 ## Требования

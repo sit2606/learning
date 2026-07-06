@@ -5,7 +5,7 @@ workflowLib — модуль оркестрации рабочего проце�
 - directory_creation(): создание папки files/
 - file_creation(): проверка и пересоздание CSV-файлов
 - get_command(): ввод команды от пользователя
-- proceed_command(command): маршрутизация и выполнение команды
+- proceed_command(command, user): маршрутизация и выполнение команды
 
 Поддерживаемые команды:
 - help — справка
@@ -15,6 +15,8 @@ workflowLib — модуль оркестрации рабочего проце�
 - show — данные одного рынка по Id
 - register — регистрация пользователя
 - login — авторизация пользователя
+- logout — выход из системы
+- review — добавление отзыва
 - exit — выход
 
 Использование:
@@ -55,6 +57,7 @@ def file_creation():
     3. create_market_base(read_csv()) — парсинг Export.csv и создание MARKET_INFO.csv
     4. create_user_base() — создание USER_INFO.csv
     5. create_reference_base() — создание итогового справочника
+    6. create_review_base() — создание файла отзывов REVIEWS.csv
     """
     if fileLib.file_status_check():
         print('Recreation in progress...')
@@ -73,9 +76,20 @@ def file_creation():
         print('Review base successfully created...')
 
 def get_command():
+    """Считывает команду пользователя из stdin."""
     command = input('Пожалуйста, введите команду: ').strip()
     return command
 def proceed_command(command, user):
+    """
+    Обрабатывает команду пользователя и возвращает состояние сессии.
+
+    Args:
+        command: Строка команды от пользователя.
+        user: Текущий авторизованный пользователь или None.
+
+    Returns:
+        (is_run, user) — кортеж (продолжать ли работу, текущий пользователь).
+    """
     is_run = True
     match command:
         case 'help':
