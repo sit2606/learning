@@ -22,7 +22,7 @@ lab7/
 │   └── requiredFiles.py            # Константы категорий и список файлов
 ├── UI/                             # Слой интерфейса пользователя
 │   ├── uiLib.py                    # Функции вывода в консоль
-│   └── columnToRu.py               # Словарь перевода названий колонок на русский
+│   └── column_helper.py            # Словари перевода названий колонок и описания типов
 ├── files/                          # CSV-файлы (справочники, связи, данные)
 ├── документация/                   # Диаграммы и пользовательские истории
 ├── .gitignore                      # Исключения Git
@@ -132,8 +132,7 @@ commandHandler (BL) → только marketList (BL)                            
 
 | Функция | Описание |
 |---------|----------|
-| `get_all_markets()` | Получает данные о рынках (ключ — market_id), резолвит ID → имена |
-| `get_all_markets_ordered_by_num()` | То же, но ключ — порядковый номер (для пагинации) |
+| `get_all_markets(mode)` | Получает данные о рынках (mode='uid' — ключ market_id, mode='num' — ключ порядковый номер) |
 | `get_all_markets_ordered_by_column(col, order)` | Сортировка по колонке (1-8), order: 'a'/'d' |
 | `get_all_markets_filtered_by_column(col)` | Фильтрация по колонке (1-8), по алфавиту |
 | `prepare_ordered_list(markets)` | Переиндексация dict с 1 для пагинации |
@@ -155,9 +154,9 @@ commandHandler (BL) → только marketList (BL)                            
 | `print_detailed_market_info(market_info)` | Выводит подробную информацию о рынке (адрес, расписание, соцсети, оплата, товары) |
 | `print_market_reviews(reviews, average_score)` | Выводит список отзывов о рынке и среднюю оценку |
 
-### UI/columnToRu.py
+### UI/column_helper.py
 
-Словарь для перевода названий колонок с английского на русский язык.
+Словари для перевода названий колонок с английского на русский язык и описания типов.
 
 | Ключ | Значение |
 |------|----------|
@@ -212,7 +211,6 @@ CRUD-операции со справочниками и связями.
 | `create_connection_entry_by_list(name, list)` | Батчевая запись списка связей |
 | `read_connection_entry(name, mkt, ref)` | Ищет статус связи по market_id и reference_id |
 | `get_all_connections_by_market_id(name, mkt_id)` | Все связи для рынка → {market_id: {ref_id: status}} |
-| `humanize_reference(ref)` | Заглушка для преобразования ID → имя |
 
 ### DAL/fileLib.py
 
@@ -280,11 +278,11 @@ App.py
                  │                 → uiLib.print_help()
                  │
                  ├─ 'list_all' → commandHandler.command_list_all() → (True, markets)
-                 │                 → marketList.get_all_markets()
+                 │                 → marketList.get_all_markets('uid')
                  │                 → uiLib.print_list_all(markets)
                  │
                  ├─ 'list'     → commandHandler.command_list() → (True, markets, start, step)
-                 │                 → marketList.get_all_markets_ordered_by_num()
+                 │                 → marketList.get_all_markets('num')
                  │                 → uiLib.print_list(markets, start, step)
                  │
                  ├─ 'order'    → commandHandler.command_order() → (True, markets, col, order)

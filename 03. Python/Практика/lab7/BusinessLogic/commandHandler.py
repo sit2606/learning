@@ -27,8 +27,8 @@ from datetime import datetime
 import bcrypt
 import getpass
 
-from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column, \
-    prepare_ordered_list, get_market_by_id
+from BusinessLogic.marketList import  get_all_markets, get_all_markets_ordered_by_column, \
+    prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
 from DAL import userLib
 from DAL.reviewLib import create_review, calculate_score
 from DAL.userLib import get_user_by_username
@@ -46,7 +46,7 @@ def command_exit():
 
 def command_list_all():
     """Возвращает (True, dict_всех_рынков)."""
-    return True, get_all_markets()
+    return True, get_all_markets('uid')
 
 
 def command_list():
@@ -56,7 +56,7 @@ def command_list():
     """
     start_num = int(input('Введите стартовый номер: ')) or 1
     step = int(input('Введите  шаг: ')) or 10
-    return True, get_all_markets_ordered_by_num(), start_num, step
+    return True, get_all_markets('num'), start_num, step
 
 
 def command_order():
@@ -245,6 +245,6 @@ def show_filtered():
     Returns:
         (True, dict_рынков, номер_колонки) — кортеж (статус, рынки, колонка).
     """
-    column = int(input('Введите номер колонки, по которой вы хотите отфильтровать список список: '))
-    markets = prepare_ordered_list(markets)
+    column = int(input('Введите номер колонки, по которой вы хотите отфильтровать список: '))
+    get_all_markets_filtered_by_column()
     return True, markets, column

@@ -4,7 +4,7 @@ uiLib — библиотека функций вывода в консоль.
 Модуль содержит функции для отображения:
 - print_welcome(): приветствие
 - print_help(): справка по командам
-- print_table_header(): шапка таблицы
+- print_table_header(): шапка таблицы (русские названия колонок)
 - print_header_numbers(): нумерация колонок для сортировки/фильтрации
 - print_list_all(markets): полный список рынков
 - print_list(markets, start, step): список с пагинацией
@@ -17,7 +17,7 @@ uiLib — библиотека функций вывода в консоль.
 """
 
 
-from UI.columnToRu import COLUMNS
+from UI.column_helper import COLUMNS
 
 
 def print_welcome():

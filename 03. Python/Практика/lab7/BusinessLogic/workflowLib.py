@@ -1,6 +1,14 @@
 """
 workflowLib — модуль оркестрации рабочего процесса.
 
+Зависимости:
+- os: работа с файловой системой
+- BusinessLogic.commandHandler: обработчики команд
+- DAL.fileLib: инициализация CSV-файлов
+- DAL.reviewLib: чтение отзывов
+- DAL.userLib: чтение данных пользователей
+- UI.uiLib: вывод в консоль
+
 Основные функции:
 - directory_creation(): создание папки files/
 - file_creation(): проверка и пересоздание CSV-файлов
@@ -28,7 +36,7 @@ import os
 from BusinessLogic import commandHandler
 from DAL import fileLib
 from DAL.reviewLib import get_review_by_market_id
-from DAL.userLib import get_user_by_uid, read_user
+from DAL.userLib import read_user
 from UI import uiLib
 
 
@@ -161,8 +169,8 @@ def proceed_command(command, user):
                     case 'y':
                         reviews = get_review_by_market_id(market_info["basic_info"]["market_id"])
                         for review in reviews:
-                            user = read_user(review["user_id"])
-                            review.update({"user_name": user["firstname"] + " " + user["lastname"]})
+                            review_author = read_user(review["user_id"])
+                            review.update({"user_name": review_author["firstname"] + " " + review_author["lastname"]})
                         uiLib.print_market_reviews(reviews, market_info['basic_info']['score'])
                     case  _:
                         return is_run

@@ -2,16 +2,18 @@
 App — точка входа приложения для управления фермерскими рынками.
 
 Выполняет:
-1. Создание директории files/
-2. Инициализацию справочников и парсинг Export.csv
-3. Тестирование CRUD пользователей
-4. Цикл обработки пользовательских команд (с отслеживанием сессии user)
+1. Тестирование новых функций (testing)
+2. Создание директории files/
+3. Инициализацию справочников и парсинг Export.csv
+4. Тестирование CRUD пользователей
+5. Цикл обработки пользовательских команд (с отслеживанием сессии user)
 
 Использование:
     python App.py
 """
 import csv
 
+from BusinessLogic.marketList import get_all_markets, get_market_by_id
 from DAL import userLib
 from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
@@ -19,18 +21,11 @@ from BusinessLogic.workflowLib import *
 
 def testing():
     """
-    Тестирование новых функций (временная функция для отладки).
+    Тестирование новых функций (временная заглушка для отладки).
 
-    Вызывает:
-    - create_reference_base() — создание итогового справочника
-    - get_all_connections_by_market_id() — получение связей рынка
-    - get_reference_with_uid_as_key() — чтение справочника по Id
-    - get_market_by_id() — получение данных рынка по Id
+    В данный момент отключена (pass).
     """
-    from DAL import userLib
-    user_1 = userLib.get_user_by_username('asd')
-    user_2 = userLib.get_user_by_username()
-    print('a')
+    pass
 
 
 def user_lib_testing():
@@ -63,13 +58,14 @@ def main():
     Основная функция запуска приложения.
 
     Порядок выполнения:
-    1. directory_creation() — создание папки files/
-    2. file_creation() — проверка и инициализация CSV-файлов
-    3. user_lib_testing() — тестирование CRUD пользователей
-    4. Цикл команд: приветствие, чтение и обработка команд
+    1. testing() — тестирование новых функций (заглушка)
+    2. directory_creation() — создание папки files/
+    3. file_creation() — проверка и инициализация CSV-файлов
+    4. user_lib_testing() — тестирование CRUD пользователей
+    5. Цикл команд: приветствие, чтение и обработка команд
        с отслеживанием текущего пользователя (user = None при старте)
     """
-    #testing()
+    testing()
     directory_creation()
     file_creation()
     user_lib_testing()

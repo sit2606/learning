@@ -62,10 +62,10 @@ def print_help():
 
 ### Шаг 5: Добавить константу перевода (опционально)
 
-Если команда работает с колонками, добавьте перевод в `columnToRu.py`:
+Если команда работает с колонками, добавьте перевод в `column_helper.py`:
 
 ```python
-# UI/columnToRu.py
+# UI/column_helper.py
 
 COLUMNS = {
     # ... существующие колонки ...
@@ -166,7 +166,7 @@ REF_LIST = [
 ```python
 # BusinessLogic/marketList.py
 
-def get_all_markets():
+def get_all_markets(mode):
     # ... существующий код ...
     new_reference = get_reference_with_uid_as_key('NEW_CATEGORY', 'Common')
 

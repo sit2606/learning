@@ -4,8 +4,7 @@ marketList — бизнес-логика для работы со списком
 Модуль предоставляет функции для получения и сортировки данных
 о фермерских рынках из MARKET_INFO.csv:
 
-- get_all_markets(): все рынки с резолвингом ID → имена
-- get_all_markets_ordered_by_num(): с порядковой нумерацией
+- get_all_markets(mode): все рынки с резолвингом ID → имена ('uid' или 'num')
 - get_all_markets_ordered_by_column(col, order): сортировка по колонке
 - get_all_markets_filtered_by_column(col): фильтрация по колонке (по алфавиту)
 - prepare_ordered_list(markets): переиндексация для пагинации
@@ -39,40 +38,20 @@ def get_market_references(market_id):
     market_x_grocery = get_all_connections_by_market_id('MarketXGrocery', _market_id)
     market_x_social_media = get_all_connections_by_market_id('MarketXSocialMedia', _market_id)
     return market_x_banking_info,market_x_grocery,market_x_social_media
-def get_all_markets():
+def get_all_markets(mode):
     """
-    Получает данные о всех фермерских рынках.
+    Получает данные о всех фермерских рынках с порядковой нумерацией.
 
     Читает MARKET_INFO.csv, резолвит ID городов/округов/штатов в имена,
     добавляет порядковый номер и market_id.
 
-    Returns:
-        dict: словарь {market_id: {атрибуты_рынка, number, city, county, state}}.
-    """
-    market_base = get_raw_markets_from_file()
-    city_reference = get_reference_with_uid_as_key('CITY', 'Common')
-    county_reference = get_reference_with_uid_as_key('COUNTY', 'Common')
-    state_reference = get_reference_with_uid_as_key('STATE', 'Common')
-    num  = 1
-    for market_id, market_info in market_base.items():
-        city = city_reference[market_info['city']]
-        county = county_reference[market_info['county']]
-        state = state_reference[market_info['state']]
-        market_info.update({'city': city, 'county': county, 'state': state})
-        market_info.update({'number': num})
-        market_info.update({'market_id': market_id})
-        num += 1
-        market_base.update({market_id: market_info})
-    return market_base
-def get_all_markets_ordered_by_num():
-    """
-    Получает данные о всех фермерских рынках с порядковой нумерацией.
-
-    Возвращает dict, где ключ — порядковый номер (int), значение — dict с атрибутами рынка.
-    Используется для пагинации в команде 'list'.
+    Args:
+        mode: Режим ключевания словаря:
+            'num' — ключ порядковый номер (для пагинации),
+            'uid' — ключ market_id.
 
     Returns:
-        dict: словарь {номер: {атрибуты_рынка, number, market_id}}.
+        dict: словарь {ключ: {атрибуты_рынка, number, market_id}}.
     """
     market_base = get_raw_markets_from_file()
     city_reference = get_reference_with_uid_as_key('CITY', 'Common')
@@ -87,7 +66,11 @@ def get_all_markets_ordered_by_num():
         market_info.update({'city': city, 'county': county, 'state': state})
         market_info.update({'number': num})
         market_info.update({'market_id': market_id})
-        ordered_market_base.update({num: market_info})
+        match mode:
+            case 'num':
+                ordered_market_base.update({num: market_info})
+            case 'uid':
+                ordered_market_base.update({market_id: market_info})
         num += 1
     return ordered_market_base
 def get_all_markets_ordered_by_column(column_number, order = False):
@@ -118,7 +101,7 @@ def get_all_markets_ordered_by_column(column_number, order = False):
             order = False
         case 'd':
             order = True
-    market_base = get_all_markets_ordered_by_num()
+    market_base = get_all_markets('num')
     sorting_base = {}
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[columns[column_number]] })
@@ -127,6 +110,7 @@ def get_all_markets_ordered_by_column(column_number, order = False):
     for item_id in sorted_items:
         ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
     return ordered_market_base, columns[column_number]
+
 def prepare_ordered_list(markets):
     """Переиндексация dict с 1 для корректной пагинации."""
     markets_for_show = dict()
@@ -151,7 +135,7 @@ def get_market_by_id(market_id):
     Returns:
         dict: структура с данными рынка или None если не найден.
     """
-    market_base = get_all_markets()
+    market_base = get_all_markets('uid')
     _market_id = market_id
     try:
         market_info = {market_id: market_base[str(_market_id)]}
@@ -229,7 +213,7 @@ def get_all_markets_filtered_by_column(column_number):
                7: 'zip',
                8: 'score'
                }
-    market_base = get_all_markets_ordered_by_num()
+    market_base = get_all_markets('num')
     sorting_base = {}
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[columns[column_number]]})
