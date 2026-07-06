@@ -69,11 +69,13 @@ def file_creation():
         print('User base successfully created...')
         fileLib.create_reference_base()
         print('Reference base successfully created...')
+        fileLib.create_review_base()
+        print('Review base successfully created...')
 
 def get_command():
     command = input('Пожалуйста, введите команду: ').strip()
     return command
-def proceed_command(command):
+def proceed_command(command, user):
     is_run = True
     match command:
         case 'help':
@@ -122,19 +124,21 @@ def proceed_command(command):
                             print('Ошибка ввода')
         case 'show':
             try:
-                market_id = int(input('Введите ID рынка: '))
-                is_run, market_info = commandHandler.command_show(market_id)
+                is_run, market_info = commandHandler.command_show()
                 uiLib.print_detailed_market_info(market_info)
             except ValueError:
                 print('Пожалуйста, введите число.')
         case 'register':
-            is_run = commandHandler.register_user()
-
+            is_run, user = commandHandler.register_user()
         case 'login':
-            is_run = commandHandler.login_user()
+            is_run, user = commandHandler.login_user(user)
+        case 'logout':
+            is_run, user = commandHandler.logout_user(user)
+        case 'review':
+            is_run, user = commandHandler.add_review(user)
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()
         case _:
             print('Такой команды нет. Введите help, чтобы вывести список всех команд')
-    return is_run
+    return is_run, user

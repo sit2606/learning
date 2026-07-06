@@ -74,13 +74,14 @@ def main():
     """
     #testing()
     directory_creation()
-    user_lib_testing()
     file_creation()
+    user_lib_testing()
     run_app = True
     print_welcome()
+    user = None
     while run_app:
         command = get_command()
-        run_app = proceed_command(command)
+        run_app, user = proceed_command(command, user)
 
 
 if __name__ == "__main__":

@@ -18,6 +18,8 @@ commandHandler — обработчики команд пользователя.
     from BusinessLogic.commandHandler import command_help, command_list_all
 """
 import uuid
+from datetime import datetime
+
 
 import bcrypt
 import getpass
@@ -25,6 +27,7 @@ import getpass
 from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id
 from DAL import userLib
+from DAL.reviewLib import create_review
 from DAL.userLib import get_user_by_username
 
 
@@ -65,7 +68,7 @@ def command_order():
     return True, markets, column, order
 
 
-def command_show(market_id):
+def command_show():
     """
     Получает данные одного рынка по Id.
 
@@ -76,10 +79,11 @@ def command_show(market_id):
         (True, market_info) — кортеж (статус, данные рынка),
         True — при ошибке (рынок не найден).
     """
+    market_id = int(input('Введите ID рынка: '))
     market_info = get_market_by_id(market_id)
     if market_info is None:
         print('Ошибка в ID, попробуйте ещё раз')
-        return True
+        return True, None
     else:
         return True, market_info
 
@@ -99,7 +103,7 @@ def register_user():
         user_name = input('Введите ваш логин: ')
         match user_name:
             case 'stop':
-                return True
+                return True, None
             case _:
                 user = get_user_by_username(user_name)
                 if user is not None:
@@ -120,10 +124,8 @@ def register_user():
                     user.update({'location': 'test_location'})
                     userLib.create_user(user)
                     print('Регистрация успешна! Добро пожаловать!')
-                    return True
-
-
-def login_user():
+                    return True, user
+def login_user(user):
     """
     Авторизация пользователя.
 
@@ -132,15 +134,68 @@ def login_user():
     Returns:
         True — всегда (для продолжения работы).
     """
-    user = {}
-    user_name = input('Введите ваш логин: ')
-    user.update({'user_name': user_name})
-    user_password = getpass.getpass("Введите ваш пароль: ")
-    password_bytes = user_password.encode('utf-8')
-    user_in_base = get_user_by_username(user_name)
-    is_valid = bcrypt.checkpw(password_bytes, user_in_base['password'].encode('utf-8'))
-    if is_valid:
-        print('Добро пожаловать!')
+    if user is None:
+        user = {}
+        user_name = input('Введите ваш логин: ')
+        user_in_base = get_user_by_username(user_name)
+        if user_in_base is None:
+            print('Пользователь не найден, попробуйте снова')
+            return True, None
+        else:
+            user.update({'user_name': user_name})
+            user_password = getpass.getpass("Введите ваш пароль: ")
+            password_bytes = user_password.encode('utf-8')
+            is_valid = bcrypt.checkpw(password_bytes, user_in_base['password'].encode('utf-8'))
+            if is_valid:
+                print('Добро пожаловать!')
+                return True, user_in_base
+            else:
+                print('Неверный пароль. Попробуйте ещё раз')
+                return True, None
     else:
-        print('Неверный пароль. Попробуйте ещё раз')
-    return True
+        print("Вы уже вошли в Систему")
+        return True, user
+
+def logout_user(user):
+    user = None
+    print('Вы успешно вышли из системы')
+    return True, user
+
+
+def add_review(user):
+    if user is None:
+        print('Чтобы оставить отзыв на рынок, вы должны войти в Систему.')
+        return True, user
+    else:
+            status, market_info = command_show()
+            if market_info is None:
+                return True, user
+            else:
+                review = True
+                while review:
+                    score = input('Введите оценку по пятибальной шкале, где 1 - плохо, 5 - отлично. \nВведите `back`'
+                                  'чтобы выйти из процесса оценки\n')
+                    match score:
+                        case 'back':
+                            review = False
+                            return True, user
+                        case _:
+                            try:
+                                score = int(score)
+                                if not (1 <= score <= 5):
+                                    print('Оценка должна быть от 1 до 5. Попробуйте снова')
+                                    continue
+                                review_text = input('Введите дополнительный отзыв, или оставьте поле ввода пустым, если не хотите\n'
+                                      'добавлять развёрнутый отзыв \n')
+                                review = {}
+                                review["Id"] = str(uuid.uuid4())
+                                review['review_date'] = str(datetime.now())
+                                review['user_id'] = user['Id']
+                                review['market_id'] = market_info['basic_info']['market_id']
+                                review['review_text'] = review_text
+                                review['score'] = score
+                                create_review(review)
+                                return True, user
+                            except ValueError:
+                                print('Оценка должна быть целым, положительным числом. Попробуйте снова')
+                                continue

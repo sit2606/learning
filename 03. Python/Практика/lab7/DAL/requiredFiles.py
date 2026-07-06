@@ -87,6 +87,7 @@ FILES_TO_CHECK = {
     'MarketXSocialMedia',
     'MEDIA',
     'STATE',
-    'USER_INFO'
+    'USER_INFO',
+    'REVIEWS'
 }
 # Множество имён CSV-файлов (без расширения) для проверки наличия перед работой

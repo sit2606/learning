@@ -269,3 +269,18 @@ def create_reference_base():
     except Exception as e:
         print(e)
         print("Error in create_reference_base")
+def create_review_base():
+    _reference_name = 'REVIEWS'
+    field_names = ['Id',
+                   'review_date',
+                   'user_id',
+                   'market_id',
+                   'review_text',
+                   'score']
+    try:
+        with open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=field_names)
+            writer.writeheader()
+    except Exception as e:
+        print(e)
+        print("Error in create_review_base")
