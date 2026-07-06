@@ -27,7 +27,7 @@ import bcrypt
 import getpass
 
 from BusinessLogic.marketList import get_all_markets, get_all_markets_ordered_by_num, get_all_markets_ordered_by_column, \
-    prepare_ordered_list, get_market_by_id
+    prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
 from DAL import userLib
 from DAL.reviewLib import create_review, get_review_by_market_id, calculate_score
 from DAL.userLib import get_user_by_username
@@ -228,3 +228,12 @@ def add_review(user):
                             except ValueError:
                                 print('Оценка должна быть целым, положительным числом. Попробуйте снова')
                                 continue
+
+
+
+
+
+def show_filtered():
+    column = int(input('Введите номер колонки, по которой вы хотите отфильтровать список список: '))
+    markets = prepare_ordered_list(markets)
+    return True, markets, column

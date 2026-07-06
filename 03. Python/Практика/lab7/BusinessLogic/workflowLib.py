@@ -126,7 +126,7 @@ def proceed_command(command, user):
                         case _:
                             print('Ошибка ввода')
         case 'order':
-            uiLib.print_ordered_instruction()
+            uiLib.print_header_numbers()
             is_run, market_list, column, order = commandHandler.command_order()
             if market_list is None:
                 print('Ошибка. Попробуйте ещё раз')
@@ -168,6 +168,9 @@ def proceed_command(command, user):
             is_run, user = commandHandler.logout_user(user)
         case 'review':
             is_run, user = commandHandler.add_review(user)
+        case 'filter':
+            uiLib.print_header_numbers()
+            is_run = commandHandler.show_filtered()
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()

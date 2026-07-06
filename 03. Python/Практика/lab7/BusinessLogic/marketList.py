@@ -203,3 +203,23 @@ def update_market_info(market_info):
             market_info['basic_info'].update({"state": state_uid[value]})
     market_info['basic_info'].pop('number')
     update_market(market_info['basic_info'])
+
+def get_all_markets_filtered_by_column(column_number):
+    columns = {1: 'number',
+               2: 'market_id',
+               3: 'city',
+               4: 'county',
+               5: 'state',
+               6: 'marketname',
+               7: 'zip',
+               8: 'score'
+               }
+    market_base = get_all_markets_ordered_by_num()
+    sorting_base = {}
+    for market_id, market_info in market_base.items():
+        sorting_base.update({market_id: market_info[columns[column_number]]})
+    sorted_items = sorted(sorting_base.items(), key=lambda x: x[1])
+    ordered_market_base = dict()
+    for item_id in sorted_items:
+        ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
+    return ordered_market_base, columns[column_number]

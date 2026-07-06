@@ -33,6 +33,8 @@ def print_help():
     print('help - выводит перечень всех доступных команд')
     print('order - выводит таблицу рынков отсортированных по колонке')
     print('register - запускает процедуру регистрации пользователя')
+    print('review - добавить отзыв к рынку')
+    print('filter - вывести отфильтрованный по какому-либо критерию список рынков')
     print('login - войти в приложение со своим логином\\паролем')
     print('logout - выйти из приложения')
     print('exit - завершает работу приложения')
@@ -68,13 +70,15 @@ def print_list(markets_for_show, start_pos= 1, step = 10, column_name = None):
             formatted_output = ( ' | ' + str(markets_for_show[number]['number']) +  ' | ' +
                         markets_for_show[number]['market_id'] + ' | ' + markets_for_show[number]['city'] + ' | ' + markets_for_show[number]['county']
                         + ' | ' + markets_for_show[number]['state'] +
-                        ' | ' + markets_for_show[number]['marketname']+ ' | ' + markets_for_show[number]['zip'] + ' | ')
+                        ' | ' + markets_for_show[number]['marketname']+ ' | ' + markets_for_show[number]['zip'] + ' | '
+                                 + markets_for_show[number]['score'] + ' | '
+                                 )
             print(formatted_output)
         print('======--------------------------------======')
     except KeyError:
         print('Список закончился')
     return markets_for_show,end_pos,step
-def print_ordered_instruction():
+def print_header_numbers():
     print('======--------------------------------======')
     print_table_header()
     print('Номер - 1')
@@ -84,9 +88,8 @@ def print_ordered_instruction():
     print('штат - 5')
     print('название рынка - 6')
     print('п. индекс - 7')
+    print('ср. оценка - 8')
     print('======--------------------------------======')
-
-
 def print_detailed_market_info(market_info):
     print('======--------------------------------======')
     print('Основная информация')
@@ -124,7 +127,10 @@ def print_detailed_market_info(market_info):
 
 def print_market_reviews(reviews, average_score):
     print('======--------------------------------======')
-    print(f'На основании {len(reviews)} отзывов средняя оценка рынка:  {average_score}')
+    if len(reviews) == 1:
+        print(f'На основании {len(reviews)} отзыва средняя оценка рынка:  {average_score}')
+    else:
+        print(f'На основании {len(reviews)} отзывов средняя оценка рынка:  {average_score}')
     for review in reviews:
         print('======--------------------------------======')
         print(f'Автор рецензии {review["user_name"]}')
