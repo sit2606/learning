@@ -209,12 +209,15 @@ def get_all_markets_filtered_by_column(column, filter = None):
     Returns:
         tuple: (dict_рынков, column_info) — отфильтрованный словарь и dict колонки.
     """
-    market_base = processFilter()
+
+    market_list, column_info = get_all_markets_ordered_by_column(column)
+    market_base = processFilter.process(market_list, column, filter)
     sorting_base = {}
     for market_id, market_info in market_base.items():
-        sorting_base.update({market_id: market_info[COLUMNS_INFO[column['name']]]})
+        sorting_base.update({market_id: market_info[column_info['name']]})
     sorted_items = sorted(sorting_base.items(), key=lambda x: x[1])
     ordered_market_base = dict()
     for item_id in sorted_items:
         ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
-    return ordered_market_base, COLUMNS_INFO[column_number]
+    ordered_market_base = prepare_ordered_list(ordered_market_base)
+    return ordered_market_base, column_info

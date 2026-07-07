@@ -163,6 +163,8 @@ def proceed_command(command, user):
         case 'show':
             try:
                 is_run, market_info = commandHandler.command_show()
+                if market_info is None:
+                    return is_run
                 uiLib.print_detailed_market_info(market_info)
                 should_continue = input('Если хотите увидеть отзывы на рынок, введите `y`\n'
                                         'Если хотите вернуться к вводу команд, нажмите Enter\n')

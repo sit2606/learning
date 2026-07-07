@@ -41,7 +41,7 @@ from DAL import userLib
 from DAL.reviewLib import create_review, calculate_score
 from DAL.userLib import get_user_by_username
 from UI import uiLib
-from UI.column_helper import COLUMNS_INFO
+from UI.column_helper import COLUMNS_INFO, COLUMNS_INFO_REVERSED
 
 
 def command_help():
@@ -101,13 +101,17 @@ def command_show():
         (True, market_info) — кортеж (статус, данные рынка),
         (True, None) — при ошибке (рынок не найден).
     """
-    market_id = int(input('Введите ID рынка: '))
-    market_info = get_market_by_id(market_id)
-    if market_info is None:
-        print('Ошибка в ID, попробуйте ещё раз')
+    try:
+        market_id = int(input('Введите ID рынка: '))
+        market_info = get_market_by_id(market_id)
+        if market_info is None:
+            print('Ошибка в ID, попробуйте ещё раз')
+            return True, None
+        else:
+            return True, market_info
+    except ValueError:
+        print('ID рынка должно быть числом')
         return True, None
-    else:
-        return True, market_info
 
 
 def register_user():
@@ -274,5 +278,8 @@ def show_filtered():
     column, filter_value = uiLib.request_filter()
     if column is None and filter_value is None:
         return True
-    get_all_markets_filtered_by_column(COLUMNS_INFO[column], filter_value)
+
+    markets_to_show = get_all_markets_filtered_by_column(column, filter_value)
+
+    uiLib.print_list(markets_to_show[0], column_name=COLUMNS_INFO[column])
     return True

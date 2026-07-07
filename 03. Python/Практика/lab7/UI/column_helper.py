@@ -39,3 +39,5 @@ COLUMNS_INFO = {1: {'name': 'number',
                    8: {'name':'score',
                        'type': 'numeric'},
                    }
+COLUMNS_INFO_REVERSED = {'name': 1, 'market_id': 2, 'city': 3, 'county': 4, 'state': 5,
+                         'marketname': 6, 'zip': 7, 'score': 8}
