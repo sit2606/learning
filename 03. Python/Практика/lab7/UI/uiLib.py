@@ -15,9 +15,8 @@ uiLib — библиотека функций вывода в консоль.
 Использование:
     from UI.uiLib import print_welcome, print_help, print_list, print_detailed_market_info
 """
-
-
-from UI.column_helper import COLUMNS
+from UI.column_helper import COLUMNS, COLUMNS_INFO
+from UI.comparison_helper import COMPARISON_SIGNS
 
 
 def print_welcome():
@@ -48,19 +47,10 @@ def print_exit():
     print('======--------------------------------======')
     print('Программа завершает работу!')
     print('======--------------------------------======')
-def print_list_all(markets):
-    print('======--------------------------------======')
-    print('Список всех рынков:')
-    for market_id, market_info in markets.items():
-        formatted_output = (str(market_id) + ' | ' +  market_info['city'] + ' | ' + market_info['county'] + ' | ' + market_info['state'] +
-                            ' | ' + market_info['marketname'] +' | '+ market_info['zip'])
-        print(formatted_output)
-        print('--------------------------------------------')
-    print('======--------------------------------======')
-def print_list(markets_for_show, start_pos= 1, step = 10, column_name = None):
+def print_list(markets_for_show, start_pos= 1, step = 10000, column_name = None):
     print('======--------------------------------======')
     if column_name is not None:
-        print(f'Список всех рынков (сортированный по столбцу "{COLUMNS[column_name]}"):')
+        print(f'Список всех рынков (сортированный по столбцу "{COLUMNS[column_name['name']]}"):')
     else:
         print('Список всех рынков:')
     print_table_header()
@@ -82,7 +72,6 @@ def print_list(markets_for_show, start_pos= 1, step = 10, column_name = None):
 def print_header_numbers():
     """Выводит шапку таблицы с номерами колонок для сортировки и фильтрации."""
     print('======--------------------------------======')
-    print_table_header()
     print('Номер - 1')
     print('ID - 2')
     print('город - 3')
@@ -125,8 +114,6 @@ def print_detailed_market_info(market_info):
     for grocery_name, method_status in market_info['grocery_info'].items():
         print(grocery_name + ' - ' + method_status)
     return None
-
-
 def print_market_reviews(reviews, average_score):
     """
     Выводит список отзывов о рынке и среднюю оценку.
@@ -147,3 +134,69 @@ def print_market_reviews(reviews, average_score):
         print(f'Текст рецензии')
         print(review['review_text'])
     return None
+
+def print_comparison_rules():
+    print('======--------------------------------======')
+    print('Введите критерий, по которому нужно отфильтровать выборку')
+    print('Критерий вводится в виде формулы:')
+    print('> - больше чем')
+    print('< - меньше чем')
+    print('>= - больше чем или равно')
+    print('<= -  меньше чем или равно')
+    print('= равно')
+    print('Пример: \n')
+    print('> 30  выведет все записи, которые строго больше 30')
+    print('Лучше всего отделить число от знака пробелом')
+def request_filter():
+    print_header_numbers()
+    filter_input = True
+    while filter_input:
+        user_input = input('Введите номер колонки, по которой вы хотите отфильтровать список\n'
+                           'или введите `back` чтобы вернуться \n' )
+        match user_input:
+            case 'back':
+                return None,None
+            case _:
+                try:
+                    column = int(user_input)
+                    if COLUMNS_INFO[column]['type'] == 'text':
+                        return_filter = ''
+                        match COLUMNS_INFO[column]['name']:
+                            case 'city':
+                                return_filter = input('Введите название города на английском языке ').strip().capitalize()
+                            case 'state':
+                                return_filter = input('Введите название штата на английском языке ').strip().capitalize()
+                            case 'marketname':
+                                return_filter = input('Введите название рынка на английском языке ').strip().capitalize()
+                            case 'county':
+                                return_filter = input('Введите название графства на английском языке ').strip().capitalize()
+                        return column, return_filter
+                    if COLUMNS_INFO[column]['type'] == 'numeric':
+                            sign = ''
+                            filter_value = ''
+                            print_comparison_rules()
+                            match COLUMNS_INFO[column]['name']:
+                                case 'number':
+                                    filter_value = input('Введите критерий сравнения\n')
+                                case 'market_id':
+                                    filter_value = input('Введите критерий сравнения\n')
+                                case 'zip':
+                                    filter_value = input('Введите критерий сравнения\n')
+                                case 'score':
+                                    filter_value = input('Введите критерий сравнения\n')
+                            match filter_value:
+                                case _:
+                                    for symbol in filter_value.strip().split(' '):
+                                        if symbol in COMPARISON_SIGNS:
+                                            sign = symbol
+                                        elif symbol.isnumeric():
+                                            filter_value = str(symbol)
+                                            return_filter = (sign,filter_value)
+                                            return column, return_filter
+                                        else:
+                                            print('Ошибка ввода формулы. Попробуйте снова или введите `back` для выхода')
+                except Exception as e:
+                    print(e)
+                    print('Что то пошло не так')
+                    return None,None
+    return None, None

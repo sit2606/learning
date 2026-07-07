@@ -120,6 +120,7 @@ def read_csv():
                     reference_id = banking_info[key]
                     MarketXBankingInfo.append([current_id, reference_id, value])
                 if key in requiredFiles.LOCATION:
+                    value = value.strip().capitalize()
                     reference_id = referenceLib.read_reference_entry(key.upper(), entry_name=value)
                     if reference_id is None:
                         create_reference_entry(key.upper().strip(), value)

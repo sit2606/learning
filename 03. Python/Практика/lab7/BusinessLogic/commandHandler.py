@@ -32,6 +32,8 @@ from BusinessLogic.marketList import  get_all_markets, get_all_markets_ordered_b
 from DAL import userLib
 from DAL.reviewLib import create_review, calculate_score
 from DAL.userLib import get_user_by_username
+from UI import uiLib
+from UI.column_helper import COLUMNS_INFO
 
 
 def command_help():
@@ -46,7 +48,7 @@ def command_exit():
 
 def command_list_all():
     """Возвращает (True, dict_всех_рынков)."""
-    return True, get_all_markets('uid')
+    return True, get_all_markets('num')
 
 
 def command_list():
@@ -59,13 +61,14 @@ def command_list():
     return True, get_all_markets('num'), start_num, step
 
 
-def command_order():
+def command_order(column = None, order = None, start_num = None, step = None):
     """
     Запрашивает у пользователя номер колонки и порядок сортировки.
     Возвращает (True, dict_рынков, имя_колонки, порядок).
     """
-    column = int(input('Введите номер колонки, по которой вы хотите отсортировать список: '))
-    order = input('Введите порядок сортировки d - от большего к меньшему, a - от меньшего к большему: ')
+    if column is None and order is None:
+        column = int(input('Введите номер колонки, по которой вы хотите отсортировать список: '))
+        order = input('Введите порядок сортировки d - от большего к меньшему, a - от меньшего к большему: ')
     markets, column = get_all_markets_ordered_by_column(column, order)
     markets = prepare_ordered_list(markets)
     return True, markets, column, order
@@ -245,6 +248,8 @@ def show_filtered():
     Returns:
         (True, dict_рынков, номер_колонки) — кортеж (статус, рынки, колонка).
     """
-    column = int(input('Введите номер колонки, по которой вы хотите отфильтровать список: '))
-    get_all_markets_filtered_by_column()
-    return True, markets, column
+    column, filter_value = uiLib.request_filter()
+    if column is None and filter_value is None:
+        return True
+    get_all_markets_filtered_by_column(COLUMNS_INFO[column], filter_value)
+    return True

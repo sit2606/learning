@@ -15,7 +15,7 @@ import csv
 
 from BusinessLogic.marketList import get_all_markets, get_market_by_id
 from DAL import userLib
-from UI.uiLib import print_welcome
+from UI.uiLib import print_welcome, request_filter
 from BusinessLogic.workflowLib import *
 
 
@@ -26,6 +26,7 @@ def testing():
     В данный момент отключена (pass).
     """
     pass
+
 
 
 def user_lib_testing():

@@ -123,7 +123,7 @@ def proceed_command(command, user):
             if market_list is None:
                 print('Ошибка. Попробуйте ещё раз')
             else:
-                uiLib.print_list_all(market_list)
+                uiLib.print_list(market_list)
         case 'list':
             is_run, market_list, start_pos, step = commandHandler.command_list()
             if market_list is None:
@@ -143,11 +143,12 @@ def proceed_command(command, user):
                             print('Ошибка ввода')
         case 'order':
             uiLib.print_header_numbers()
+            uiLib.print_table_header()
             is_run, market_list, column, order = commandHandler.command_order()
             if market_list is None:
                 print('Ошибка. Попробуйте ещё раз')
             else:
-                ordered_list, position, step = uiLib.print_list(markets_for_show=market_list, column_name= column)
+                ordered_list, position, step = uiLib.print_list(markets_for_show=market_list, column_name= column, step= 10)
                 is_continue = True
                 while is_continue:
                     continue_command = input('Желаете продолжить? Введите \'y\' для продолжения, или \'n\' для завершения: ')
@@ -185,7 +186,6 @@ def proceed_command(command, user):
         case 'review':
             is_run, user = commandHandler.add_review(user)
         case 'filter':
-            uiLib.print_header_numbers()
             is_run = commandHandler.show_filtered()
         case 'exit':
             uiLib.print_exit()

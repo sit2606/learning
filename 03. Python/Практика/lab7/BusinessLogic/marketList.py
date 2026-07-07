@@ -15,11 +15,12 @@ marketList — бизнес-логика для работы со списком
 Использование:
     from BusinessLogic.marketList import get_all_markets, get_market_by_id
 """
-
+from BusinessLogic import processFilter
 from DAL.dataLib import update_market
 from DAL.fileLib import get_raw_markets_from_file
 from DAL.referenceLib import get_reference_with_uid_as_key, get_all_connections_by_market_id, \
     get_reference_with_name_as_key
+from UI.column_helper import COLUMNS_INFO
 
 
 def get_market_references(market_id):
@@ -87,15 +88,7 @@ def get_all_markets_ordered_by_column(column_number, order = False):
     Returns:
         tuple: (dict_рынков, имя_колонки) — отсортированный словарь и имя колонки.
     """
-    columns = {1 : 'number',
-               2 : 'market_id',
-               3 : 'city',
-               4 : 'county',
-               5 : 'state',
-               6 : 'marketname',
-               7 : 'zip',
-               8 : 'score'
-               }
+    column = COLUMNS_INFO[column_number]
     match order:
         case 'a':
             order = False
@@ -104,12 +97,12 @@ def get_all_markets_ordered_by_column(column_number, order = False):
     market_base = get_all_markets('num')
     sorting_base = {}
     for market_id, market_info in market_base.items():
-        sorting_base.update({market_id: market_info[columns[column_number]] })
+        sorting_base.update({market_id: market_info[column['name']]})
     sorted_items = sorted(sorting_base.items(), key=lambda x: x[1], reverse=order)
     ordered_market_base = dict()
     for item_id in sorted_items:
         ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
-    return ordered_market_base, columns[column_number]
+    return ordered_market_base, column
 
 def prepare_ordered_list(markets):
     """Переиндексация dict с 1 для корректной пагинации."""
@@ -192,33 +185,14 @@ def update_market_info(market_info):
     market_info['basic_info'].pop('number')
     update_market(market_info['basic_info'])
 
-def get_all_markets_filtered_by_column(column_number):
-    """
-    Получает данные о всех фермерских рынках, отсортированные по алфавиту по колонке.
+def get_all_markets_filtered_by_column(column, filter = None):
 
-    Аналог get_all_markets_ordered_by_column, но всегда сортирует по возрастанию.
-
-    Args:
-        column_number (int): номер колонки для фильтрации (1-8).
-
-    Returns:
-        tuple: (dict_рынков, имя_колонки) — отсортированный словарь и имя колонки.
-    """
-    columns = {1: 'number',
-               2: 'market_id',
-               3: 'city',
-               4: 'county',
-               5: 'state',
-               6: 'marketname',
-               7: 'zip',
-               8: 'score'
-               }
-    market_base = get_all_markets('num')
+    market_base = processFilter()
     sorting_base = {}
     for market_id, market_info in market_base.items():
-        sorting_base.update({market_id: market_info[columns[column_number]]})
+        sorting_base.update({market_id: market_info[COLUMNS_INFO[column['name']]]})
     sorted_items = sorted(sorting_base.items(), key=lambda x: x[1])
     ordered_market_base = dict()
     for item_id in sorted_items:
         ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
-    return ordered_market_base, columns[column_number]
+    return ordered_market_base, COLUMNS_INFO[column_number]
