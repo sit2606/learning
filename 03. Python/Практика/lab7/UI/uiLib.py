@@ -1,19 +1,26 @@
 """
-uiLib — библиотека функций вывода в консоль.
+uiLib — библиотека функций вывода и ввода в консоль.
 
 Модуль содержит функции для отображения:
 - print_welcome(): приветствие
 - print_help(): справка по командам
 - print_table_header(): шапка таблицы (русские названия колонок)
 - print_header_numbers(): нумерация колонок для сортировки/фильтрации
-- print_list_all(markets): полный список рынков
-- print_list(markets, start, step): список с пагинацией
+- print_list(markets, start, step): список рынков с пагинацией
 - print_exit(): сообщение о завершении
 - print_detailed_market_info(market_info): подробная информация о рынке
 - print_market_reviews(reviews, average_score): вывод отзывов о рынке
+- print_comparison_rules(): инструкция по использованию знаков сравнения
+
+Функции ввода:
+- request_filter(): запрос критерия фильтрации у пользователя
+
+Зависимости:
+- UI.column_helper: COLUMNS (перевод колонок), COLUMNS_INFO (тип и имя колонок)
+- UI.comparison_helper: COMPARISON_SIGNS (знаки сравнения для числовых фильтров)
 
 Использование:
-    from UI.uiLib import print_welcome, print_help, print_list, print_detailed_market_info
+    from UI.uiLib import print_welcome, print_help, print_list, request_filter
 """
 from UI.column_helper import COLUMNS, COLUMNS_INFO
 from UI.comparison_helper import COMPARISON_SIGNS

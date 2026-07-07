@@ -12,7 +12,8 @@ lab7/
 ├── BusinessLogic/                  # Слой бизнес-логики
 │   ├── workflowLib.py              # Оркестрация процесса и обработка команд
 │   ├── commandHandler.py           # Обработчики команд
-│   └── marketList.py               # Бизнес-логика получения списка рынков
+│   ├── marketList.py               # Бизнес-логика получения списка рынков
+│   └── processFilter.py            # Обработка фильтрации рынков
 ├── DAL/                            # Слой доступа к данным (Data Access Layer)
 │   ├── fileLib.py                  # Парсинг Export.csv, инициализация справочников
 │   ├── referenceLib.py             # CRUD-операции со справочниками и связями
@@ -21,8 +22,9 @@ lab7/
 │   ├── reviewLib.py                # CRUD-операции с отзывами
 │   └── requiredFiles.py            # Константы категорий и список файлов
 ├── UI/                             # Слой интерфейса пользователя
-│   ├── uiLib.py                    # Функции вывода в консоль
-│   └── column_helper.py            # Словари перевода названий колонок и описания типов
+│   ├── uiLib.py                    # Функции вывода и ввода в консоль
+│   ├── column_helper.py            # Словари перевода названий колонок и описания типов
+│   └── comparison_helper.py        # Константы знаков сравнения для фильтрации
 ├── files/                          # CSV-файлы (справочники, связи, данные)
 ├── документация/                   # Диаграммы и пользовательские истории
 ├── .gitignore                      # Исключения Git
@@ -45,12 +47,16 @@ python App.py
 ```
 App.py
  │
- ├── UI/uiLib.py                    — приветствие, справка, список рынков, выход
+ ├── UI/
+ │    ├── uiLib.py                    — приветствие, справка, ввод фильтра, вывод данных
+ │    ├── column_helper.py            — COLUMNS (перевод), COLUMNS_INFO (тип и имя колонок)
+ │    └── comparison_helper.py        — COMPARISON_SIGNS (знаки сравнения для фильтров)
  │
  ├── BusinessLogic/
  │    ├── workflowLib.py            — оркестрация, командный цикл, вызов UI
- │    ├── commandHandler.py         — обработчики команд (только данные, без UI)
- │    └── marketList.py             — бизнес-логика списка рынков
+ │    ├── commandHandler.py         — обработчики команд (ввод + бизнес-логика)
+ │    ├── marketList.py             — бизнес-логика списка рынков
+ │    └── processFilter.py          — обработка фильтрации
  │
  └── DAL/
       ├── fileLib.py                — парсинг CSV, инициализация, чтение данных
@@ -110,21 +116,29 @@ commandHandler (BL) → только marketList (BL)                            
 
 ### BusinessLogic/commandHandler.py
 
-Обработчики команд. Возвращают данные для вывода, не зависят от UI.
+Обработчики команд. Содержат ввод данных от пользователя и бизнес-логику.
 
 | Функция | Возвращает | Описание |
 |---------|------------|----------|
 | `command_help()` | `True` | Подтверждение продолжения работы |
 | `command_list_all()` | `(True, markets)` | Кортеж (статус, все рынки) |
 | `command_list()` | `(True, markets, start, step)` | Кортеж (статус, рынки с нумерацией, старт, шаг) |
-| `command_order()` | `(True, markets, col, order)` | Кортеж (статус, рынки, колонка, порядок) |
+| `command_order(column, order)` | `(True, markets, col, order)` | Сортировка (column/order опциональны) |
 | `command_show()` | `(True, market_info)` или `(True, None)` | Данные рынка или ошибка |
 | `register_user()` | `(True, user)` или `(True, None)` | Регистрация нового пользователя |
 | `login_user(user)` | `(True, user)` или `(True, None)` | Авторизация пользователя |
 | `logout_user(user)` | `(True, None)` | Выход из системы |
 | `add_review(user)` | `(True, user)` | Добавление отзыва на рынок |
-| `show_filtered()` | `(True, markets, col)` | Фильтрация рынков по колонке |
+| `show_filtered()` | `True` | Фильтрация через UI.request_filter |
 | `command_exit()` | `False` | Сигнал завершения работы |
+
+### BusinessLogic/processFilter.py
+
+Модуль обработки фильтрации рынков.
+
+| Функция | Описание |
+|---------|----------|
+| `process(column, filter)` | Применяет фильтр к списку рынков через get_all_markets_ordered_by_column |
 
 ### BusinessLogic/marketList.py
 
@@ -133,14 +147,14 @@ commandHandler (BL) → только marketList (BL)                            
 | Функция | Описание |
 |---------|----------|
 | `get_all_markets(mode)` | Получает данные о рынках (mode='uid' — ключ market_id, mode='num' — ключ порядковый номер) |
-| `get_all_markets_ordered_by_column(col, order)` | Сортировка по колонке (1-8), order: 'a'/'d' |
-| `get_all_markets_filtered_by_column(col)` | Фильтрация по колонке (1-8), по алфавиту |
+| `get_all_markets_ordered_by_column(col, order)` | Сортировка по колонке (1-8), возвращает (dict, column_info) |
+| `get_all_markets_filtered_by_column(col, filter)` | Фильтрация по колонке с критерием |
 | `prepare_ordered_list(markets)` | Переиндексация dict с 1 для пагинации |
 | `get_market_by_id(market_id)` | Получение подробных данных рынка: basic_info, media_info, bank_info, grocery_info |
 
 ### UI/uiLib.py
 
-Функции вывода текста в консоль (интерфейс пользователя).
+Функции вывода и ввода в консоль (интерфейс пользователя).
 
 | Функция | Описание |
 |---------|----------|
@@ -148,17 +162,23 @@ commandHandler (BL) → только marketList (BL)                            
 | `print_help()` | Выводит список доступных команд |
 | `print_table_header()` | Выводит шапку таблицы (русские названия колонок) |
 | `print_header_numbers()` | Выводит нумерацию колонок для сортировки/фильтрации |
-| `print_list_all(markets)` | Выводит таблицу со списком всех рынков |
 | `print_list(markets, start_pos, step, column_name)` | Выводит таблицу с пагинацией и опциональной сортировкой |
 | `print_exit()` | Выводит сообщение о завершении работы |
-| `print_detailed_market_info(market_info)` | Выводит подробную информацию о рынке (адрес, расписание, соцсети, оплата, товары) |
+| `print_detailed_market_info(market_info)` | Выводит подробную информацию о рынке |
 | `print_market_reviews(reviews, average_score)` | Выводит список отзывов о рынке и среднюю оценку |
+| `print_comparison_rules()` | Выводит инструкцию по знакам сравнения для фильтрации |
+| `request_filter()` | Запрашивает у пользователя критерий фильтрации (колонка + значение) |
 
 ### UI/column_helper.py
 
-Словари для перевода названий колонок с английского на русский язык и описания типов.
+Словари для перевода названий колонок и описания типов.
 
-| Ключ | Значение |
+| Константа | Описание |
+|-----------|----------|
+| `COLUMNS` | `{англ_название: русское_название}` для шапки таблицы |
+| `COLUMNS_INFO` | `{номер: {name, type}}` для маппинга номеров колонок |
+
+| Ключ COLUMNS | Значение |
 |------|----------|
 | `number` | Номер |
 | `market_id` | ID |
@@ -168,6 +188,14 @@ commandHandler (BL) → только marketList (BL)                            
 | `marketname` | название рынка |
 | `zip` | п. индекс |
 | `score` | ср. оценка |
+
+### UI/comparison_helper.py
+
+Константы знаков сравнения для фильтрации числовых колонок.
+
+| Константа | Значения |
+|-----------|----------|
+| `COMPARISON_SIGNS` | `['>', '<', '>=', '<=', '=']` |
 
 ### DAL/requiredFiles.py
 
@@ -278,8 +306,8 @@ App.py
                  │                 → uiLib.print_help()
                  │
                  ├─ 'list_all' → commandHandler.command_list_all() → (True, markets)
-                 │                 → marketList.get_all_markets('uid')
-                 │                 → uiLib.print_list_all(markets)
+                 │                 → marketList.get_all_markets('num')
+                 │                 → uiLib.print_list(markets)
                  │
                  ├─ 'list'     → commandHandler.command_list() → (True, markets, start, step)
                  │                 → marketList.get_all_markets('num')
@@ -321,7 +349,7 @@ App.py
 ## Требования
 
 - Python 3.x
-- Стандартная библиотека: `csv`, `uuid`, `os`, `getpass`
+- Стандартная библиотека: `csv`, `uuid`, `os`, `getpass`, `statistics`
 
 ## Установка зависимостей
 

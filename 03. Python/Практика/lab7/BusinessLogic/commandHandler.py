@@ -6,13 +6,21 @@ commandHandler — обработчики команд пользователя.
 - command_exit(): выход
 - command_list_all(): список всех рынков
 - command_list(): список с пагинацией
-- command_order(): сортировка по колонке
+- command_order(column, order): сортировка по колонке (с optional параметрами)
 - command_show(): показ данных одного рынка (запрашивает ID внутри)
 - register_user(): регистрация нового пользователя
 - login_user(user): авторизация пользователя
 - logout_user(user): выход из системы
 - add_review(user): добавление отзыва на рынок
-- show_filtered(): фильтрация рынков по колонке
+- show_filtered(): фильтрация рынков по колонке (через UI.request_filter)
+
+Зависимости:
+- uuid, datetime: генерация ID и дат
+- bcrypt, getpass: хеширование паролей
+- BusinessLogic.marketList: бизнес-логика рынков
+- DAL.userLib, DAL.reviewLib: доступ к данным пользователей и отзывов
+- UI.uiLib: ввод фильтра и справка по колонкам
+- UI.column_helper: COLUMNS_INFO для маппинга номеров колонок
 
 Каждая функция возвращает кортеж (статус, данные) для передачи в UI.
 Вызывается из workflowLib.proceed_command().
@@ -63,8 +71,19 @@ def command_list():
 
 def command_order(column = None, order = None, start_num = None, step = None):
     """
-    Запрашивает у пользователя номер колонки и порядок сортировки.
-    Возвращает (True, dict_рынков, имя_колонки, порядок).
+    Сортирует список рынков по указанной колонке.
+
+    Если column и order не заданы — запрашивает у пользователя.
+    Возвращает (True, dict_рынков, колонка, порядок).
+
+    Args:
+        column: номер колонки (1-8) или None для запроса у пользователя.
+        order: порядок сортировки ('a'/'d') или None для запроса у пользователя.
+        start_num: стартовая позиция (не используется в текущей реализации).
+        step: шаг пагинации (не используется в текущей реализации).
+
+    Returns:
+        tuple: (True, markets, column_info, order).
     """
     if column is None and order is None:
         column = int(input('Введите номер колонки, по которой вы хотите отсортировать список: '))
@@ -243,10 +262,14 @@ def add_review(user):
 
 def show_filtered():
     """
-    Запрашивает у пользователя номер колонки и возвращает отфильтрованный список.
+    Фильтрует список рынков по критерию, введённому пользователем.
+
+    Использует uiLib.request_filter() для получения номера колонки
+    и значения фильтра. Для текстовых колонок — точное совпадение.
+    Для числовых — сравнение с оператором (>, <, >=, <=, =).
 
     Returns:
-        (True, dict_рынков, номер_колонки) — кортеж (статус, рынки, колонка).
+        True — статус продолжения работы.
     """
     column, filter_value = uiLib.request_filter()
     if column is None and filter_value is None:

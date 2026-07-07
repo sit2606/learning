@@ -6,11 +6,18 @@ marketList — бизнес-логика для работы со списком
 
 - get_all_markets(mode): все рынки с резолвингом ID → имена ('uid' или 'num')
 - get_all_markets_ordered_by_column(col, order): сортировка по колонке
-- get_all_markets_filtered_by_column(col): фильтрация по колонке (по алфавиту)
+- get_all_markets_filtered_by_column(col, filter): фильтрация по колонке с критерием
 - prepare_ordered_list(markets): переиндексация для пагинации
 - get_market_by_id(market_id): получение одного рынка по Id
 - get_market_references(market_id): получение связей рынка со справочниками
 - update_market_info(market_info): обновление данных рынка
+
+Зависимости:
+- BusinessLogic.processFilter: обработка фильтрации
+- DAL.dataLib: обновление данных рынка
+- DAL.fileLib: чтение MARKET_INFO.csv
+- DAL.referenceLib: чтение справочников и связей
+- UI.column_helper: COLUMNS_INFO (тип и имя колонок)
 
 Использование:
     from BusinessLogic.marketList import get_all_markets, get_market_by_id
@@ -78,6 +85,7 @@ def get_all_markets_ordered_by_column(column_number, order = False):
     """
     Получает данные о всех фермерских рынках, отсортированные по указанной колонке.
 
+    Использует COLUMNS_INFO для маппинга номера колонки на имя и тип.
     Поддерживаемые колонки: 1-номер, 2-ID, 3-город, 4-графство,
     5-штат, 6-название, 7-индекс, 8-ср. оценка.
 
@@ -86,7 +94,8 @@ def get_all_markets_ordered_by_column(column_number, order = False):
         order (str): 'a' — по возрастанию, 'd' — по убыванию.
 
     Returns:
-        tuple: (dict_рынков, имя_колонки) — отсортированный словарь и имя колонки.
+        tuple: (dict_рынков, column_info) — отсортированный словарь и dict колонки
+               {name: имя_колонки, type: тип_колонки}.
     """
     column = COLUMNS_INFO[column_number]
     match order:
@@ -186,7 +195,20 @@ def update_market_info(market_info):
     update_market(market_info['basic_info'])
 
 def get_all_markets_filtered_by_column(column, filter = None):
+    """
+    Фильтрует и сортирует рынки по указанной колонке и критерию.
 
+    Использует processFilter() для первичной обработки,
+    затем сортирует результат по алфавиту/порядку.
+
+    Args:
+        column: dict колонки {name: имя, type: тип} из COLUMNS_INFO.
+        filter: критерий фильтрации (строка для текстовых или
+                кортеж (знак, значение) для числовых колонок).
+
+    Returns:
+        tuple: (dict_рынков, column_info) — отфильтрованный словарь и dict колонки.
+    """
     market_base = processFilter()
     sorting_base = {}
     for market_id, market_info in market_base.items():
