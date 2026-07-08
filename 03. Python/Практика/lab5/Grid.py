@@ -89,33 +89,37 @@ def draw_coordinates(im, border_width,input_length, input_width, input_step):
     for y in range (0,input_width, input_step):
         draw.text((0,y + 25), str(int(y/input_step)), fill="black", font=font)
     return(new_img)
-def draw_by_dictionary(input_step,field,image_to_draw):
+def draw_by_dictionary(input_step,field,image_to_draw, color='green'):
     """
     Отрисовывает элементы на изображении на основе словаря состояний.
-    
+
     Аргументы:
         input_step: Шаг сетки.
-        field: Словарь, где ключи - кортежи координат (x, y), 
+        field: Словарь, где ключи - кортежи координат (x, y),
                а значения - объекты с атрибутом _status.
         image_to_draw: Изображение, на котором производится отрисовка.
+        color: Базовый цвет клеток (red, blue, green).
     """
-    last_item = next(reversed(field.items())) 
+    last_item = next(reversed(field.items()))
     y = last_item[0][1]
     x = last_item[0][0]
     for y_coord in range(0,y+1,1):
         for x_coord in range(0,x+1, 1):
-            if field.get((int(x_coord),int(y_coord)))._status == True: 
-                draw_by_index(x_coord, y_coord, image_to_draw, input_step)
-def draw_by_index(first_index,second_index,image,step):
+            if field.get((int(x_coord),int(y_coord)))._status == True:
+                cell_obj = field.get((int(x_coord), int(y_coord)))
+                draw_by_index(x_coord, y_coord, image_to_draw, input_step, age=cell_obj._age, color=color)
+def draw_by_index(first_index,second_index,image,step,age=1,color='green'):
     """
-    Отрисовывает зеленый прямоугольник по заданным индексам сетки.
-    
+    Отрисовывает прямоугольник по заданным индексам сетки.
+
     Аргументы:
         first_index: Индекс по оси X.
         second_index: Индекс по оси Y.
         image: Изображение для отрисовки.
         step: Шаг сетки.
-        
+        age: Возраст ячейки (определяет оттенок цвета).
+        color: Базовый цвет клеток (red, blue, green).
+
     Возвращает:
         None, если индексы выходят за пределы сетки.
     """
@@ -127,7 +131,15 @@ def draw_by_index(first_index,second_index,image,step):
     if (width - _n1*_step)<0 or (height-_n2*_step)<0:
         print('Таких индексов нет в сетке')
         return(None)
-    draw.rectangle((0+5+_step*_n1,0+5+_step*_n2, _n1*_step+_step+5,_step+5+_step*_n2), fill="Green")
+    base_colors = {
+        'red': (255, 0, 0),
+        'blue': (0, 0, 255),
+        'green': (0, 255, 0),
+    }
+    r, g, b = base_colors.get(color, (0, 255, 0))
+    factor = max(0, 255 - age * 15) / 255
+    cell_color = (int(r * factor), int(g * factor), int(b * factor))
+    draw.rectangle((0+5+_step*_n1,0+5+_step*_n2, _n1*_step+_step+5,_step+5+_step*_n2), fill=cell_color)
 
 def draw_generation_count(image, generation_count):
     """

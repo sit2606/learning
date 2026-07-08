@@ -1,13 +1,16 @@
 -- Field Options
 - Length
-140
+200
 - Width
-160
+100
 - Generation count
 30
-- Start Field Config (Please, provide a coordinates of alive cells)
-(1, 3)
-(2, 3)
-(3, 3)
-(3, 2)
-(2, 1)
+- Current generation
+10
+- Color
+blue
+- Field Config
+(3, 3) age=4
+(3, 4) age=9
+(4, 3) age=8
+(4, 4) age=7
