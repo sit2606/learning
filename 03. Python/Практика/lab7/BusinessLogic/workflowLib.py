@@ -51,7 +51,7 @@ def directory_creation():
         "Error in directory_creation" и текст исключения в консоль.
     """
     try:
-        os.makedirs("../files", exist_ok=True)
+        os.makedirs("files", exist_ok=True)
     except Exception as e:
         print(e)
         print("Error in directory_creation")
