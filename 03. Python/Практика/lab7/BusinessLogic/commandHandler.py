@@ -8,18 +8,19 @@ commandHandler — обработчики команд пользователя.
 - command_list(): список с пагинацией
 - command_order(column, order): сортировка по колонке (с optional параметрами)
 - command_show(): показ данных одного рынка (запрашивает ID внутри)
-- register_user(): регистрация нового пользователя
+- register_user(): регистрация нового пользователя (с запросом координат)
 - login_user(user): авторизация пользователя
 - logout_user(user): выход из системы
 - add_review(user): добавление отзыва на рынок
 - show_filtered(): фильтрация рынков по колонке (через UI.request_filter)
+- update_user(user): обновление данных пользователя (заглушка)
 
 Зависимости:
 - uuid, datetime: генерация ID и дат
 - bcrypt, getpass: хеширование паролей
 - BusinessLogic.marketList: бизнес-логика рынков
 - DAL.userLib, DAL.reviewLib: доступ к данным пользователей и отзывов
-- UI.uiLib: ввод фильтра и справка по колонкам
+- UI.uiLib: ввод координат, фильтра, справка по колонкам
 - UI.column_helper: COLUMNS_INFO для маппинга номеров колонок
 
 Каждая функция возвращает кортеж (статус, данные) для передачи в UI.
@@ -39,7 +40,7 @@ from BusinessLogic.marketList import  get_all_markets, get_all_markets_ordered_b
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
 from DAL import userLib
 from DAL.reviewLib import create_review, calculate_score
-from DAL.userLib import get_user_by_username
+from DAL.userLib import get_user
 from UI import uiLib
 from UI.column_helper import COLUMNS_INFO, COLUMNS_INFO_REVERSED
 
@@ -97,9 +98,11 @@ def command_show():
     """
     Запрашивает у пользователя ID рынка и получает его данные.
 
+    Обрабатывает ValueError при вводе нечислового ID.
+
     Returns:
         (True, market_info) — кортеж (статус, данные рынка),
-        (True, None) — при ошибке (рынок не найден).
+        (True, None) — при ошибке (рынок не найден или неверный ввод).
     """
     try:
         market_id = int(input('Введите ID рынка: '))
@@ -119,6 +122,7 @@ def register_user():
     Регистрация нового пользователя.
 
     Запрашивает логин, пароль (хешируется через bcrypt), имя и фамилию.
+    Предлагает указать координаты (широта, долгота) для фильтрации по дистанции.
     Проверяет уникальность логина. Ввод 'stop' отменяет регистрацию.
 
     Returns:
@@ -132,7 +136,7 @@ def register_user():
             case 'stop':
                 return True, None
             case _:
-                user = get_user_by_username(user_name)
+                user = get_user(user_name)
                 if user is not None:
                     print('Пожалуйста, введите другой username или введите stop для завершения регистрации')
                 else:
@@ -148,9 +152,24 @@ def register_user():
                     user.update({'firstname': user_firstname})
                     user_lastname = input('Введите Вашу фамилию ')
                     user.update({'lastname': user_lastname})
-                    user.update({'location': 'test_location'})
+                    command = input('Вы хотите указать свои координаты?\n'
+                                    'Введите `y` чтобы указать\n'
+                                    'Введите `n` чтобы не указывать (координаты нужны, чтобы работала'
+                                    'функция определения дистанции до рынков\n')
+                    match command:
+                        case 'y':
+                            latitude, longitude = uiLib.get_user_coordinates_manually()
+                            if latitude is None or longitude is None:
+                                print('')
+                                user.update({'location': (None, None)})
+                            user.update({'location': (latitude, longitude)})
+                        case 'n':
+                                user.update({'location': (None, None)})
+                        case _:
+                            print('Команда не распознана, вы сможете указать координаты позже')
+                            user.update({'location': (None, None)})
                     userLib.create_user(user)
-                    user = get_user_by_username(user_name)
+                    user = get_user(user_name)
                     print('Регистрация успешна! Добро пожаловать!')
                     return True, user
 def login_user(user):
@@ -170,7 +189,7 @@ def login_user(user):
     if user is None:
         user = {}
         user_name = input('Введите ваш логин: ')
-        user_in_base = get_user_by_username(user_name)
+        user_in_base = get_user(user_name)
         if user_in_base is None:
             print('Пользователь не найден, попробуйте снова')
             return True, None
@@ -188,7 +207,6 @@ def login_user(user):
     else:
         print("Вы уже вошли в Систему")
         return True, user
-
 def logout_user(user):
     """
     Выход пользователя из системы.
@@ -206,8 +224,6 @@ def logout_user(user):
         user = None
         print('Вы успешно вышли из системы')
         return True, user
-
-
 def add_review(user):
     """
     Добавление отзыва на рынок.
@@ -260,10 +276,6 @@ def add_review(user):
                                 print('Оценка должна быть целым, положительным числом. Попробуйте снова')
                                 continue
 
-
-
-
-
 def show_filtered():
     """
     Фильтрует список рынков по критерию, введённому пользователем.
@@ -283,3 +295,14 @@ def show_filtered():
 
     uiLib.print_list(markets_to_show[0], column_name=COLUMNS_INFO[column])
     return True
+def update_user(user):
+    """
+    Обновление данных пользователя (заглушка).
+
+    Args:
+        user: Текущий авторизованный пользователь.
+
+    Returns:
+        None — функция в разработке.
+    """
+    return None

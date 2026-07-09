@@ -4,12 +4,13 @@ column_helper — словари для перевода названий кол
 Модуль содержит:
 - COLUMNS: словарь {англ_название: русское_название} для отображения шапки таблицы
 - COLUMNS_INFO: словарь {номер: {name, type}} для валидации и сортировки колонок
+- COLUMNS_INFO_REVERSED: словарь {имя_колонки: номер} — обратный маппинг
 
 Используется в uiLib.py для отображения шапки таблицы и инструкций
 по сортировке/фильтрации.
 
 Использование:
-    from UI.column_helper import COLUMNS, COLUMNS_INFO
+    from UI.column_helper import COLUMNS, COLUMNS_INFO, COLUMNS_INFO_REVERSED
 """
 COLUMNS = {
     'number' : 'Номер',

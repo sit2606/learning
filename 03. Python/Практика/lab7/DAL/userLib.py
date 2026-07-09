@@ -7,13 +7,12 @@ userLib — библиотека для управления пользоват�
 Функции:
 - create_user(user): добавляет пользователя, возвращает UUID
 - read_user(user_id): читает пользователя по UUID
-- get_user_by_uid(uid): читает пользователя по UUID (альтернатива read_user)
-- get_user_by_username(username): читает пользователя по логину
+- get_user(pattern, mode): читает пользователя по username (mode='username') или uid (mode='uid')
 - update_user(user): обновляет данные пользователя
 - delete_user(user_id): удаляет пользователя по UUID
 
 Использование:
-    from DAL.userLib import create_user, read_user, get_user_by_username
+    from DAL.userLib import create_user, read_user, get_user
 """
 
 import csv
@@ -76,25 +75,39 @@ def read_user(user_id):
     except Exception as e:
         print(e)
         print("Error in read_user")
-def get_user_by_username(username=None):
+def get_user(pattern=None, mode = 'username'):
     """
-    Читает пользователя по логину (user_name).
+    Читает пользователя по username или UUID.
 
     Args:
-        username (str): Логин пользователя.
+        pattern: Значение для поиска (username или UUID).
+        mode: Режим поиска — 'username' (по логину) или 'uid' (по UUID).
 
     Returns:
         dict: данные пользователя или None если не найден.
     """
-    try:
-        with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
-            user_base = csv.DictReader(file)
-            for user in user_base:
-                if user["user_name"] == username:
-                    return user
-    except Exception as e:
-        print(e)
-        print("Error in get_user_by_username")
+    match mode:
+        case 'username':
+            try:
+                with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
+                    user_base = csv.DictReader(file)
+                    for user in user_base:
+                        if user["user_name"] == pattern:
+                            return user
+            except Exception as e:
+                print(e)
+                print("Error in get_user")
+        case 'uid':
+            try:
+                with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
+                    user_base = csv.DictReader(file)
+                    for user in user_base:
+                        if user["Id"] == pattern:
+                            return user
+            except Exception as e:
+                print(e)
+                print("Error in get_user")
+
 def update_user(user = DEFAULT_USER):
     """
     Обновляет данные пользователя в USER_INFO.csv.

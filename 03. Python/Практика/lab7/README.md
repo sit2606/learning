@@ -13,7 +13,8 @@ lab7/
 │   ├── workflowLib.py              # Оркестрация процесса и обработка команд
 │   ├── commandHandler.py           # Обработчики команд
 │   ├── marketList.py               # Бизнес-логика получения списка рынков
-│   └── processFilter.py            # Обработка фильтрации рынков
+│   ├── processFilter.py            # Обработка фильтрации рынков
+│   └── geoLib.py                   # Библиотека геоданных и расчёта дистанций
 ├── DAL/                            # Слой доступа к данным (Data Access Layer)
 │   ├── fileLib.py                  # Парсинг Export.csv, инициализация справочников
 │   ├── referenceLib.py             # CRUD-операции со справочниками и связями
@@ -56,7 +57,8 @@ App.py
  │    ├── workflowLib.py            — оркестрация, командный цикл, вызов UI
  │    ├── commandHandler.py         — обработчики команд (ввод + бизнес-логика)
  │    ├── marketList.py             — бизнес-логика списка рынков
- │    └── processFilter.py          — обработка фильтрации
+ │    ├── processFilter.py          — обработка фильтрации
+ │    └── geoLib.py                 — геоданные и расчёт дистанций
  │
  └── DAL/
       ├── fileLib.py                — парсинг CSV, инициализация, чтение данных
@@ -124,21 +126,32 @@ commandHandler (BL) → только marketList (BL)                            
 | `command_list_all()` | `(True, markets)` | Кортеж (статус, все рынки) |
 | `command_list()` | `(True, markets, start, step)` | Кортеж (статус, рынки с нумерацией, старт, шаг) |
 | `command_order(column, order)` | `(True, markets, col, order)` | Сортировка (column/order опциональны) |
-| `command_show()` | `(True, market_info)` или `(True, None)` | Данные рынка или ошибка |
-| `register_user()` | `(True, user)` или `(True, None)` | Регистрация нового пользователя |
+| `command_show()` | `(True, market_info)` или `(True, None)` | Данные рынка, ошибка ID или неверный ввод |
+| `register_user()` | `(True, user)` или `(True, None)` | Регистрация (с запросом координат) |
 | `login_user(user)` | `(True, user)` или `(True, None)` | Авторизация пользователя |
 | `logout_user(user)` | `(True, None)` | Выход из системы |
 | `add_review(user)` | `(True, user)` | Добавление отзыва на рынок |
 | `show_filtered()` | `True` | Фильтрация через UI.request_filter |
+| `update_user(user)` | `None` | Обновление данных пользователя (заглушка) |
 | `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/processFilter.py
 
-Модуль обработки фильтрации рынков.
+Модуль обработки фильтрации рынков. Для текстовых колонок — поиск подстроки. Для числовых — сравнение с оператором.
 
 | Функция | Описание |
 |---------|----------|
-| `process(column, filter)` | Применяет фильтр к списку рынков через get_all_markets_ordered_by_column |
+| `process(market_list, column, filter_value)` | Фильтрует рынки: text → подстрока, numeric → сравнение (>, <, >=, <=, =) |
+
+### BusinessLogic/geoLib.py
+
+Библиотека для работы с геоданными и расчёта дистанций (в разработке).
+
+Планируемые функции:
+- `calculate_distance(lat1, lon1, lat2, lon2)` — расчёт дистанции по формуле Хаверсина
+- Фильтрация рынков по расстоянию от пользователя
+
+Поле `location` в USER_INFO.csv хранится как строка `'(широта, долгота)'`.
 
 ### BusinessLogic/marketList.py
 
@@ -168,6 +181,8 @@ commandHandler (BL) → только marketList (BL)                            
 | `print_market_reviews(reviews, average_score)` | Выводит список отзывов о рынке и среднюю оценку |
 | `print_comparison_rules()` | Выводит инструкцию по знакам сравнения для фильтрации |
 | `request_filter()` | Запрашивает у пользователя критерий фильтрации (колонка + значение) |
+| `get_user_coordinates_manually()` | Ручной ввод координат (широта, долгота) с валидацией диапазонов |
+| `request_user_updates(user)` | Интерфейс обновления данных пользователя (username, имя, фамилия, координаты) |
 
 ### UI/column_helper.py
 
@@ -177,6 +192,7 @@ commandHandler (BL) → только marketList (BL)                            
 |-----------|----------|
 | `COLUMNS` | `{англ_название: русское_название}` для шапки таблицы |
 | `COLUMNS_INFO` | `{номер: {name, type}}` для маппинга номеров колонок |
+| `COLUMNS_INFO_REVERSED` | `{имя_колонки: номер}` — обратный маппинг |
 
 | Ключ COLUMNS | Значение |
 |------|----------|
@@ -265,8 +281,7 @@ CRUD-операции с пользователями через CSV-файл fi
 | `DEFAULT_USER` | Значения по умолчанию для нового пользователя |
 | `create_user(user)` | Создаёт пользователя, возвращает UUID |
 | `read_user(user_id)` | Читает пользователя по Id, возвращает dict |
-| `get_user_by_uid(uid)` | Читает пользователя по UUID (альтернатива read_user) |
-| `get_user_by_username(username)` | Читает пользователя по логину, возвращает dict или None |
+| `get_user(pattern, mode)` | Читает по username (mode='username') или uid (mode='uid') |
 | `update_user(user)` | Обновляет данные пользователя по Id |
 | `delete_user(user_id)` | Удаляет пользователя по Id |
 
@@ -325,6 +340,7 @@ App.py
                  │                 → marketList.get_all_markets_filtered_by_column()
                  │
                  ├─ 'register' → commandHandler.register_user() → (True, user)
+                 │                 → uiLib.get_user_coordinates_manually()
                  │
                  ├─ 'login'    → commandHandler.login_user(user) → (True, user)
                  │
@@ -332,6 +348,8 @@ App.py
                  │
                  ├─ 'review'   → commandHandler.add_review(user) → (True, user)
                  │                 → reviewLib.create_review(review)
+                 │
+                 ├─ 'update_user' → commandHandler.update_user(user) → None (заглушка)
                  │
                  └─ 'exit'     → commandHandler.command_exit() → False
                                    → uiLib.print_exit()

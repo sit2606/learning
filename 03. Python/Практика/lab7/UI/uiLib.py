@@ -14,14 +14,18 @@ uiLib — библиотека функций вывода и ввода в ко
 
 Функции ввода:
 - request_filter(): запрос критерия фильтрации у пользователя
+- get_user_coordinates_manually(): ручной ввод координат пользователя (широта, долгота)
+- request_user_updates(user): интерфейс обновления данных пользователя
 
 Зависимости:
+- DAL.userLib: get_user для проверки уникальности username
 - UI.column_helper: COLUMNS (перевод колонок), COLUMNS_INFO (тип и имя колонок)
 - UI.comparison_helper: COMPARISON_SIGNS (знаки сравнения для числовых фильтров)
 
 Использование:
     from UI.uiLib import print_welcome, print_help, print_list, request_filter
 """
+from DAL.userLib import get_user
 from UI.column_helper import COLUMNS, COLUMNS_INFO
 from UI.comparison_helper import COMPARISON_SIGNS
 
@@ -141,6 +145,41 @@ def print_market_reviews(reviews, average_score):
         print(f'Текст рецензии')
         print(review['review_text'])
     return None
+def get_user_coordinates_manually():
+    """
+    Запрашивает у пользователя координаты (широту и долготу) вручную.
+
+    Валидация:
+    - Широта: от -90 до 90
+    - Долгота: от -180 до 180
+
+    Returns:
+        tuple: (latitude, longitude) — кортеж координат (float, float),
+               или (None, None) при отмене ввода.
+    """
+    getting_coordinates = True
+    while getting_coordinates:
+        try:
+            command = input('Нажмите enter, чтобы начать ввод координат или введите `b`\n'
+                            'чтобы покинуть ввод координат\n')
+            match command:
+                case 'b':
+                    getting_coordinates = False
+                case _:
+                    latitude  = float(input('Введите, пожалуйста широту: '))
+                    if -90 > latitude >= 90:
+                        raise ValueError()
+                    longitude = float(input('Введите, пожалуйста, долготу: '))
+                    if -180 >= longitude >= 180:
+                        raise ValueError()
+                    return latitude, longitude
+        except ValueError:
+            print('Широта\\ должны быть числами\n')
+            print('Широта должна быть в диапазоне от - 90 до 90\n')
+            print('Долгота должна быть в диапазоне от -180 до 180\n')
+            continue
+    return None, None
+
 
 def print_comparison_rules():
     print('======--------------------------------======')
@@ -207,3 +246,66 @@ def request_filter():
                     print('Что то пошло не так')
                     return None,None
     return None, None
+
+def request_user_updates(user):
+    """
+    Интерфейс обновления данных пользователя.
+
+    Показывает текущие значения полей и позволяет выбрать, какое изменить:
+    1 — username, 2 — имя, 3 — фамилия, 4 — координаты.
+
+    Args:
+        user: Текущий авторизованный пользователь.
+
+    Returns:
+        dict: обновлённый словарь пользователя с изменённым полем.
+    """
+    updates_process = True
+    while updates_process:
+        print(f'1. Ваш username {user['user_name']}'
+              f'2. Ваше имя {user['firstname']}'
+              f'3. Ваша фамилия {user["lastname"]}'
+              f'4. Ваши координаты{user["location"]}')
+        command = input('Введите, какой пункт вы хотите изменить: '
+                        'Введите `b`, чтобы выйти без изменений')
+        match command:
+            case '1':
+                user_name_process = True
+                while user_name_process:
+                    print('Вы выбрали изменить username')
+                    new_user_name = input('Введите новый username: ')
+                    match new_user_name:
+                        case 'b':
+                            user_name_process = False
+                        case _:
+                            user = get_user(new_user_name)
+                            if user is not None:
+                                print('Пожалуйста, введите другой username или введите `b` чтобы выйти')
+                            else:
+                                print('username обновлён!')
+                                user.update({'user_name': new_user_name})
+                                return user
+            case '2':
+                print('Вы выбрали изменить имя')
+                new_name = input('Введите новое имя: ')
+                user.update({'user_name': new_name})
+                print('Имя обновлено!')
+                return user
+            case '3':
+                print('Вы выбрали изменить фамилию')
+                new_name = input('Введите новую фамилию: ')
+                user.update({'user_name': new_name})
+                print('Фамилию обновлена!')
+                return user
+            case '4':
+                print('Вы выбрали изменить координаты')
+                latitude, longitude = get_user_coordinates_manually()
+                user.update({'location': (latitude, longitude)})
+                print('Координаты обновлены!')
+                return user
+            case 'b':
+                updates_process = False
+                return user
+            case _:
+                print('Ошибка ввода, попробуйте ещё раз')
+                continue

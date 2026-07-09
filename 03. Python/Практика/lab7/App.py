@@ -15,7 +15,8 @@ import csv
 
 from BusinessLogic.marketList import get_all_markets, get_market_by_id
 from DAL import userLib
-from UI.uiLib import print_welcome, request_filter
+from DAL.userLib import get_user
+from UI.uiLib import print_welcome, request_filter, request_user_updates
 from BusinessLogic.workflowLib import *
 
 
@@ -25,7 +26,9 @@ def testing():
 
     В данный момент отключена (pass).
     """
-    pass
+    user_uid = userLib.create_user()
+    user = get_user(user_uid, mode='uid')
+    request_user_updates(user)
 
 
 
@@ -66,7 +69,7 @@ def main():
     5. Цикл команд: приветствие, чтение и обработка команд
        с отслеживанием текущего пользователя (user = None при старте)
     """
-    testing()
+    #testing()
     directory_creation()
     file_creation()
     user_lib_testing()

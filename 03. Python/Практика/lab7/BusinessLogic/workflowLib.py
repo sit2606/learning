@@ -22,10 +22,11 @@ workflowLib — модуль оркестрации рабочего проце�
 - order — сортировка по колонке
 - show — данные одного рынка по Id (с просмотром отзывов)
 - filter — фильтрация рынков по колонке
-- register — регистрация пользователя
+- register — регистрация пользователя (с запросом координат)
 - login — авторизация пользователя
 - logout — выход из системы
 - review — добавление отзыва
+- update_user — обновление данных пользователя (заглушка)
 - exit — выход
 
 Использование:
@@ -187,6 +188,8 @@ def proceed_command(command, user):
             is_run, user = commandHandler.logout_user(user)
         case 'review':
             is_run, user = commandHandler.add_review(user)
+        case 'update_user':
+            is_run, user = commandHandler.update_user(user)
         case 'filter':
             is_run = commandHandler.show_filtered()
         case 'exit':

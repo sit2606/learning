@@ -198,16 +198,19 @@ def get_all_markets_filtered_by_column(column, filter = None):
     """
     Фильтрует и сортирует рынки по указанной колонке и критерию.
 
-    Использует processFilter() для первичной обработки,
-    затем сортирует результат по алфавиту/порядку.
+    1. Получает все рынки через get_all_markets_ordered_by_column()
+    2. Применяет фильтр через processFilter.process()
+    3. Сортирует результат по алфавиту/порядку
+    4. Переиндексирует для пагинации
 
     Args:
-        column: dict колонки {name: имя, type: тип} из COLUMNS_INFO.
-        filter: критерий фильтрации (строка для текстовых или
-                кортеж (знак, значение) для числовых колонок).
+        column (int): Номер колонки (1-8) из COLUMNS_INFO.
+        filter: Критерий фильтрации. Для текстовых — строка (подстрока).
+                Для числовых — кортеж (знак_сравнения, значение_строка).
 
     Returns:
-        tuple: (dict_рынков, column_info) — отфильтрованный словарь и dict колонки.
+        tuple: (dict_рынков, column_info) — отфильтрованный словарь
+               (с ключами от 1) и dict колонки {name, type}.
     """
 
     market_list, column_info = get_all_markets_ordered_by_column(column)
