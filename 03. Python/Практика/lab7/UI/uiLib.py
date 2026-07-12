@@ -19,14 +19,14 @@ uiLib — библиотека функций вывода и ввода в ко
 
 Зависимости:
 - DAL.userLib: get_user для проверки уникальности username
-- UI.column_helper: COLUMNS (перевод колонок), COLUMNS_INFO (тип и имя колонок)
+- UI.column_helper: COLUMNS (перевод колонок), COLUMNS_INFO (тип и имя колонок), COLUMN_TO_SHOW (отображаемые колонки)
 - UI.comparison_helper: COMPARISON_SIGNS (знаки сравнения для числовых фильтров)
 
 Использование:
     from UI.uiLib import print_welcome, print_help, print_list, request_filter
 """
 from DAL.userLib import get_user
-from UI.column_helper import COLUMNS, COLUMNS_INFO
+from UI.column_helper import COLUMNS, COLUMNS_INFO, COLUMN_TO_SHOW
 from UI.comparison_helper import COMPARISON_SIGNS
 
 
@@ -47,11 +47,13 @@ def print_help():
     print('review - добавить отзыв к рынку')
     print('filter - вывести отфильтрованный по какому-либо критерию список рынков')
     print('login - войти в приложение со своим логином\\паролем')
+    print('update_user - обновление пользовательских данных')
     print('logout - выйти из приложения')
     print('exit - завершает работу приложения')
 def print_table_header():
+    from UI.column_helper import  COLUMN_TO_SHOW
     header = ''
-    for column in COLUMNS.values():
+    for column in COLUMN_TO_SHOW:
         header += ' | ' + column
     print(header)
 def print_exit():
@@ -69,12 +71,9 @@ def print_list(markets_for_show, start_pos= 1, step = 10000, column_name = None)
     end_pos = start_pos + step
     try:
         for number  in range(start_pos, start_pos + step):
-            formatted_output = ( ' | ' + str(markets_for_show[number]['number']) +  ' | ' +
-                        markets_for_show[number]['market_id'] + ' | ' + markets_for_show[number]['city'] + ' | ' + markets_for_show[number]['county']
-                        + ' | ' + markets_for_show[number]['state'] +
-                        ' | ' + markets_for_show[number]['marketname']+ ' | ' + markets_for_show[number]['zip'] + ' | '
-                                 + markets_for_show[number]['score'] + ' | '
-                                 )
+            formatted_output = f'| {number} '
+            for column in COLUMN_TO_SHOW:
+                formatted_output += (' | ' + str(markets_for_show[number][column]))
             print(formatted_output)
         print('======--------------------------------======')
     except KeyError:
@@ -91,6 +90,7 @@ def print_header_numbers():
     print('название рынка - 6')
     print('п. индекс - 7')
     print('ср. оценка - 8')
+    print('расстояние - 9')
     print('======--------------------------------======')
 def print_detailed_market_info(market_info):
     print('======--------------------------------======')
@@ -166,18 +166,17 @@ def get_user_coordinates_manually():
                 case 'b':
                     getting_coordinates = False
                 case _:
-                    latitude  = float(input('Введите, пожалуйста широту: '))
-                    if -90 > latitude >= 90:
-                        raise ValueError()
+                    latitude = float(input('Введите, пожалуйста, широту: '))
+                    if not (-90 <= latitude <= 90):
+                        print("Ошибка: широта должна быть от -90 до 90. Попробуйте снова.")
+                        continue
                     longitude = float(input('Введите, пожалуйста, долготу: '))
-                    if -180 >= longitude >= 180:
-                        raise ValueError()
+                    if not (-180 <= longitude <= 180):
+                        print("Ошибка: долгота должна быть от -180 до 180. Попробуйте снова.")
+                        continue
                     return latitude, longitude
         except ValueError:
-            print('Широта\\ должны быть числами\n')
-            print('Широта должна быть в диапазоне от - 90 до 90\n')
-            print('Долгота должна быть в диапазоне от -180 до 180\n')
-            continue
+            print("Ошибка: нужно ввести число. Попробуйте снова.")
     return None, None
 
 
@@ -230,6 +229,8 @@ def request_filter():
                                     filter_value = input('Введите критерий сравнения\n')
                                 case 'score':
                                     filter_value = input('Введите критерий сравнения\n')
+                                case 'distance':
+                                    filter_value = input('Введите критерий сравнения\n')
                             match filter_value:
                                 case _:
                                     for symbol in filter_value.strip().split(' '):
@@ -252,7 +253,7 @@ def request_user_updates(user):
     Интерфейс обновления данных пользователя.
 
     Показывает текущие значения полей и позволяет выбрать, какое изменить:
-    1 — username, 2 — имя, 3 — фамилия, 4 — координаты.
+    1 — username, 2 — имя, 3 — фамилия, 4 — широта, 5 — долгота.
 
     Args:
         user: Текущий авторизованный пользователь.
@@ -262,12 +263,14 @@ def request_user_updates(user):
     """
     updates_process = True
     while updates_process:
-        print(f'1. Ваш username {user['user_name']}'
-              f'2. Ваше имя {user['firstname']}'
-              f'3. Ваша фамилия {user["lastname"]}'
-              f'4. Ваши координаты{user["location"]}')
+        print(f'1. Ваш username {user["user_name"]}'
+              f'\n2. Ваше имя {user["firstname"]}'
+              f'\n3. Ваша фамилия {user["lastname"]}'
+              f'\n4. Ваши координаты:\n'
+              f'широта {user["latitude"]}\n'
+              f'долгота {user["longitude"]}')
         command = input('Введите, какой пункт вы хотите изменить: '
-                        'Введите `b`, чтобы выйти без изменений')
+                        'Введите `b`, чтобы выйти без изменений\n')
         match command:
             case '1':
                 user_name_process = True
@@ -278,8 +281,8 @@ def request_user_updates(user):
                         case 'b':
                             user_name_process = False
                         case _:
-                            user = get_user(new_user_name)
-                            if user is not None:
+                            user_exist = get_user(new_user_name)
+                            if user_exist is not None:
                                 print('Пожалуйста, введите другой username или введите `b` чтобы выйти')
                             else:
                                 print('username обновлён!')
@@ -299,10 +302,14 @@ def request_user_updates(user):
                 return user
             case '4':
                 print('Вы выбрали изменить координаты')
-                latitude, longitude = get_user_coordinates_manually()
-                user.update({'location': (latitude, longitude)})
-                print('Координаты обновлены!')
-                return user
+                coords = get_user_coordinates_manually()
+                if coords is not None:
+                    user.update({'latitude': coords[0]})
+                    user.update({'longitude': coords[1]})
+                    print('Координаты обновлены!')
+                    return user
+                else:
+                    print('Что-то пошло не так')
             case 'b':
                 updates_process = False
                 return user

@@ -29,7 +29,6 @@ def process(market_list, column, filter_value):
     """
     column_to_filter = COLUMNS_INFO[column]
     filtered_market = {}
-    print('s')
     if column_to_filter['type'] == 'text':
         filter_value = filter_value.lower().strip()
         for key,value in market_list.items():

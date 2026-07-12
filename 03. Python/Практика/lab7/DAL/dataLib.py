@@ -51,7 +51,8 @@ def update_market(data_to_update):
                    'season3time',
                    'season4date',
                    'season4time',
-                   'score']
+                   'score',
+                   'distance']
     try:
         with open(f"files/MARKET_INFO.csv", "r", newline="", encoding="utf-8") as file:
             reader = csv.DictReader(file)

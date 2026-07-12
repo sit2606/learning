@@ -14,6 +14,7 @@ marketList — бизнес-логика для работы со списком
 
 Зависимости:
 - BusinessLogic.processFilter: обработка фильтрации
+- BusinessLogic.geoLib: расчёт расстояния (distance)
 - DAL.dataLib: обновление данных рынка
 - DAL.fileLib: чтение MARKET_INFO.csv
 - DAL.referenceLib: чтение справочников и связей
@@ -22,7 +23,7 @@ marketList — бизнес-логика для работы со списком
 Использование:
     from BusinessLogic.marketList import get_all_markets, get_market_by_id
 """
-from BusinessLogic import processFilter
+from BusinessLogic import processFilter, geoLib
 from DAL.dataLib import update_market
 from DAL.fileLib import get_raw_markets_from_file
 from DAL.referenceLib import get_reference_with_uid_as_key, get_all_connections_by_market_id, \
@@ -81,17 +82,21 @@ def get_all_markets(mode):
                 ordered_market_base.update({market_id: market_info})
         num += 1
     return ordered_market_base
-def get_all_markets_ordered_by_column(column_number, order = False):
+def get_all_markets_ordered_by_column(column_number, order = False, user = None):
     """
     Получает данные о всех фермерских рынках, отсортированные по указанной колонке.
 
     Использует COLUMNS_INFO для маппинга номера колонки на имя и тип.
     Поддерживаемые колонки: 1-номер, 2-ID, 3-город, 4-графство,
-    5-штат, 6-название, 7-индекс, 8-ср. оценка.
+    5-штат, 6-название, 7-индекс, 8-ср. оценка, 9-расстояние.
+
+    Для колонки 9 (distance) — рассчитывает расстояние от пользователя
+    через geoLib.get_distance().
 
     Args:
-        column_number (int): номер колонки для сортировки (1-8).
+        column_number (int): номер колонки для сортировки (1-9).
         order (str): 'a' — по возрастанию, 'd' — по убыванию.
+        user: Словарь пользователя (обязателен для колонки distance).
 
     Returns:
         tuple: (dict_рынков, column_info) — отсортированный словарь и dict колонки
@@ -104,6 +109,8 @@ def get_all_markets_ordered_by_column(column_number, order = False):
         case 'd':
             order = True
     market_base = get_all_markets('num')
+    if column['name'] == 'distance':
+        market_base =  geoLib.get_distance(user, market_base)
     sorting_base = {}
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[column['name']]})
@@ -194,7 +201,7 @@ def update_market_info(market_info):
     market_info['basic_info'].pop('number')
     update_market(market_info['basic_info'])
 
-def get_all_markets_filtered_by_column(column, filter = None):
+def get_all_markets_filtered_by_column(column, filter = None, user = None):
     """
     Фильтрует и сортирует рынки по указанной колонке и критерию.
 
@@ -204,16 +211,17 @@ def get_all_markets_filtered_by_column(column, filter = None):
     4. Переиндексирует для пагинации
 
     Args:
-        column (int): Номер колонки (1-8) из COLUMNS_INFO.
+        column (int): Номер колонки (1-9) из COLUMNS_INFO.
         filter: Критерий фильтрации. Для текстовых — строка (подстрока).
                 Для числовых — кортеж (знак_сравнения, значение_строка).
+        user: Словарь пользователя (передаётся для колонки distance).
 
     Returns:
         tuple: (dict_рынков, column_info) — отфильтрованный словарь
                (с ключами от 1) и dict колонки {name, type}.
     """
 
-    market_list, column_info = get_all_markets_ordered_by_column(column)
+    market_list, column_info = get_all_markets_ordered_by_column(column, user=user)
     market_base = processFilter.process(market_list, column, filter)
     sorting_base = {}
     for market_id, market_info in market_base.items():

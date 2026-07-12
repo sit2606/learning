@@ -23,7 +23,7 @@ TIMESHEET_INFO = {'Season1Date',
                   'Season4Date',
                   'Season4Time'}  # Расписание по сезонам (дата + время)
 
-COORDINATES = {'LON', 'LAT'}  # Географические координаты рынка
+COORDINATES = {'x', 'y'}  # Географические координаты рынка
 
 MEDIA = {
     'Website',

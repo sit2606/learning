@@ -19,8 +19,9 @@ commandHandler — обработчики команд пользователя.
 - uuid, datetime: генерация ID и дат
 - bcrypt, getpass: хеширование паролей
 - BusinessLogic.marketList: бизнес-логика рынков
-- DAL.userLib, DAL.reviewLib: доступ к данным пользователей и отзывов
-- UI.uiLib: ввод координат, фильтра, справка по колонкам
+- BusinessLogic.geoLib: расчёт расстояний (для фильтрации distance)
+- DAL.userLib, DAL.reviewLib, DAL.fileLib: доступ к данным
+- UI.uiLib: ввод координат, фильтра, обновление пользователя
 - UI.column_helper: COLUMNS_INFO для маппинга номеров колонок
 
 Каждая функция возвращает кортеж (статус, данные) для передачи в UI.
@@ -36,9 +37,10 @@ from datetime import datetime
 import bcrypt
 import getpass
 
+from BusinessLogic import geoLib
 from BusinessLogic.marketList import  get_all_markets, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
-from DAL import userLib
+from DAL import userLib, fileLib
 from DAL.reviewLib import create_review, calculate_score
 from DAL.userLib import get_user
 from UI import uiLib
@@ -160,14 +162,14 @@ def register_user():
                         case 'y':
                             latitude, longitude = uiLib.get_user_coordinates_manually()
                             if latitude is None or longitude is None:
-                                print('')
-                                user.update({'location': (None, None)})
-                            user.update({'location': (latitude, longitude)})
+                                user.update({'latitude': '', 'longitude': ''})
+                            else:
+                                user.update({'latitude': str(latitude), 'longitude': str(longitude)})
                         case 'n':
-                                user.update({'location': (None, None)})
+                                user.update({'latitude': '', 'longitude': ''})
                         case _:
                             print('Команда не распознана, вы сможете указать координаты позже')
-                            user.update({'location': (None, None)})
+                            user.update({'latitude': '', 'longitude': ''})
                     userLib.create_user(user)
                     user = get_user(user_name)
                     print('Регистрация успешна! Добро пожаловать!')
@@ -276,33 +278,46 @@ def add_review(user):
                                 print('Оценка должна быть целым, положительным числом. Попробуйте снова')
                                 continue
 
-def show_filtered():
+def show_filtered(user):
     """
-    Фильтрует список рынков по критерию, введённому пользователем.
+    Фильтрует список рынков по критерию, введённому пользователю.
 
-    Использует uiLib.request_filter() для получения номера колонки
-    и значения фильтра. Для текстовых колонок — точное совпадение.
-    Для числовых — сравнение с оператором (>, <, >=, <=, =).
+    Требуется авторизация. Использует uiLib.request_filter() для получения
+    номера колонки и значения фильтра. Поддерживает фильтрацию по расстоянию.
+
+    Args:
+        user: Текущий авторизованный пользователь или None.
 
     Returns:
-        True — статус продолжения работы.
+        (True, user) — статус продолжения работы.
     """
+    if user is None:
+        print('Чтобы отфильтровать рынки, вы должны войти в Систему.')
+        return True, user
     column, filter_value = uiLib.request_filter()
     if column is None and filter_value is None:
         return True
-
-    markets_to_show = get_all_markets_filtered_by_column(column, filter_value)
+    markets_to_show = get_all_markets_filtered_by_column(column, filter_value, user)
 
     uiLib.print_list(markets_to_show[0], column_name=COLUMNS_INFO[column])
-    return True
+    return True, user
 def update_user(user):
     """
-    Обновление данных пользователя (заглушка).
+    Обновление данных пользователя.
+
+    Требуется авторизация. Использует uiLib.request_user_updates()
+    для получения изменений, затем сохраняет через userLib.update_user().
 
     Args:
-        user: Текущий авторизованный пользователь.
+        user: Текущий авторизованный пользователь или None.
 
     Returns:
-        None — функция в разработке.
+        (True, user) — обновлённый пользователь,
+        (True, None) — если не авторизован.
     """
-    return None
+    if user is None:
+        print('Чтобы изменить пользователя, вы должны войти в Систему.')
+        return True, user
+    user = uiLib.request_user_updates(user)
+    userLib.update_user(user)
+    return True, user

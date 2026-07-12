@@ -101,7 +101,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `directory_creation()` | Создаёт папку `files/` для хранения CSV-файлов |
 | `file_creation()` | Проверяет файлы, при необходимости инициализирует справочники, создаёт MARKET_INFO.csv, USER_INFO.csv, Reference_Base.csv, REVIEWS.csv |
 | `get_command(user)` | Считывает команду пользователя из stdin (с приветствием для авторизованных) |
-| `proceed_command(command, user)` | Обрабатывает команду (help/list/list_all/order/show/filter/register/login/logout/review/exit) |
+| `proceed_command(command, user)` | Обрабатывает команду (help/list/list_all/order/show/filter/register/login/logout/review/update_user/exit) |
 
 Поддерживаемые команды:
 - `help` — справка
@@ -109,11 +109,12 @@ commandHandler (BL) → только marketList (BL)                            
 - `list` — список с пагинацией
 - `order` — сортировка по колонке
 - `show` — данные одного рынка по Id (с просмотром отзывов)
-- `filter` — фильтрация рынков по колонке
-- `register` — регистрация пользователя
+- `filter` — фильтрация рынков по колонке (включая расстояние)
+- `register` — регистрация пользователя (с запросом координат)
 - `login` — авторизация пользователя
 - `logout` — выход из системы
 - `review` — добавление отзыва на рынок
+- `update_user` — обновление данных пользователя
 - `exit` — выход
 
 ### BusinessLogic/commandHandler.py
@@ -131,8 +132,8 @@ commandHandler (BL) → только marketList (BL)                            
 | `login_user(user)` | `(True, user)` или `(True, None)` | Авторизация пользователя |
 | `logout_user(user)` | `(True, None)` | Выход из системы |
 | `add_review(user)` | `(True, user)` | Добавление отзыва на рынок |
-| `show_filtered()` | `True` | Фильтрация через UI.request_filter |
-| `update_user(user)` | `None` | Обновление данных пользователя (заглушка) |
+| `show_filtered(user)` | `(True, user)` | Фильтрация (требуется авторизация) |
+| `update_user(user)` | `(True, user)` | Обновление данных пользователя |
 | `command_exit()` | `False` | Сигнал завершения работы |
 
 ### BusinessLogic/processFilter.py
@@ -145,13 +146,14 @@ commandHandler (BL) → только marketList (BL)                            
 
 ### BusinessLogic/geoLib.py
 
-Библиотека для работы с геоданными и расчёта дистанций (в разработке).
+Библиотека для работы с геоданными и расчёта дистанций.
 
-Планируемые функции:
-- `calculate_distance(lat1, lon1, lat2, lon2)` — расчёт дистанции по формуле Хаверсина
-- Фильтрация рынков по расстоянию от пользователя
+| Функция | Описание |
+|---------|----------|
+| `haversine(lat1, lon1, lat2, lon2)` | Расчёт расстояния между двумя точками (формула Хаверсина), результат в км |
+| `get_distance(user, market_base)` | Добавляет поле `distance` (км) в каждый рынок относительно пользователя |
 
-Поле `location` в USER_INFO.csv хранится как строка `'(широта, долгота)'`.
+Поля `latitude` и `longitude` в USER_INFO.csv хранят координаты пользователя (строки).
 
 ### BusinessLogic/marketList.py
 
@@ -160,8 +162,8 @@ commandHandler (BL) → только marketList (BL)                            
 | Функция | Описание |
 |---------|----------|
 | `get_all_markets(mode)` | Получает данные о рынках (mode='uid' — ключ market_id, mode='num' — ключ порядковый номер) |
-| `get_all_markets_ordered_by_column(col, order)` | Сортировка по колонке (1-8), возвращает (dict, column_info) |
-| `get_all_markets_filtered_by_column(col, filter)` | Фильтрация по колонке с критерием |
+| `get_all_markets_ordered_by_column(col, order, user)` | Сортировка по колонке (1-9), user обязателен для distance |
+| `get_all_markets_filtered_by_column(col, filter, user)` | Фильтрация по колонке с критерием, user для distance |
 | `prepare_ordered_list(markets)` | Переиндексация dict с 1 для пагинации |
 | `get_market_by_id(market_id)` | Получение подробных данных рынка: basic_info, media_info, bank_info, grocery_info |
 
@@ -174,7 +176,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `print_welcome()` | Выводит приветственное сообщение |
 | `print_help()` | Выводит список доступных команд |
 | `print_table_header()` | Выводит шапку таблицы (русские названия колонок) |
-| `print_header_numbers()` | Выводит нумерацию колонок для сортировки/фильтрации |
+| `print_header_numbers()` | Выводит нумерацию колонок для сортировки/фильтрации (1-9, включая расстояние) |
 | `print_list(markets, start_pos, step, column_name)` | Выводит таблицу с пагинацией и опциональной сортировкой |
 | `print_exit()` | Выводит сообщение о завершении работы |
 | `print_detailed_market_info(market_info)` | Выводит подробную информацию о рынке |
@@ -193,6 +195,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `COLUMNS` | `{англ_название: русское_название}` для шапки таблицы |
 | `COLUMNS_INFO` | `{номер: {name, type}}` для маппинга номеров колонок |
 | `COLUMNS_INFO_REVERSED` | `{имя_колонки: номер}` — обратный маппинг |
+| `COLUMN_TO_SHOW` | Список имён колонок для отображения в таблице |
 
 | Ключ COLUMNS | Значение |
 |------|----------|
@@ -204,6 +207,7 @@ commandHandler (BL) → только marketList (BL)                            
 | `marketname` | название рынка |
 | `zip` | п. индекс |
 | `score` | ср. оценка |
+| `distance` | расстояние (км) |
 
 ### UI/comparison_helper.py
 
@@ -277,7 +281,7 @@ CRUD-операции с пользователями через CSV-файл fi
 
 | Элемент | Описание |
 |---------|----------|
-| `field_names` | Столбцы CSV: Id, user_name, password, firstname, lastname, location |
+| `field_names` | Столбцы CSV: Id, user_name, password, firstname, lastname, latitude, longitude |
 | `DEFAULT_USER` | Значения по умолчанию для нового пользователя |
 | `create_user(user)` | Создаёт пользователя, возвращает UUID |
 | `read_user(user_id)` | Читает пользователя по Id, возвращает dict |

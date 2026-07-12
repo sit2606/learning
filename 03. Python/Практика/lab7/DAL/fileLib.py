@@ -107,7 +107,14 @@ def read_csv():
                 if key in requiredFiles.MARKET_INFO:
                     market_info[current_id][key.lower()] = value
                 if key in requiredFiles.COORDINATES:
-                    market_info[current_id][key.lower()] = value
+                    if key == 'x':
+                        if value.strip() == '':
+                            value = '0'
+                        market_info[current_id]['longitude'] = value
+                    if key == 'y':
+                        if value.strip() == '':
+                            value = '0'
+                        market_info[current_id]['latitude'] = value
                 if key in requiredFiles.TIMESHEET_INFO:
                     market_info[current_id][key.lower()] = value
                 if key in requiredFiles.MEDIA:
@@ -129,6 +136,7 @@ def read_csv():
                     else:
                         market_info[current_id][key.lower()] = reference_id[0]
                 market_info[current_id]['score'] = None
+                market_info[current_id]['distance'] = None
         create_connection_entry_by_list('MarketXSocialMedia',MarketXSocialMedia)
         create_connection_entry_by_list('MarketXGrocery', MarketXGrocery)
         create_connection_entry_by_list('MarketXBankingInfo', MarketXBankingInfo)
@@ -183,6 +191,8 @@ def create_market_base(market_info):
                    'county',
                    'state',
                    'zip',
+                   'longitude',
+                   'latitude',
                    'season1date',
                    'season1time',
                    'season2date',
@@ -191,7 +201,8 @@ def create_market_base(market_info):
                    'season3time',
                    'season4date',
                    'season4time',
-                   'score']
+                   'score',
+                   'distance']
     try:
         with open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=field_names)
@@ -207,7 +218,7 @@ def create_user_base():
     """
     Создаёт CSV-файл USER_INFO.csv с заголовками для хранения данных пользователей.
 
-    Структура файла: Id, user_name, password, firstname, lastname, location.
+    Структура файла: Id, user_name, password, firstname, lastname, latitude, longitude.
 
     Raises:
         Exception: при ошибке создания файла выводит сообщение
@@ -219,7 +230,8 @@ def create_user_base():
                    'password',
                    'firstname',
                    'lastname',
-                   'location']
+                   'latitude',
+                   'longitude']
     try:
         with open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
             writer = csv.DictWriter(file, fieldnames=field_names)

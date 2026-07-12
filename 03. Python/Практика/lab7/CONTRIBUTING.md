@@ -449,7 +449,7 @@ pytest test_*.py -v
 Приложение поддерживает отслеживание текущего пользователя через объект `user`:
 
 - `user = None` — пользователь не авторизован
-- `user = {...}` — словарь с данными пользователя (Id, user_name, firstname,lastname, location)
+- `user = {...}` — словарь с данными пользователя (Id, user_name, firstname,lastname, latitude, longitude)
 
 ### Поток авторизации
 

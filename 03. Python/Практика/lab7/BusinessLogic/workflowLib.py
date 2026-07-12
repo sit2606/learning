@@ -26,7 +26,7 @@ workflowLib — модуль оркестрации рабочего проце�
 - login — авторизация пользователя
 - logout — выход из системы
 - review — добавление отзыва
-- update_user — обновление данных пользователя (заглушка)
+- update_user — обновление данных пользователя
 - exit — выход
 
 Использование:
@@ -165,7 +165,7 @@ def proceed_command(command, user):
             try:
                 is_run, market_info = commandHandler.command_show()
                 if market_info is None:
-                    return is_run
+                    return is_run, user
                 uiLib.print_detailed_market_info(market_info)
                 should_continue = input('Если хотите увидеть отзывы на рынок, введите `y`\n'
                                         'Если хотите вернуться к вводу команд, нажмите Enter\n')
@@ -177,7 +177,7 @@ def proceed_command(command, user):
                             review.update({"user_name": review_author["firstname"] + " " + review_author["lastname"]})
                         uiLib.print_market_reviews(reviews, market_info['basic_info']['score'])
                     case  _:
-                        return is_run
+                        return is_run, user
             except ValueError:
                 print('Пожалуйста, введите число.')
         case 'register':
@@ -191,7 +191,7 @@ def proceed_command(command, user):
         case 'update_user':
             is_run, user = commandHandler.update_user(user)
         case 'filter':
-            is_run = commandHandler.show_filtered()
+            is_run, user = commandHandler.show_filtered(user)
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()

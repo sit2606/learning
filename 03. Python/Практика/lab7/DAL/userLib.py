@@ -24,20 +24,22 @@ field_names = ['Id',
                'password',
                'firstname',
                'lastname',
-               'location']
+               'latitude',
+               'longitude']
 DEFAULT_USER = {'Id': None,
                 'user_name': 'test',
                 'password': '',
                 'firstname': 'test_firstname',
                 'lastname': 'test_lastname',
-                'location': 'test_location'}
+                'latitude': '',
+                'longitude': ''}
 def create_user(user = DEFAULT_USER):
     """
     Создаёт нового пользователя и добавляет в USER_INFO.csv.
 
     Args:
         user (dict): Словарь с данными пользователя. Обязательные ключи:
-            user_name, password, firstname, lastname, location.
+            user_name, password, firstname, lastname, latitude, longitude.
             По умолчанию используется DEFAULT_USER.
 
     Returns:
@@ -49,7 +51,7 @@ def create_user(user = DEFAULT_USER):
         with open(file_path, "a", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             uid = uuid.uuid4()
-            writer.writerow([uid, user['user_name'],user['password'], user['firstname'], user['lastname'], user['location']])
+            writer.writerow([uid, user['user_name'],user['password'], user['firstname'], user['lastname'], user['latitude'], user['longitude']])
             return str(uid)
     except Exception as e:
         print(e)
@@ -63,7 +65,7 @@ def read_user(user_id):
         user_id (str): UUID пользователя.
 
     Returns:
-        dict: данные пользователя (Id, user_name, password, firstname, lastname, location)
+        dict: данные пользователя (Id, user_name, password, firstname, lastname, latitude, longitude)
               или None если не найден.
     """
     try:
@@ -132,7 +134,8 @@ def update_user(user = DEFAULT_USER):
                    'password',
                    'firstname',
                    'lastname',
-                   'location'])
+                   'latitude',
+                   'longitude'])
             writer.writeheader()
             writer.writerows(new_file)
     except Exception as e:
@@ -161,7 +164,8 @@ def delete_user(user_id):
                    'password',
                    'firstname',
                    'lastname',
-                   'location'])
+                   'latitude',
+                   'longitude'])
             writer.writeheader()
             writer.writerows(new_file)
     except Exception as e:
