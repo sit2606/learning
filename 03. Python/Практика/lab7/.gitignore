@@ -2,3 +2,5 @@ files/
 __pycache__/
 .venv/
 .idea/
+tests.py
+Задание.md

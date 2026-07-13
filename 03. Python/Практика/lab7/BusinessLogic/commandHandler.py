@@ -67,8 +67,10 @@ def command_list():
     Запрашивает у пользователя стартовую позицию и шаг.
     Возвращает (True, dict_рынков_с_нумерацией, старт, шаг).
     """
-    start_num = int(input('Введите стартовый номер: ')) or 1
-    step = int(input('Введите  шаг: ')) or 10
+    start_input = input('Введите стартовый номер: ').strip()
+    start_num = int(start_input) if start_input else 1
+    step_input = input('Введите  шаг: ').strip()
+    step = int(step_input) if step_input else 10
     return True, get_all_markets('num'), start_num, step
 
 
@@ -296,7 +298,7 @@ def show_filtered(user):
         return True, user
     column, filter_value = uiLib.request_filter()
     if column is None and filter_value is None:
-        return True
+        return True, user
     markets_to_show = get_all_markets_filtered_by_column(column, filter_value, user)
 
     uiLib.print_list(markets_to_show[0], column_name=COLUMNS_INFO[column])

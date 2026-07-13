@@ -25,14 +25,14 @@
             "id": "b785bd7d087f9865",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "03. Python/Практика/lab7/UI/uiLib.py",
-                "bFile": "03. Python/Практика/lab7/UI/uiLib.py",
-                "aRef": ""
+                "file": "03. Python/Практика/lab7/CONTRIBUTING.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: uiLib.py  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "CONTRIBUTING"
             }
           }
         ],
@@ -214,6 +214,9 @@
   },
   "active": "b785bd7d087f9865",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/CONTRIBUTING.md",
+    "03. Python/Практика/lab7/README.md",
+    "03. Python/Практика/lab7/Задание.md",
     "03. Python/Практика/lab7/tests.py",
     "03. Python/Содержание курса.md",
     "03. Python/Практика/lab7/BusinessLogic/__pycache__/geoLib.cpython-314.pyc",
@@ -227,7 +230,6 @@
     "03. Python/Практика/lab7/files/USER_INFO.csv",
     "03. Python/Практика/lab7/files/MARKET_INFO.csv",
     "03. Python/Практика/lab7/files/MarketXBankingInfo.csv",
-    "03. Python/Практика/lab7/files/MarketXGrocery.csv",
     "03. Python/Практика/lab7/документация/2026-06-29 16.37.43 Функции.md",
     "03. Python/Практика/lab7/документация/физическая диаграмма.svg",
     "03. Python/Практика/lab7/документация/Функции.md",
@@ -245,13 +247,11 @@
     "03. Python/Практика/lab5/sim_result/Gen 53.png",
     "03. Python/Практика/lab7/документация/2026-06-29 16.30 Физическая диаграмма.md",
     "03. Python/Практика/lab7/документация/2026-06-29 16.10 Пользовательские истории.md",
-    "03. Python/Практика/lab7/README.md",
     "03. Python/Практика/lab7/документация/Изменения после 2026-06-29.md",
     "03. Python/Практика/lab7/документация/2026-06-29 16.23.31 сущности.md",
     "03. Python/Практика/lab4_3.md",
     "README.md",
     "03. Python/2026-06-04 Python (базовый) Лекция 3.md",
-    "03. Python/Практика/lab7/CONTRIBUTING.md",
     "03. Python/Практика/lab5/README.md",
     "02. Введение в базы данных/2026-05-12 Первое занятие.md",
     "03. Python/2026-06-29 Python  Лекция 8.md",

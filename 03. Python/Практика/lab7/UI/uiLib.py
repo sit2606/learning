@@ -303,13 +303,13 @@ def request_user_updates(user):
             case '4':
                 print('Вы выбрали изменить координаты')
                 coords = get_user_coordinates_manually()
-                if coords is not None:
+                if coords[0] is not None and coords[1] is not None:
                     user.update({'latitude': coords[0]})
                     user.update({'longitude': coords[1]})
                     print('Координаты обновлены!')
                     return user
                 else:
-                    print('Что-то пошло не так')
+                    print('Координаты не изменены')
             case 'b':
                 updates_process = False
                 return user

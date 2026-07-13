@@ -1,4 +1,127 @@
-# Руководство разработчика
+# Руководство администратора и разработчика
+
+## Развёртывание на клиентской машине
+
+### Системные требования
+
+- Python 3.10 или выше
+- ОС: Windows, macOS, Linux
+- ~50 МБ свободного места (включая данные)
+
+### Пошаговая инструкция
+
+1. **Установка Python**
+
+   Скачайте Python 3.10+ с https://www.python.org/downloads/
+   При установке отметьте галочку "Add Python to PATH".
+
+2. **Клонирование репозитория**
+
+   ```bash
+   git clone <URL_репозитория>
+   cd lab7
+   ```
+
+3. **Создание виртуального окружения**
+
+   ```bash
+   python -m venv .venv
+   ```
+
+4. **Активация окружения**
+
+   ```bash
+   # Windows (PowerShell)
+   .venv\Scripts\Activate.ps1
+
+   # Windows (CMD)
+   .venv\Scripts\activate.bat
+
+   # macOS/Linux
+   source .venv/bin/activate
+   ```
+
+5. **Установка зависимостей**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+6. **Подготовка данных**
+
+   Поместите файл `Export.csv` в корневую директорию проекта.
+
+7. **Запуск**
+
+   ```bash
+   python App.py
+   ```
+
+### Автоматическая настройка
+
+При первом запуске приложение автоматически:
+- Создаёт директорию `files/`
+- Парсит `Export.csv` ( ~1700 записей)
+- Создаёт CSV-файлы: MARKET_INFO.csv, USER_INFO.csv, REFERENCE_BASE.csv, REVIEWS.csv
+- Инициализирует справочники: MEDIA.csv, GROCERY_TYPES.csv, BANKING_INFO.csv
+
+### Первый запуск
+
+1. Зарегистрируйтесь командой `register`
+2. Укажите координаты для работы фильтра по расстоянию
+3. Просматривайте рынки командой `list_all` или `list`
+
+---
+
+## Архитектура приложения
+
+### Трёхуровневая архитектура
+
+```
+┌─────────────────────────────────────────┐
+│                  UI                      │
+│  Вывод данных, ввод пользователя        │
+│  (uiLib, column_helper, comparison)      │
+└──────────────────┬──────────────────────┘
+                   │
+┌──────────────────▼──────────────────────┐
+│            BusinessLogic                 │
+│  Бизнес-логика, обработка команд        │
+│  (workflowLib, commandHandler,           │
+│   marketList, processFilter, geoLib)     │
+└──────────────────┬──────────────────────┘
+                   │
+┌──────────────────▼──────────────────────┐
+│                DAL                       │
+│  Доступ к данным, CRUD-операции         │
+│  (fileLib, referenceLib, dataLib,        │
+│   userLib, reviewLib, requiredFiles)     │
+└─────────────────────────────────────────┘
+```
+
+### Потоки данных
+
+**Просмотр рынков:**
+```
+user → get_command() → proceed_command('list') → command_list()
+    → get_all_markets('num') → print_list()
+```
+
+**Фильтрация по расстоянию:**
+```
+user → proceed_command('filter') → show_filtered(user)
+    → request_filter() → get_all_markets_filtered_by_column(col, filter, user)
+    → geoLib.get_distance() → print_list()
+```
+
+**Добавление отзыва:**
+```
+user → proceed_command('review') → add_review(user)
+    → command_show() → input(оценка, текст) → create_review()
+    → calculate_score() → update_market_info()
+```
+
+---
 
 ## Добавление новой команды
 
@@ -421,35 +544,29 @@ market_id,marketname,street,city,county,state,zip,season1date,season1time,...
 fmid1,Market Name,123 St,City,County,State,12345,2024-01-01,09:00,...
 ```
 
----
+### USER_INFO.csv
 
-## Тестирование
-
-### Ручное тестирование
-
-```python
-python
->>> import DAL.referenceLib as ref
->>> ref.create_reference('TEST')
->>> ref.create_reference_entry('TEST', 'value')
->>> ref.read_reference_entry('TEST', entry_name='value')
+```
+Id,user_name,password,firstname,lastname,latitude,longitude
+uuid1,admin,$2b$...,Admin,Admin,40.7128,-74.0060
 ```
 
-### Автоматическое тестирование
+### REVIEWS.csv
 
-```bash
-pip install pytest
-pytest test_*.py -v
+```
+Id,review_date,user_id,market_id,review_text,score
+uuid1,2024-01-01 12:00:00,uuid_user1,uuid_market1,Отличный рынок!,5
 ```
 
 ---
+
 
 ## Система сессий (авторизация)
 
 Приложение поддерживает отслеживание текущего пользователя через объект `user`:
 
 - `user = None` — пользователь не авторизован
-- `user = {...}` — словарь с данными пользователя (Id, user_name, firstname,lastname, latitude, longitude)
+- `user = {...}` — словарь с данными пользователя (Id, user_name, firstname, lastname, latitude, longitude)
 
 ### Поток авторизации
 
@@ -490,3 +607,4 @@ def proceed_command(command, user):
 | Дубли в связях | Повторный вызов read_csv | Очищать файлы перед пересозданием |
 | `KeyError` в get_market_by_id | Рынок не найден в MARKET_INFO.csv | Проверить market_id, пересоздать файлы |
 | `Error in create_reference_base` | Папка files/ не создана | Вызвать directory_creation() перед file_creation() |
+| `Invalid salt` при login | Пароль не хеширован или пустой | Проверить хеширование через bcrypt при регистрации |
