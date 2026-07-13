@@ -291,14 +291,14 @@ def request_user_updates(user):
             case '2':
                 print('Вы выбрали изменить имя')
                 new_name = input('Введите новое имя: ')
-                user.update({'user_name': new_name})
+                user.update({'firstname': new_name})
                 print('Имя обновлено!')
                 return user
             case '3':
                 print('Вы выбрали изменить фамилию')
                 new_name = input('Введите новую фамилию: ')
-                user.update({'user_name': new_name})
-                print('Фамилию обновлена!')
+                user.update({'lastname': new_name})
+                print('Фамилия обновлена!')
                 return user
             case '4':
                 print('Вы выбрали изменить координаты')
