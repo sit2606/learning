@@ -125,6 +125,7 @@ python App.py
 | `logout` | Выход из системы | Да |
 | `review` | Добавление отзыва на рынок | Да |
 | `update_user` | Обновление данных пользователя | Да |
+| `delete` | Удаление рынка и его связей | Да |
 | `exit` | Выход из приложения | Нет |
 
 ### Просмотр списка рынков
@@ -185,6 +186,12 @@ python App.py
 **Команда `update_user`** — обновление данных (требуется авторизация):
 1. Выберите пункт для изменения (1-4)
 2. Введите новое значение
+
+**Команда `delete`** — удаление рынка (требуется авторизация):
+1. Введите ID рынка для удаления
+2. Просмотрите данные рынка
+3. Введите `yes` для подтверждения или `back` для отмены
+4. Рынок и все его связи удаляются безвозвратно
 
 ---
 
@@ -273,6 +280,10 @@ App.py
                  │
                  ├─ 'update_user' → commandHandler.update_user(user) → (True, user)
                  │                   → uiLib.request_user_updates(user)
+                 │
+                 ├─ 'delete'    → commandHandler.delete_market(user) → (True, user)
+                 │                   → dataLib.delete_market(market_info)
+                 │                   → referenceLib.delete_all_connections_by_market_id()
                  │
                  └─ 'exit'       → commandHandler.command_exit() → False
                                      → uiLib.print_exit()

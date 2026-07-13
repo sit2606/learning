@@ -12,15 +12,16 @@ commandHandler — обработчики команд пользователя.
 - login_user(user): авторизация пользователя
 - logout_user(user): выход из системы
 - add_review(user): добавление отзыва на рынок
-- show_filtered(): фильтрация рынков по колонке (через UI.request_filter)
-- update_user(user): обновление данных пользователя (заглушка)
+- show_filtered(user): фильтрация рынков по колонке (через UI.request_filter)
+- update_user(user): обновление данных пользователя
+- delete_market(user): удаление рынка и его связей
 
 Зависимости:
 - uuid, datetime: генерация ID и дат
 - bcrypt, getpass: хеширование паролей
 - BusinessLogic.marketList: бизнес-логика рынков
 - BusinessLogic.geoLib: расчёт расстояний (для фильтрации distance)
-- DAL.userLib, DAL.reviewLib, DAL.fileLib: доступ к данным
+- DAL.userLib, DAL.reviewLib, DAL.dataLib, DAL.referenceLib: доступ к данным
 - UI.uiLib: ввод координат, фильтра, обновление пользователя
 - UI.column_helper: COLUMNS_INFO для маппинга номеров колонок
 
@@ -36,8 +37,6 @@ from datetime import datetime
 
 import bcrypt
 import getpass
-
-from markdown_it.rules_block import reference
 
 from BusinessLogic import geoLib
 from BusinessLogic.marketList import  get_all_markets, get_all_markets_ordered_by_column, \
@@ -328,6 +327,20 @@ def update_user(user):
 
 
 def delete_market(user):
+    """
+    Удаление рынка и его связей.
+
+    Требуется авторизация. Запрашивает ID рынка, показывает данные,
+    запрашивает подтверждение удаления. Удаляет рынок из MARKET_INFO.csv
+    и все связанные записи из MarketXBankingInfo, MarketXGrocery, MarketXSocialMedia.
+
+    Args:
+        user: Текущий авторизованный пользователь или None.
+
+    Returns:
+        (True, user) — после удаления или отмены,
+        (True, None) — если не авторизован.
+    """
     if user is None:
         print('Для удаления рынков необходимо войти в Систему')
         return True, user

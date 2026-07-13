@@ -25,14 +25,14 @@
             "id": "b785bd7d087f9865",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "03. Python/Практика/lab7/CONTRIBUTING.md",
-                "mode": "source",
-                "source": false
+                "aFile": "dream_tasks.py",
+                "bFile": "dream_tasks.py",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "CONTRIBUTING"
+              "icon": "diff",
+              "title": "Diff: dream_tasks.py  (Working Tree)"
             }
           }
         ],
@@ -214,18 +214,18 @@
   },
   "active": "37833373d3a8017d",
   "lastOpenFiles": [
+    "03. Python/Практика/lab7/__pycache__/tests.cpython-314.pyc",
+    "dream_tasks.py",
+    "dream_sessions.py",
+    "dream_recent.py",
+    "dream_inspect.py",
+    "03. Python/Практика/lab7/CONTRIBUTING.md",
     "03. Python/Практика/lab7/files/REVIEWS.csv",
     "03. Python/Практика/lab7/files/Reference_Base.csv",
     "03. Python/Практика/lab7/files/USER_INFO.csv",
     "03. Python/Практика/lab7/files/MARKET_INFO.csv",
     "03. Python/Практика/lab7/files/MarketXBankingInfo.csv",
     "03. Python/Практика/lab7/files/MarketXGrocery.csv",
-    "03. Python/Практика/lab7/files/MarketXSocialMedia.csv",
-    "03. Python/Практика/lab7/files/STATE.csv",
-    "03. Python/Практика/lab7/files/COUNTY.csv",
-    "03. Python/Практика/lab7/files/CITY.csv",
-    "03. Python/Практика/lab7/files/BANKING_INFO.csv",
-    "03. Python/Практика/lab7/CONTRIBUTING.md",
     "03. Python/Практика/lab7/README.md",
     "03. Python/Практика/lab7/Задание.md",
     "03. Python/Содержание курса.md",
