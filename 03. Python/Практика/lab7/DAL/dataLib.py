@@ -51,7 +51,9 @@ def update_market(data_to_update):
                    'season3time',
                    'season4date',
                    'season4time',
-                   'score',
+                   'longitude',
+                   'latitude'
+                    'score',
                    'distance']
     try:
         with open(f"files/MARKET_INFO.csv", "r", newline="", encoding="utf-8") as file:
@@ -70,10 +72,44 @@ def update_market(data_to_update):
         print("Error in update_market")
 
 
-def delete_market():
+def delete_market(market_info):
     """
     Удаляет запись фермерского рынка.
 
     Функция в разработке (заглушка).
     """
-    pass
+    _user_id = market_info['basic_info']['market_id']
+    field_names = ['market_id',
+                   'marketname',
+                   'street',
+                   'city',
+                   'county',
+                   'state',
+                   'zip',
+                   'longitude',
+                   'latitude',
+                   'season1date',
+                   'season1time',
+                   'season2date',
+                   'season2time',
+                   'season3date',
+                   'season3time',
+                   'season4date',
+                   'season4time',
+                   'score',
+                   'distance']
+    try:
+        with open(f"files/MARKET_INFO.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            new_file = []
+            for row in reader:
+                if _user_id == row["market_id"]:
+                    continue
+                new_file.append(row)
+        with open(f"files/MARKET_INFO.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=field_names)
+            writer.writeheader()
+            writer.writerows(new_file)
+    except Exception as e:
+        print(e)
+        print("Error in delete_market")

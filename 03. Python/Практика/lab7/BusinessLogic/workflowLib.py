@@ -192,6 +192,8 @@ def proceed_command(command, user):
             is_run, user = commandHandler.update_user(user)
         case 'filter':
             is_run, user = commandHandler.show_filtered(user)
+        case 'delete':
+            is_run, user = commandHandler.delete_market(user)
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()

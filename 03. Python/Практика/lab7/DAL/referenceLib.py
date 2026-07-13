@@ -411,3 +411,20 @@ def get_all_connections_by_market_id(reference_name, market_id):
             return {_market_id : connections_dict}
     except:
         print("Error in read_connection_entry")
+def delete_all_connections_by_market_id(reference_name, market_id):
+    _reference_name = reference_name
+    _market_id = str(market_id)
+    new_file = []
+    try:
+        with open(f"files/{_reference_name}.csv", "r", newline="", encoding="utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row["market_id"] == _market_id:
+                    continue
+                new_file.append(row)
+        with  open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=['market_id', 'reference_id', 'status'])
+            writer.writeheader()
+            writer.writerows(new_file)
+    except Exception as e:
+        print("Error in delete_all_connections_by_market_id")

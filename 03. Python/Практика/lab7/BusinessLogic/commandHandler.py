@@ -37,10 +37,12 @@ from datetime import datetime
 import bcrypt
 import getpass
 
+from markdown_it.rules_block import reference
+
 from BusinessLogic import geoLib
 from BusinessLogic.marketList import  get_all_markets, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
-from DAL import userLib, fileLib
+from DAL import userLib, fileLib, dataLib, referenceLib
 from DAL.reviewLib import create_review, calculate_score
 from DAL.userLib import get_user
 from UI import uiLib
@@ -323,3 +325,32 @@ def update_user(user):
     user = uiLib.request_user_updates(user)
     userLib.update_user(user)
     return True, user
+
+
+def delete_market(user):
+    if user is None:
+        print('Для удаления рынков необходимо войти в Систему')
+        return True, user
+    else:
+            delete_process = True
+            status, market_info = command_show()
+            if market_info is None:
+                return True, user
+            else:
+                while delete_process:
+                    command = input('Введите `yes` чтобы удалить рынок. Операцию удаления нельзя отменить! \nВведите `back`'
+                                  'чтобы выйти из удаления\n')
+                    match command:
+                        case 'yes':
+                            dataLib.delete_market(market_info)
+                            referenceLib.delete_all_connections_by_market_id(market_id= market_info['basic_info']['market_id'],reference_name= 'MarketXBankingInfo')
+                            referenceLib.delete_all_connections_by_market_id(market_id= market_info['basic_info']['market_id'], reference_name='MarketXGrocery')
+                            referenceLib.delete_all_connections_by_market_id(market_id= market_info['basic_info']['market_id'],reference_name='MarketXSocialMedia')
+                            print(f'Рынок {market_info['basic_info']['market_id']} успешно удалён!')
+                            return True, user
+                        case 'back':
+                            print('Удаление рынка прервано')
+                            return True, user
+                        case _:
+                            print('Команда не распознана')
+    return None

@@ -212,24 +212,25 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "b785bd7d087f9865",
+  "active": "37833373d3a8017d",
   "lastOpenFiles": [
-    "03. Python/Практика/lab7/CONTRIBUTING.md",
-    "03. Python/Практика/lab7/README.md",
-    "03. Python/Практика/lab7/Задание.md",
-    "03. Python/Практика/lab7/tests.py",
-    "03. Python/Содержание курса.md",
-    "03. Python/Практика/lab7/BusinessLogic/__pycache__/geoLib.cpython-314.pyc",
-    "03. Python/2026-07-08 Python  Лекция 12 1.md",
-    "03. Python/2026-07-06 Python  Лекция 11.md",
-    "03. Python/Практика/lab6/lab6.py",
-    "03. Python/Практика/lab7/BusinessLogic/workflowLib.py~",
-    "03. Python/Практика/lab7/files/BANKING_INFO.csv",
     "03. Python/Практика/lab7/files/REVIEWS.csv",
     "03. Python/Практика/lab7/files/Reference_Base.csv",
     "03. Python/Практика/lab7/files/USER_INFO.csv",
     "03. Python/Практика/lab7/files/MARKET_INFO.csv",
     "03. Python/Практика/lab7/files/MarketXBankingInfo.csv",
+    "03. Python/Практика/lab7/files/MarketXGrocery.csv",
+    "03. Python/Практика/lab7/files/MarketXSocialMedia.csv",
+    "03. Python/Практика/lab7/files/STATE.csv",
+    "03. Python/Практика/lab7/files/COUNTY.csv",
+    "03. Python/Практика/lab7/files/CITY.csv",
+    "03. Python/Практика/lab7/files/BANKING_INFO.csv",
+    "03. Python/Практика/lab7/CONTRIBUTING.md",
+    "03. Python/Практика/lab7/README.md",
+    "03. Python/Практика/lab7/Задание.md",
+    "03. Python/Содержание курса.md",
+    "03. Python/2026-07-08 Python  Лекция 12 1.md",
+    "03. Python/2026-07-06 Python  Лекция 11.md",
     "03. Python/Практика/lab7/документация/2026-06-29 16.37.43 Функции.md",
     "03. Python/Практика/lab7/документация/физическая диаграмма.svg",
     "03. Python/Практика/lab7/документация/Функции.md",
@@ -258,7 +259,6 @@
     "02. Введение в базы данных/Нормальные формы.md",
     "03. Python/2026-06-25 Python  Лекция 7.md",
     "01. Технологии программирования/2026-04-27 Седьмое занятие.md",
-    "01. Технологии программирования/2026-04-28 Восьмое занятие.md",
-    "01. Технологии программирования/2026-05-04 Девятое занятие.md"
+    "01. Технологии программирования/2026-04-28 Восьмое занятие.md"
   ]
 }
