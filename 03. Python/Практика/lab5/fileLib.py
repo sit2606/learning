@@ -1,6 +1,12 @@
-def openConfig():
+def openConfig(step = 20):
     """
     Считывает параметры конфигурации и начальные координаты живых клеток из файла 'input.txt'.
+    Проверяет, что все координаты клеток находятся в пределах допустимого диапазона сетки.
+
+    Аргументы:
+        step (int): Шаг сетки (по умолчанию 20). Используется для вычисления
+                    допустимых границ координат: x=0..(INPUT_LENGTH//step-1),
+                    y=0..(INPUT_WIDTH//step-1).
 
     Возвращает:
         tuple: Кортеж, содержащий:
@@ -9,7 +15,11 @@ def openConfig():
             - GENERATION_COUNT (int): Количество поколений для симуляции.
             - STARTING_FIELD (list): Список кортежей с координатами начальных живых клеток и их возрастом.
             - COLOR (str): Базовый цвет клеток (red, blue, green).
+
+    Исключения:
+        SystemExit: Если координата клетки выходит за границы поля.
     """
+    import sys
     file = open('input.txt')
     COLOR = 'green'
     for line in file:
@@ -24,11 +34,20 @@ def openConfig():
         if line == '- Field Config\n':
             STARTING_FIELD = file.readlines()
     result = []
+    max_x  = INPUT_LENGTH // step - 1
+    max_y = INPUT_WIDTH // step -1
     for item in STARTING_FIELD:
         item = item.strip()
         if 'age=' in item:
             coord_part, age_part = item.split(' age=')
             result.append((eval(coord_part), int(age_part)))
+            for coord, age in result:
+                x, y = coord
+                if x < 0 or x > max_x or y < 0 or y > max_y:
+                    print(f"Предупреждение: координата {coord} выходит за границы поля "
+                        f"(допустимо: x=0..{max_x}, y=0..{max_y})")
+                    print("Проверьте файл input.txt")
+                    sys.exit(1)
         else:
             result.append((eval(item), 0))
     STARTING_FIELD = result

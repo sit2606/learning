@@ -7,7 +7,9 @@
     python lab5.py --manual        — ручной режим с предустановленным паттерном
 
 Режимы работы:
-    --file    : параметры и начальные координаты считываются из 'input.txt'
+    --file    : параметры и начальные координаты считываются из 'input.txt'.
+                Координаты клеток проверяются на соответствие размерам сетки.
+                При выходе координат за границы поля выводится предупреждение.
     --manual  : предустановленный паттерн (глайдер)
     (без флагов): случайное заполнение поля
 
@@ -41,7 +43,7 @@ FILE_MODE = '--file' in sys.argv
 MANUAL_MODE = '--manual' in sys.argv
 
 if (FILE_MODE):
-    INPUT_LENGTH, INPUT_WIDTH, GENERATION_COUNT,STARTING_FIELD, COLOR = fileLib.openConfig();
+    INPUT_LENGTH, INPUT_WIDTH, GENERATION_COUNT,STARTING_FIELD, COLOR = fileLib.openConfig(INPUT_STEP);
 else:
     INPUT_LENGTH = 400
     INPUT_WIDTH = 400
