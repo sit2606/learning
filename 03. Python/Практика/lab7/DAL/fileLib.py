@@ -21,7 +21,8 @@ import csv
 import uuid
 
 from DAL import referenceLib, requiredFiles
-from DAL.referenceLib import create_reference_entry, get_reference_with_name_as_key, create_connection_entry_by_list
+from DAL.referenceLib import create_reference_entry, get_reference_with_name_as_key, create_connection_entry_by_list, \
+    create_connection_reference
 import os
 
 REF_LIST = [{'MEDIA': requiredFiles.MEDIA}, {'GROCERY_TYPES': requiredFiles.GROCERY_TYPES},
@@ -137,6 +138,9 @@ def read_csv():
                         market_info[current_id][key.lower()] = reference_id[0]
                 market_info[current_id]['score'] = None
                 market_info[current_id]['distance'] = None
+        create_connection_reference('MarketXSocialMedia')
+        create_connection_reference('MarketXGrocery')
+        create_connection_reference('MarketXBankingInfo')
         create_connection_entry_by_list('MarketXSocialMedia',MarketXSocialMedia)
         create_connection_entry_by_list('MarketXGrocery', MarketXGrocery)
         create_connection_entry_by_list('MarketXBankingInfo', MarketXBankingInfo)

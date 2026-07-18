@@ -14,7 +14,7 @@ App — точка входа приложения для управления �
 import csv
 
 from BusinessLogic.marketList import get_all_markets, get_market_by_id
-from DAL import userLib, referencelib2, filelib2
+from DAL import userLib, referencelib2, filelib2, referenceLib
 from DAL.userLib import get_user
 from UI.uiLib import print_welcome, request_filter, request_user_updates
 from BusinessLogic.workflowLib import *
@@ -33,11 +33,8 @@ def testing():
     Returns:
         None
     """
-    referencelib2.read_reference_entry('MEDIA', '4')
-    filelib2.prepare_ref()
-
-    referencelib2.read_reference_entry('MEDIA', entry_name='Twitter')
-
+    data = {'Id':'89682d31-0f45-43f8-b5a1-072a98cae862', 'Name' : 'Fickbook'}
+    referenceLib.update_reference_entry("MEDIA", data )
 
 def user_lib_testing():
     """
@@ -76,7 +73,7 @@ def main():
     5. Цикл команд: приветствие, чтение и обработка команд
        с отслеживанием текущего пользователя (user = None при старте)
     """
-    testing()
+    #testing()
     directory_creation()
     file_creation()
     user_lib_testing()
