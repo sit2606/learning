@@ -14,22 +14,29 @@ App — точка входа приложения для управления �
 import csv
 
 from BusinessLogic.marketList import get_all_markets, get_market_by_id
-from DAL import userLib
+from DAL import userLib, referencelib2, filelib2
 from DAL.userLib import get_user
 from UI.uiLib import print_welcome, request_filter, request_user_updates
 from BusinessLogic.workflowLib import *
 
 
 def testing():
-    """
-    Тестирование новых функций (временная заглушка для отладки).
+    """Тестирование новых функций SQLite (версия 2).
 
-    В данный момент отключена (pass).
-    """
-    user_uid = userLib.create_user()
-    user = get_user(user_uid, mode='uid')
-    request_user_updates(user)
+    Выполняет:
+    1. Инициализацию справочных таблиц (prepare_ref)
+    2. Тестирование чтения записей из справочников
 
+    Args:
+        None
+
+    Returns:
+        None
+    """
+    referencelib2.read_reference_entry('MEDIA', '4')
+    filelib2.prepare_ref()
+
+    referencelib2.read_reference_entry('MEDIA', entry_name='Twitter')
 
 
 def user_lib_testing():
@@ -69,7 +76,7 @@ def main():
     5. Цикл команд: приветствие, чтение и обработка команд
        с отслеживанием текущего пользователя (user = None при старте)
     """
-    #testing()
+    testing()
     directory_creation()
     file_creation()
     user_lib_testing()
