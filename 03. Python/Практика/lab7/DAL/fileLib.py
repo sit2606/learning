@@ -54,6 +54,8 @@ def prepare_ref():
         list_of_entries = item.get(ref_name)
         for value in list_of_entries:
             create_reference_entry(ref_name, value)
+
+
 def read_csv():
     """
     Читает CSV-файл 'Export.csv' с данными о фермерских рынках.

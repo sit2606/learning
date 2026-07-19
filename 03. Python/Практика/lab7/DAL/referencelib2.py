@@ -11,14 +11,21 @@
        Составной ключ: PRIMARY KEY (market_id, reference_id)
        Используются для: связи рынков со справочниками
 
-Функции:
+Функции для простых справочников:
     create_reference — создаёт таблицу простого справочника
     create_reference_entry — добавляет запись в простой справочник
-    read_reference_entry — читает запись из простого справочника
+    read_reference_entry — читает запись из простого справочника по id/имени
     update_reference_entry — обновляет запись в простом справочнике
+    get_reference_with_name_as_key — возвращает словарь {name: id} или {name: [ref_id, status]}
+    get_reference_with_uid_as_key — возвращает словарь {id: name} или {market_id: [ref_id, status]}
+
+Функции для связующих справочников:
     create_connection_reference — создаёт таблицу связующего справочника
     create_connection_entry — добавляет запись в связующий справочник
     create_connection_entry_by_list — batch-вставка в связующий справочник
+    read_connection_entry — читает статус связи между рынком и справочником
+    get_all_connections_by_market_id — возвращает все связи для рынка
+    delete_all_connections_by_market_id — удаляет все связи для рынка
 """
 
 import sqlite3
@@ -56,7 +63,98 @@ def create_reference(reference_name):
         print(e)
         print("Error in create_reference")
 
+def get_reference_with_name_as_key(reference_name, reference_type=''):
+    """Возвращает справочник в виде словаря с именем в качестве ключа.
 
+    Для простых справочников: {name: id}
+    Для связующих справочников: {market_id: [reference_id, status]}
+
+    Args:
+        reference_name (str): Имя таблицы (например, 'statuses')
+        reference_type (str): Тип справочника ('Common' или 'Connection')
+
+    Returns:
+        dict: Словарь справочника
+
+    Example:
+        >>> get_reference_with_name_as_key("statuses", "Common")
+        {'Approved': 1, 'Pending': 2, 'Rejected': 3}
+        >>> get_reference_with_name_as_key("market_statuses", "Connection")
+        {'1': ['2', 'active'], '3': ['1', 'pending']}
+    """
+    reference = dict()
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM {reference_name}")
+        entry = cursor.fetchall()
+        conn.close()
+        match reference_type:
+            case 'Common':
+                for i in entry:
+                    reference.update({i['name']: i['id']})
+                return reference
+            case 'Connection':
+                for i in entry:
+                    reference.update({
+                        i['market_id']: [i['reference_id'], i['status']]
+                    })
+                return reference
+            case _:
+                print('Error in get_reference_with_name_as_key')
+                print('No reference type provided')
+                return None
+    except Exception as e:
+        print(e)
+        print("Error in get_reference_with_name_as_key")
+        return None
+def get_reference_with_uid_as_key(reference_name, reference_type='Common'):
+    """Возвращает справочник в виде словаря с ID в качестве ключа.
+
+    Для простых справочников: {id: name}
+    Для связующих справочников: {market_id: [reference_id, status]}
+
+    Args:
+        reference_name (str): Имя таблицы (например, 'statuses')
+        reference_type (str): Тип справочника ('Common' или 'Connection')
+
+    Returns:
+        dict: Словарь справочника
+
+    Example:
+        >>> get_reference_with_uid_as_key("statuses", "Common")
+        {1: 'Approved', 2: 'Pending', 3: 'Rejected'}
+        >>> get_reference_with_uid_as_key("market_statuses", "Connection")
+        {1: ['2', 'active'], 3: ['1', 'pending']}
+    """
+    reference = dict()
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM {reference_name}")
+        entry = cursor.fetchall()
+        conn.close()
+        match reference_type:
+            case 'Common':
+                for i in entry:
+                    reference.update({i['id']: i['name']})
+                return reference
+            case 'Connection':
+                for i in entry:
+                    reference.update({
+                        i['market_id']: [i['reference_id'], i['status']]
+                    })
+                return reference
+            case _:
+                print('Error in get_reference_with_uid_as_key')
+                print('No reference type provided')
+                return None
+    except Exception as e:
+        print(e)
+        print("Error in get_reference_with_uid_as_key")
+        return None
 def create_reference_entry(reference_name, data_to_create):
     """Добавляет запись в справочник.
 
@@ -74,15 +172,15 @@ def create_reference_entry(reference_name, data_to_create):
         >>> create_reference_entry("statuses", "approved")
         # Добавляет запись "Approved" в таблицу statuses
     """
-    _data_to_create = data_to_create.strip().capitalize()
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute(
         f"INSERT OR IGNORE INTO {reference_name} (name) VALUES (?)",
-        (_data_to_create,)
+        (data_to_create,)
     )
     conn.commit()
     conn.close()
+
 def read_reference_entry(reference_name, entry_uid=None, entry_name=None):
     """Читает запись из справочника по id или имени.
 
@@ -119,6 +217,7 @@ def read_reference_entry(reference_name, entry_uid=None, entry_name=None):
         print(e)
         print("Error in read_reference_entry")
         return None
+
 def update_reference_entry(reference_name, data_to_update):
     """Обновляет запись в простом справочнике.
 
@@ -146,6 +245,7 @@ def update_reference_entry(reference_name, data_to_update):
     except Exception as e:
         print(e)
         print("Error in update_reference_entry")
+
 def create_connection_reference(reference_name):
     """Создаёт таблицу связующего справочника, если она не существует.
 
@@ -242,3 +342,100 @@ def create_connection_entry_by_list(reference_name, list_entries):
     except Exception as e:
         print(e)
         print("Error in create_connection_entry_by_list")
+
+def read_connection_entry(reference_name, market_id, reference_id):
+    """Ищет статус связи между рынком и элементом справочника.
+
+    Выполняет SELECT запрос к связующей таблице и возвращает значение 'status'
+    для записи, где market_id и reference_id совпадают с переданными параметрами.
+
+    Args:
+        reference_name (str): Имя таблицы (например, 'market_statuses')
+        market_id (int): ID рынка
+        reference_id (int): ID записи из справочника
+
+    Returns:
+        str: значение поля 'status' найденной записи, или None если не найдена
+
+    Example:
+        >>> read_connection_entry('market_statuses', 1, 2)
+        'active'
+    """
+    _reference_name = reference_name
+    _market_id = market_id
+    _reference_id = reference_id
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT * FROM {reference_name} WHERE market_id = ? and reference_id = ?",
+                      (_market_id, _reference_id, ))
+        result = cursor.fetchone()
+        return result["status"]
+    except:
+        print("Error in read_connection_entry")
+
+
+def get_all_connections_by_market_id(reference_name, market_id):
+    """Возвращает все связи для указанного рынка.
+
+    Args:
+        reference_name (str): Имя таблицы (например, 'market_statuses')
+        market_id (int): ID рынка
+
+    Returns:
+        dict: Словарь {market_id: {reference_id: status, ...}}
+
+    Example:
+        >>> get_all_connections_by_market_id("market_statuses", 1)
+        {'1': {'2': 'active', '3': 'pending'}}
+    """
+    connections_dict = {}
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            f"SELECT * FROM {reference_name} WHERE market_id = ?",
+            (str(market_id),)
+        )
+        entry = cursor.fetchall()
+        conn.close()
+        for row in entry:
+            connections_dict[row["reference_id"]] = row["status"]
+        return {str(market_id): connections_dict}
+    except Exception as e:
+        print(e)
+        print("Error in get_all_connections_by_market_id")
+        return None
+
+
+def delete_all_connections_by_market_id(reference_name, market_id):
+    """Удаляет все связи для указанного рынка.
+
+    Args:
+        reference_name (str): Имя таблицы (например, 'market_statuses')
+        market_id (int): ID рынка
+
+    Returns:
+        bool: True если что-то удалено, False если нет
+
+    Example:
+        >>> delete_all_connections_by_market_id("market_statuses", 1)
+        True
+    """
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            f"DELETE FROM {reference_name} WHERE market_id = ?",
+            (str(market_id),)
+        )
+        conn.commit()
+        deleted = cursor.rowcount > 0
+        conn.close()
+        return deleted
+    except Exception as e:
+        print(e)
+        print("Error in delete_all_connections_by_market_id")
+        return False

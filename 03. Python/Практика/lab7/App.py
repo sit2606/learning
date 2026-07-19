@@ -34,7 +34,13 @@ def testing():
         None
     """
     data = {'Id':'89682d31-0f45-43f8-b5a1-072a98cae862', 'Name' : 'Fickbook'}
-    referenceLib.update_reference_entry("MEDIA", data )
+    data_list = [
+        ['1','1','y'],
+        ['2','2','y'],
+        ['3','3','y']
+    ]
+    filelib2.prepare_ref()
+    filelib2.read_csv()
 
 def user_lib_testing():
     """
@@ -73,7 +79,7 @@ def main():
     5. Цикл команд: приветствие, чтение и обработка команд
        с отслеживанием текущего пользователя (user = None при старте)
     """
-    #testing()
+    testing()
     directory_creation()
     file_creation()
     user_lib_testing()
