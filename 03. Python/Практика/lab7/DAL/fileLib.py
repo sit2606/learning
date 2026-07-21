@@ -220,7 +220,7 @@ def create_market_base(market_info):
     except Exception as e:
         print(e)
         print("Error in create market base")
-def create_user_base():
+def  create_user_base():
     """
     Создаёт CSV-файл USER_INFO.csv с заголовками для хранения данных пользователей.
 

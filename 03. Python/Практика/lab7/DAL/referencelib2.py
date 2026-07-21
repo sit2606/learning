@@ -5,23 +5,24 @@
 
 Типы таблиц:
     1. Простые справочники: id (INTEGER PRIMARY KEY), name (TEXT UNIQUE NOT NULL)
-       Используются для: Статусов, Типов оплаты, Категорий
+       Используются для: Статусов, Типов оплаты, Категорий, CITY, COUNTY, STATE
 
     2. Связующие справочники: market_id, reference_id, status
        Составной ключ: PRIMARY KEY (market_id, reference_id)
-       Используются для: связи рынков со справочниками
+       Используются для: связи рынков со справочниками (MEDIA, GROCERY_TYPES, BANKING_INFO)
 
 Функции для простых справочников:
     create_reference — создаёт таблицу простого справочника
-    create_reference_entry — добавляет запись в простой справочник
+    create_reference_entry — добавляет одну запись в простой справочник
+    create_reference_entry_by_list — batch-вставка записей в простой справочник
     read_reference_entry — читает запись из простого справочника по id/имени
     update_reference_entry — обновляет запись в простом справочнике
-    get_reference_with_name_as_key — возвращает словарь {name: id} или {name: [ref_id, status]}
-    get_reference_with_uid_as_key — возвращает словарь {id: name} или {market_id: [ref_id, status]}
+    get_reference_with_name_as_key — возвращает словарь {name: id}
+    get_reference_with_uid_as_key — возвращает словарь {id: name}
 
 Функции для связующих справочников:
     create_connection_reference — создаёт таблицу связующего справочника
-    create_connection_entry — добавляет запись в связующий справочник
+    create_connection_entry — добавляет одну запись в связующий справочник
     create_connection_entry_by_list — batch-вставка в связующий справочник
     read_connection_entry — читает статус связи между рынком и справочником
     get_all_connections_by_market_id — возвращает все связи для рынка
@@ -30,8 +31,7 @@
 
 import sqlite3
 
-DATABASE_PATH = 'database/base.db'
-
+from config import DATABASE_PATH
 
 def create_reference(reference_name):
     """Создаёт таблицу для справочника, если она не существует.
@@ -159,7 +159,6 @@ def create_reference_entry(reference_name, data_to_create):
     """Добавляет запись в справочник.
 
     Если запись с таким name уже существует, пропускает вставку (INSERT OR IGNORE).
-    Имя автоматически очищается от пробелов и капитализируется.
 
     Args:
         reference_name (str): Имя таблицы (например, 'statuses')
@@ -170,7 +169,7 @@ def create_reference_entry(reference_name, data_to_create):
 
     Example:
         >>> create_reference_entry("statuses", "approved")
-        # Добавляет запись "Approved" в таблицу statuses
+        # Добавляет запись "approved" в таблицу statuses
     """
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
@@ -181,6 +180,31 @@ def create_reference_entry(reference_name, data_to_create):
     conn.commit()
     conn.close()
 
+def create_reference_entry_by_list(reference_name, data_to_create):
+    """Batch-вставка записей в простой справочник.
+
+    Если запись с таким name уже существует, пропускает вставку (INSERT OR IGNORE).
+
+    Args:
+        reference_name (str): Имя таблицы (например, 'CITY', 'COUNTY')
+        data_to_create (list): Список кортежей [(name,), ...]
+
+    Returns:
+        None
+
+    Example:
+        >>> data = [("Los ranchos",), ("Santa fe",), ("Albuquerque",)]
+        >>> create_reference_entry_by_list("CITY", data)
+        # Вставляет 3 записи одной транзакцией
+    """
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.executemany(
+        f"INSERT OR IGNORE INTO {reference_name} (name) VALUES (?)",
+        data_to_create
+    )
+    conn.commit()
+    conn.close()
 def read_reference_entry(reference_name, entry_uid=None, entry_name=None):
     """Читает запись из справочника по id или имени.
 
@@ -355,25 +379,31 @@ def read_connection_entry(reference_name, market_id, reference_id):
         reference_id (int): ID записи из справочника
 
     Returns:
-        str: значение поля 'status' найденной записи, или None если не найдена
+        str or None: значение поля 'status' найденной записи, или None если не найдена
 
     Example:
         >>> read_connection_entry('market_statuses', 1, 2)
         'active'
+        >>> read_connection_entry('market_statuses', 999, 999)
+        None
     """
-    _reference_name = reference_name
-    _market_id = market_id
-    _reference_id = reference_id
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        cursor.execute(f"SELECT * FROM {reference_name} WHERE market_id = ? and reference_id = ?",
-                      (_market_id, _reference_id, ))
+        cursor.execute(
+            f"SELECT * FROM {reference_name} WHERE market_id = ? AND reference_id = ?",
+            (market_id, reference_id)
+        )
         result = cursor.fetchone()
-        return result["status"]
-    except:
+        conn.close()
+        if result:
+            return result["status"]
+        return None
+    except Exception as e:
+        print(e)
         print("Error in read_connection_entry")
+        return None
 
 
 def get_all_connections_by_market_id(reference_name, market_id):
@@ -439,3 +469,4 @@ def delete_all_connections_by_market_id(reference_name, market_id):
         print(e)
         print("Error in delete_all_connections_by_market_id")
         return False
+

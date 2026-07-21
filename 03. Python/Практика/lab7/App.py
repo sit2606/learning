@@ -14,7 +14,7 @@ App — точка входа приложения для управления �
 import csv
 
 from BusinessLogic.marketList import get_all_markets, get_market_by_id
-from DAL import userLib, referencelib2, filelib2, referenceLib
+from DAL import userLib, referencelib2, filelib2, referenceLib, requiredFiles, userlib2
 from DAL.userLib import get_user
 from UI.uiLib import print_welcome, request_filter, request_user_updates
 from BusinessLogic.workflowLib import *
@@ -24,8 +24,8 @@ def testing():
     """Тестирование новых функций SQLite (версия 2).
 
     Выполняет:
-    1. Инициализацию справочных таблиц (prepare_ref)
-    2. Тестирование чтения записей из справочников
+    1. Инициализацию справочных таблиц (prepare_refs)
+    2. Импорт данных из Export.csv в базу данных (read_csv)
 
     Args:
         None
@@ -33,15 +33,14 @@ def testing():
     Returns:
         None
     """
-    data = {'Id':'89682d31-0f45-43f8-b5a1-072a98cae862', 'Name' : 'Fickbook'}
-    data_list = [
-        ['1','1','y'],
-        ['2','2','y'],
-        ['3','3','y']
-    ]
-    filelib2.prepare_ref()
-    filelib2.read_csv()
-
+    requiredFiles.prepare_refs()
+    requiredFiles.create_market_table()
+    z =     filelib2.read_csv()
+    z = userLib.read_user('9e5c5c70-0534-423e-8da7-d278a0abd2d2')
+    a = userlib2.read_user(1)
+    userlib2.update_user(a)
+    userlib2.delete_user(1)
+    print('s')
 def user_lib_testing():
     """
     Демонстрация CRUD-операций с пользователями.

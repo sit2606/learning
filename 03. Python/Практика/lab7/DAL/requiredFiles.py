@@ -10,7 +10,10 @@ requiredFiles — константы категорий для парсинга 
 Использование:
     from DAL.requiredFiles import MARKET_INFO, MEDIA, FILES_TO_CHECK
 """
+import sqlite3
 
+from config import DATABASE_PATH
+from DAL.referencelib2 import create_reference, create_reference_entry, create_connection_reference
 
 MARKET_INFO = {'MarketName', 'street', 'zip'}  # Основная информация о рынке
 
@@ -91,3 +94,84 @@ FILES_TO_CHECK = {
     'REVIEWS'
 }
 # Множество имён CSV-файлов (без расширения) для проверки наличия перед работой
+REF_LIST = [
+    {'MEDIA': MEDIA},
+    {'GROCERY_TYPES': GROCERY_TYPES},
+    {'BANKING_INFO': BANKING_INFO}
+]
+
+
+def prepare_refs():
+    for item in REF_LIST:
+        ref_name = list(item.keys())[0]
+        create_reference(ref_name)
+        list_of_entries = item.get(ref_name)
+        for value in list_of_entries:
+            create_reference_entry(ref_name, value)
+    create_reference('CITY')
+    create_reference('COUNTY')
+    create_reference('STATE')
+    create_connection_reference('MarketXSocialMedia')
+    create_connection_reference('MarketXGrocery')
+    create_connection_reference('MarketXBankingInfo')
+def create_user_table():
+    field_names = ['Id',
+                   'user_name',
+                   'password',
+                   'firstname',
+                   'lastname',
+                   'latitude',
+                   'longitude']
+    DEFAULT_USER = {'Id': None,
+                    'user_name': 'test',
+                    'password': '',
+                    'firstname': 'test_firstname',
+                    'lastname': 'test_lastname',
+                    'latitude': '',
+                    'longitude': ''}
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS USERS (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password text NOT NULL,
+            firstname text NOT NULL,
+            lastname text NOT NULL,
+            latitude real,
+            longitude real
+        )''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        print("Error in create_user_table")
+def create_market_table():
+    field_names = """'id INTEGER PRIMARY KEY AUTOINCREMENT',
+                   'marketname text  NOT NULL',
+                   'street text NOT NULL',
+                   'city text NOT NULL' ,
+                   'county  integer NOT NULL',
+                   'state  integer NOT NULL',
+                   'zip integer NOT NULL',
+                   'longitude real',
+                   'latitude real',
+                   'season1date text',
+                   'season1time text',
+                   'season2date text',
+                   'season2time text',
+                   'season3date text',
+                   'season3time text',
+                   'season4date text',
+                   'season4time text',
+                   'score real'"""
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute(f'''CREATE TABLE IF NOT EXISTS MARKETS ({field_names}
+        )''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        print("Error in create_market_table")

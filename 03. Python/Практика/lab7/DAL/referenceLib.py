@@ -52,6 +52,7 @@ def create_reference(reference_name):
         print(e)
         print("Error in create reference")
 
+
 def get_reference_with_name_as_key(reference_name, reference_type=''):
     """
     Читает CSV-файл справочника и возвращает данные в виде dict.
@@ -166,8 +167,6 @@ def create_reference_entry(reference_name, data_to_create):
     except Exception as e:
         print(e)
         print("Error in create_reference_entry")
-
-
 def read_reference_entry(reference_name, entry_uid=None, entry_name=None):
     """
     Ищет запись в справочнике по UUID или имени.
@@ -211,8 +210,6 @@ def read_reference_entry(reference_name, entry_uid=None, entry_name=None):
     except Exception as e:
         print(e)
         print("Error in read_reference_entry")
-
-
 def update_reference_entry(reference_name, data_to_update):
     """
     Обновляет существующую запись в CSV-справочнике по полю 'Id'.
@@ -253,8 +250,6 @@ def update_reference_entry(reference_name, data_to_update):
     except Exception as e:
         print(e)
         print("Error in update_reference_entry")
-
-
 def create_connection_reference(reference_name):
     """
     Создаёт CSV-файл для хранения связей между рынками и справочниками.
@@ -284,8 +279,6 @@ def create_connection_reference(reference_name):
     except Exception as e:
         print(e)
         print("Error in create reference")
-
-
 def create_connection_entry(reference_name, market_id, reference_id, status):
     """
     Добавляет запись о связи между рынком и элементом справочника.
@@ -325,8 +318,6 @@ def create_connection_entry(reference_name, market_id, reference_id, status):
     except Exception as e:
         print(e)
         print("Error in create reference entity")
-
-
 def create_connection_entry_by_list(reference_name, list_entries):
     """
     Батчевая запись списка связей в CSV-файл.
