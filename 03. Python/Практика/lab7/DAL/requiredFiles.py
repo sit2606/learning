@@ -147,31 +147,48 @@ def create_user_table():
         print(e)
         print("Error in create_user_table")
 def create_market_table():
-    field_names = """'id INTEGER PRIMARY KEY AUTOINCREMENT',
-                   'marketname text  NOT NULL',
-                   'street text NOT NULL',
-                   'city text NOT NULL' ,
-                   'county  integer NOT NULL',
-                   'state  integer NOT NULL',
-                   'zip integer NOT NULL',
-                   'longitude real',
-                   'latitude real',
-                   'season1date text',
-                   'season1time text',
-                   'season2date text',
-                   'season2time text',
-                   'season3date text',
-                   'season3time text',
-                   'season4date text',
-                   'season4time text',
-                   'score real'"""
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
-        cursor.execute(f'''CREATE TABLE IF NOT EXISTS MARKETS ({field_names}
+        cursor.execute('''CREATE TABLE IF NOT EXISTS MARKETS (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            marketname TEXT NOT NULL,
+            street TEXT NOT NULL,
+            city TEXT NOT NULL,
+            county INTEGER NOT NULL,
+            state INTEGER NOT NULL,
+            zip INTEGER NOT NULL,
+            longitude REAL,
+            latitude REAL,
+            season1date TEXT,
+            season1time TEXT,
+            season2date TEXT,
+            season2time TEXT,
+            season3date TEXT,
+            season3time TEXT,
+            season4date TEXT,
+            season4time TEXT,
+            score REAL
         )''')
         conn.commit()
         conn.close()
     except Exception as e:
         print(e)
         print("Error in create_market_table")
+def create_review_table():
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS REVIEWS (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            review_date TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            market_id INTEGER NOT NULL,
+            review_text TEXT,
+            score REAL
+        )''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        print("Error in create_review_table")

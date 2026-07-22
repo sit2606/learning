@@ -14,7 +14,7 @@ App — точка входа приложения для управления �
 import csv
 
 from BusinessLogic.marketList import get_all_markets, get_market_by_id
-from DAL import userLib, referencelib2, filelib2, referenceLib, requiredFiles, userlib2
+from DAL import userLib, referencelib2, filelib2, referenceLib, requiredFiles, userlib2, reviewlib2
 from DAL.userLib import get_user
 from UI.uiLib import print_welcome, request_filter, request_user_updates
 from BusinessLogic.workflowLib import *
@@ -33,8 +33,17 @@ def testing():
     Returns:
         None
     """
+    review_test =  {
+         'market_id': '1018261',
+         'review_date': '2026-07-22 19:20:04.439247',
+         'review_text': '',
+         'score': '5',
+         'user_id': 'ab80d15b-14e7-442d-8403-b6cc3242144a'}
     requiredFiles.prepare_refs()
     requiredFiles.create_market_table()
+    requiredFiles.create_review_table()
+    reviewlib2.create_review(review_test)
+    reviewlib2.get_review_by_market_id(1018261)
     z =     filelib2.read_csv()
     z = userLib.read_user('9e5c5c70-0534-423e-8da7-d278a0abd2d2')
     a = userlib2.read_user(1)

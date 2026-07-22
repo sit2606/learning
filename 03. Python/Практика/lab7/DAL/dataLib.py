@@ -52,7 +52,7 @@ def update_market(data_to_update):
                    'season4date',
                    'season4time',
                    'longitude',
-                   'latitude'
+                   'latitude',
                     'score',
                    'distance']
     try:
