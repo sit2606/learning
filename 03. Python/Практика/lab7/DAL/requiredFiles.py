@@ -13,9 +13,8 @@ requiredFiles — константы категорий для парсинга 
 import sqlite3
 
 from config import DATABASE_PATH
-from DAL.referencelib2 import create_reference, create_reference_entry, create_connection_reference
-
-MARKET_INFO = {'MarketName', 'street', 'zip'}  # Основная информация о рынке
+from models.reference import Reference
+MARKET_INFO = {'MarketName'}  # Основная информация о рынке
 
 TIMESHEET_INFO = {'Season1Date',
                   'Season1Time',
@@ -39,7 +38,9 @@ MEDIA = {
 LOCATION = {
     'city',
     'County',
-    'State'
+    'State',
+    'street',
+    'zip'
 }  # Местоположение (город, округ, штат)
 
 BANKING_INFO = {'Credit',
@@ -94,41 +95,34 @@ FILES_TO_CHECK = {
     'REVIEWS'
 }
 # Множество имён CSV-файлов (без расширения) для проверки наличия перед работой
-REF_LIST = [
-    {'MEDIA': MEDIA},
-    {'GROCERY_TYPES': GROCERY_TYPES},
-    {'BANKING_INFO': BANKING_INFO}
-]
+REF_LIST = {'required_refs': {
+                              'MEDIA':'Common',
+                              'GROCERY_TYPES': 'Common',
+                              'BANKING_INFO': 'Common',
+                              'CITY': 'Common',
+                              'COUNTY': 'Common',
+                              'STATE': 'Common',
+                              'MarketXSocialMedia': 'Connection',
+                              'MarketXGrocery' : 'Connection',
+                              'MarketXBankingInfo': 'Connection'
+                                },
+            'values':           {
+                            'MEDIA': MEDIA,
+                            'GROCERY_TYPES': GROCERY_TYPES,
+                            'BANKING_INFO': BANKING_INFO
+                                }
+            }
+
 
 
 def prepare_refs():
-    for item in REF_LIST:
-        ref_name = list(item.keys())[0]
-        create_reference(ref_name)
-        list_of_entries = item.get(ref_name)
-        for value in list_of_entries:
-            create_reference_entry(ref_name, value)
-    create_reference('CITY')
-    create_reference('COUNTY')
-    create_reference('STATE')
-    create_connection_reference('MarketXSocialMedia')
-    create_connection_reference('MarketXGrocery')
-    create_connection_reference('MarketXBankingInfo')
+    for item in REF_LIST['required_refs'].items():
+        ref = Reference(item[0], item[1])
+    for item in REF_LIST['values'].items():
+        ref = Reference(item[0])
+        for entry in item[1]:
+            ref.add(entry)
 def create_user_table():
-    field_names = ['Id',
-                   'user_name',
-                   'password',
-                   'firstname',
-                   'lastname',
-                   'latitude',
-                   'longitude']
-    DEFAULT_USER = {'Id': None,
-                    'user_name': 'test',
-                    'password': '',
-                    'firstname': 'test_firstname',
-                    'lastname': 'test_lastname',
-                    'latitude': '',
-                    'longitude': ''}
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()

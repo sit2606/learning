@@ -13,10 +13,9 @@ App — точка входа приложения для управления �
 """
 import csv
 
-from BusinessLogic.marketList import get_all_markets, get_market_by_id
-from DAL import userLib, referencelib2, filelib2, referenceLib, requiredFiles, userlib2, reviewlib2
-from DAL.userLib import get_user
-from UI.uiLib import print_welcome, request_filter, request_user_updates
+from DAL import userLib, filelib2, requiredFiles, userlib2, reviewlib2, datalib2
+from DAL.datalib2 import get_market
+from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
 
 
@@ -42,14 +41,15 @@ def testing():
     requiredFiles.prepare_refs()
     requiredFiles.create_market_table()
     requiredFiles.create_review_table()
+    lst = filelib2.read_csv()
+    datalib2.add_many(lst)
+    get_market(1018261)
     reviewlib2.create_review(review_test)
     reviewlib2.get_review_by_market_id(1018261)
-    z =     filelib2.read_csv()
     z = userLib.read_user('9e5c5c70-0534-423e-8da7-d278a0abd2d2')
     a = userlib2.read_user(1)
     userlib2.update_user(a)
     userlib2.delete_user(1)
-    print('s')
 def user_lib_testing():
     """
     Демонстрация CRUD-операций с пользователями.
@@ -65,7 +65,7 @@ def user_lib_testing():
         if len > 1:
             pass
         else:
-            fileLib.create_user_base()
+            requiredFiles.create_user_table()
             test_user_uid = userLib.create_user()
             test_user = userLib.read_user(test_user_uid)
             test_user['firstname'] = 'TestIngs'
@@ -88,7 +88,6 @@ def main():
        с отслеживанием текущего пользователя (user = None при старте)
     """
     testing()
-    directory_creation()
     file_creation()
     user_lib_testing()
     run_app = True

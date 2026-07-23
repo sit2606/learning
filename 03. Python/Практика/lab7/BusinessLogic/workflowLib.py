@@ -36,7 +36,7 @@ workflowLib — модуль оркестрации рабочего проце�
 import os
 
 from BusinessLogic import commandHandler
-from DAL import fileLib
+from DAL import fileLib, requiredFiles, filelib2, datalib2
 from DAL.reviewLib import get_review_by_market_id
 from DAL.userLib import read_user
 from UI import uiLib
@@ -58,32 +58,11 @@ def directory_creation():
         print(e)
         print("Error in directory_creation")
 def file_creation():
-    """
-    Проверяет наличие CSV-файлов и пересоздаёт данные при необходимости.
-
-    1. file_status_check() — проверка наличия файлов
-    2. prepare_ref() — инициализация справочников MEDIA, GROCERY_TYPES, BANKING_INFO
-    3. create_market_base(read_csv()) — парсинг Export.csv и создание MARKET_INFO.csv
-    4. create_user_base() — создание USER_INFO.csv
-    5. create_reference_base() — создание итогового справочника
-    6. create_review_base() — создание файла отзывов REVIEWS.csv
-    """
-    if fileLib.file_status_check():
-        print('Recreation in progress...')
-        print('Creating basic refs...')
-        fileLib.prepare_ref()
-        print('Basic refs created...')
-        print('Exporting MARKET_INFO.csv...')
-        fileLib.create_market_base(fileLib.read_csv())
-        print('MARKET_INFO.csv exported, all important files successfully created...')
-        print('User base recreation in progress...')
-        fileLib.create_user_base()
-        print('User base successfully created...')
-        fileLib.create_reference_base()
-        print('Reference base successfully created...')
-        fileLib.create_review_base()
-        print('Review base successfully created...')
-
+    requiredFiles.prepare_refs()
+    requiredFiles.create_market_table()
+    requiredFiles.create_review_table()
+    requiredFiles.create_user_table()
+    datalib2.add_many(filelib2.read_csv())
 def get_command(user):
     """
     Считывает команду пользователя из stdin.

@@ -1,4 +1,14 @@
-import csv
+"""
+Модуль для работы с отзывами в SQLite (версия 2).
+
+Содержит функции для CRUD-операций с таблицей REVIEWS.
+
+Функции:
+    create_review — добавляет отзыв
+    get_review_by_market_id — читает отзывы для рынка
+    calculate_score — рассчитывает среднюю оценку рынка
+"""
+
 import sqlite3
 from statistics import mean
 
@@ -7,6 +17,19 @@ from config import DATABASE_PATH
 
 
 def create_review(review):
+    """Добавляет отзыв в таблицу REVIEWS.
+
+    Args:
+        review (dict): Словарь с полями:
+            - review_date: дата отзыва
+            - user_id: ID пользователя
+            - market_id: ID рынка
+            - review_text: текст отзыва
+            - score: оценка (1-5)
+
+    Returns:
+        None
+    """
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute(
@@ -16,7 +39,17 @@ def create_review(review):
     )
     conn.commit()
     conn.close()
+
+
 def get_review_by_market_id(market_id):
+    """Читает все отзывы для указанного рынка.
+
+    Args:
+        market_id: ID рынка для фильтрации
+
+    Returns:
+        list[dict]: Список словарей с отзывами
+    """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         conn.row_factory = sqlite3.Row

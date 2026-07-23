@@ -10,67 +10,77 @@
     - GROCERY_TYPES: типы продовольственных товаров
     - BANKING_INFO: банковские реквизиты
     - CITY, COUNTY, STATE: справочники местоположений (создаются автоматически)
+
+Алгоритм read_csv():
+    1. Загружает справочники (MEDIA, GROCERY_TYPES, BANKING_INFO) для сопоставления имён → ID
+    2. Читает Export.csv построчно, для каждой строки (рынка):
+       - Создаёт объект Market с market_info, timesheet, coordinates, location
+       - Заполняет поля через setattr() на основе ключей CSV
+       - Собирает связи many-to-many (SocialMedia, Grocery, BankingInfo)
+       - Собирает уникальные значения городов, округов, штатов, почтовых индексов, улиц
+    3. Сохраняет справочники местоположений в БД и получает их ID
+    4. Заменяет строковые значения локаций на ID из справочников
+    5. Сохраняет связи many-to-many в промежуточные таблицы
+    6. Возвращает список объектов Market с заполненными ID
+
+Особенности:
+    - Использует Reference class для работы со справочниками
+    - Значения координат приводятся к float (пустые строки → 0.0)
+    - Значения локаций приводятся к Capitalized виду
 """
 
 from DAL import requiredFiles
-from DAL.referencelib2 import get_reference_with_name_as_key, create_connection_entry_by_list,  create_reference_entry_by_list
 import csv
+
+from models.market import Market
+from models.reference import Reference
+
+
 def read_csv():
     """
-    Читает CSV-файл 'Export.csv' с данными о фермерских рынках.
+    Импортирует данные из CSV-файла Export.csv в базу данных SQLite.
 
-    Парсит файл построчно, группирует информацию по рынкам (ключ — FMID)
-    в словарь market_info и создаёт связи со справочниками.
+    Функция выполняет полный цикл импорта:
+    - Загружает справочники (MEDIA, GROCERY_TYPES, BANKING_INFO) для маппинга
+    - Парсит CSV-файл, создавая объекты Market для каждой строки
+    - Заполняет промежуточные таблицы связей (MarketXSocialMedia, MarketXGrocery, MarketXBankingInfo)
+    - Создаёт и заполняет справочники локаций (CITY, COUNTY, STATE, ZIP, STREET)
+    - Заменяет строковые значения локаций на ID из справочников
 
-    Алгоритм:
-    1. Загружает справочники MEDIA, GROCERY_TYPES, BANKING_INFO в память
-    2. Читает CSV, собирает уникальные значения CITY/COUNTY/STATE в set
-    3. Создаёт таблицы CITY/COUNTY/STATE и batch-вставляет значения
-    4. Заменяет текстовые значения на ID из справочников
-    5. Создаёт связующие таблицы и batch-вставляет связи
+    Возвращает:
+        list[Market]: Список объектов Market с заполненными полями и связями.
 
-    Обрабатываемые категории:
-    - MARKET_INFO → market_info: название, улица, индекс
-    - COORDINATES → market_info: долгота, широта
-    - TIMESHEET_INFO → market_info: расписание по сезонам
-    - MEDIA → связь рынков с соцсетями
-    - GROCERY_TYPES → связь рынков с типами товаров
-    - BANKING_INFO → связь рынков с способами оплаты
-    - LOCATION → CITY/COUNTY/STATE: справочники местоположений
-
-    Args:
-        None
-
-    Returns:
-        dict: словарь {FMID: {атрибуты_рынка}} со всей информацией о рынках.
-              Включает: name, street, zip, longitude, latitude, schedule,
-                        city (ID), county (ID), state (ID), score, distance
-
-    Raises:
-        FileNotFoundError: если файл 'Export.csv' не найден.
-        csv.Error: при ошибке парсинга CSV.
-
-    Note:
-        Файл 'Export.csv' должен находиться в текущей рабочей директории.
-        Таблицы CITY, COUNTY, STATE создаются автоматически при первом запуске.
+    Примечания:
+        - Файл Export.csv должен находиться в рабочей директории
+        - Пустые значения координат заменяются на 0.0
+        - Значения локаций приводятся к Capitalized виду (первая заглавная)
+        - Промежуточные таблицы связей заполняются после основного цикла
     """
-    media_reference = get_reference_with_name_as_key('MEDIA', 'Common')
-    grocery_types = get_reference_with_name_as_key('GROCERY_TYPES', 'Common')
-    banking_info = get_reference_with_name_as_key('BANKING_INFO', 'Common')
+
+    media = Reference('MEDIA')
+    grocery = Reference('GROCERY_TYPES')
+    banking = Reference('BANKING_INFO')
+    media_reference = media.get_all_with_names()
+    grocery_types = grocery.get_all_with_names()
+    banking_info = banking.get_all_with_names()
     MarketXSocialMedia = []
     MarketXGrocery = []
     MarketXBankingInfo = []
     cities = set()
     counties = set()
     states = set()
-    location_dict = {
+    zip = set()
+    street = set()
+    location_dict :dict[str, set] = {
         'city': cities,
         'County': counties,
-        'State': states
+        'State': states,
+        'zip' : zip,
+        'street' : street,
     }
-    market_info = dict()
+    market_dict = dict()
     count = 1679
-    with open("Export.csv", newline="") as csvfile:
+    with (open("Export.csv", newline="") as csvfile):
         reader = csv.DictReader(csvfile)
         for row in reader:
             count -= 1
@@ -78,20 +88,22 @@ def read_csv():
             for key, value in row.items():
                 if key == 'FMID':
                     current_id = value
-                    market_info[current_id] = dict()
+                    market = Market(current_id)
                 if key in requiredFiles.MARKET_INFO:
-                    market_info[current_id][key.lower()] = value
+                    if hasattr(market.market_info, key.lower()):
+                        setattr(market.market_info, key.lower(), value)
                 if key in requiredFiles.COORDINATES:
                     if key == 'x':
                         if value.strip() == '':
                             value = '0'
-                        market_info[current_id]['longitude'] = value
+                        market.coordinates.longitude = float(value)
                     if key == 'y':
                         if value.strip() == '':
                             value = '0'
-                        market_info[current_id]['latitude'] = value
+                        market.coordinates.latitude = float(value)
                 if key in requiredFiles.TIMESHEET_INFO:
-                    market_info[current_id][key.lower()] = value
+                    if hasattr(market.timesheet, key.lower()):
+                        setattr(market.timesheet, key.lower(), value)
                 if key in requiredFiles.MEDIA:
                     reference_id = media_reference[key]
                     MarketXSocialMedia.append([current_id, reference_id, value])
@@ -104,20 +116,36 @@ def read_csv():
                 if key in requiredFiles.LOCATION:
                     value = value.strip().capitalize()
                     location_dict[key].add(value)
-                    market_info[current_id][key.lower()] = value
-                market_info[current_id]['score'] = None
-                market_info[current_id]['distance'] = None
-        create_reference_entry_by_list('CITY', [(item,) for item in location_dict['city']])
-        create_reference_entry_by_list('COUNTY', [(item,) for item in location_dict['County']])
-        create_reference_entry_by_list('STATE', [(item,) for item in location_dict['State']])
-        location_dict['city'] = get_reference_with_name_as_key('CITY', 'Common')
-        location_dict['County'] = get_reference_with_name_as_key('COUNTY', 'Common')
-        location_dict['State'] = get_reference_with_name_as_key('STATE', 'Common')
-        for key in market_info.keys():
-            market_info[key]['city']  = location_dict['city'][market_info[key]['city']]
-            market_info[key]['county'] = location_dict['County'][market_info[key]['county']]
-            market_info[key]['state'] = location_dict['State'][market_info[key]['state']]
-        create_connection_entry_by_list('MarketXSocialMedia',MarketXSocialMedia)
-        create_connection_entry_by_list('MarketXGrocery', MarketXGrocery)
-        create_connection_entry_by_list('MarketXBankingInfo', MarketXBankingInfo)
-        return market_info
+                    if hasattr(market.location, key.lower()):
+                        setattr(market.location, key.lower(), value)
+            market_dict[current_id] = market
+        city = Reference('CITY')
+        county = Reference('COUNTY')
+        state = Reference('STATE')
+        zip = Reference('ZIP')
+        street = Reference('STREET')
+        city.add_many([(item,) for item in location_dict['city']])
+        county.add_many([(item,) for item in location_dict['County']])
+        state.add_many([(item,) for item in location_dict['State']])
+        zip.add_many([(item,) for item in location_dict['zip']])
+        street.add_many([(item,) for item in location_dict['street']])
+        location_dict['city'] =city.get_all_with_names()
+        location_dict['County'] =county.get_all_with_names()
+        location_dict['State'] = state.get_all_with_names()
+        location_dict['Zip'] = zip.get_all_with_names()
+        location_dict['street'] = street.get_all_with_names()
+        market_list =[]
+        for key in market_dict.keys():
+            market_dict[key].location.city  = location_dict['city'][market_dict[key].location.city]
+            market_dict[key].location.county  = location_dict['County'][market_dict[key].location.county]
+            market_dict[key].location.state = location_dict['State'][market_dict[key].location.state]
+            market_dict[key].location.zip = location_dict['Zip'][market_dict[key].location.zip]
+            market_dict[key].location.street = location_dict['street'][market_dict[key].location.street]
+            market_list.append(market_dict[key])
+        marketXsocial = Reference('MarketXSocialMedia', 'Connection')
+        marketXgrocery = Reference('MarketXGrocery', 'Connection')
+        marketXbankinginfo = Reference('MarketXBankingInfo', 'Connection')
+        marketXsocial.add_many(MarketXSocialMedia)
+        marketXgrocery.add_many(MarketXGrocery)
+        marketXbankinginfo.add_many(MarketXBankingInfo)
+        return market_list
