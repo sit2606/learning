@@ -146,3 +146,18 @@ def get_market(market_id):
     except Exception as e:
         print(e)
         print("Error in create_market")
+
+def get_all_markets():
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            f"""SELECT * FROM MARKETS"""
+        )
+        result = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return result
+    except Exception as e:
+        print(e)
+        print("Error in create_market")

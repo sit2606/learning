@@ -14,9 +14,10 @@ App — точка входа приложения для управления �
 import csv
 
 from DAL import userLib, filelib2, requiredFiles, userlib2, reviewlib2, datalib2
-from DAL.datalib2 import get_market
+from DAL.datalib2 import get_market, get_all_markets
 from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
+from models.market import MarketData, Market
 
 
 def testing():
@@ -42,14 +43,9 @@ def testing():
     requiredFiles.create_market_table()
     requiredFiles.create_review_table()
     lst = filelib2.read_csv()
-    datalib2.add_many(lst)
-    get_market(1018261)
-    reviewlib2.create_review(review_test)
-    reviewlib2.get_review_by_market_id(1018261)
-    z = userLib.read_user('9e5c5c70-0534-423e-8da7-d278a0abd2d2')
-    a = userlib2.read_user(1)
-    userlib2.update_user(a)
-    userlib2.delete_user(1)
+    f = get_all_markets()
+    a = MarketData(f)
+    print('s')
 def user_lib_testing():
     """
     Демонстрация CRUD-операций с пользователями.
