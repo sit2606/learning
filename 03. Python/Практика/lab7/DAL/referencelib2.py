@@ -93,7 +93,7 @@ def get_reference_with_name_as_key(reference_name, reference_type=''):
         match reference_type:
             case 'Common':
                 for i in entry:
-                    reference.update({i['name']: i['id']})
+                    reference.update({i['name']: int(i['id'])})
                 return reference
             case 'Connection':
                 for i in entry:

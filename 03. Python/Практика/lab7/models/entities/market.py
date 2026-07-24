@@ -1,5 +1,5 @@
 """
-Модель данных для фермерского рынка.
+Базовые сущности рынка.
 
 Содержит dataclass-ы для группировки информации о рынке:
 - Marketinfo: основная информация (название, оценка, расстояние)
@@ -7,6 +7,13 @@
 - Coordinates: географические координаты
 - Location: местоположение (город, округ, штат, индекс, улица)
 - Market: основной класс, объединяющий все группы
+
+Иерархия:
+    Market
+    ├── market_info: Marketinfo
+    ├── timesheet: Timesheet
+    ├── coordinates: Coordinates
+    └── location: Location
 """
 
 from dataclasses import dataclass
@@ -58,14 +65,17 @@ class Market:
 
     Attributes:
         id: Уникальный идентификатор рынка (FMID)
-        market_info: Основная информация
-        timesheet: Расписание
-        coordinates: Координаты
-        location: Местоположение
+        market_info: Основная информация (Marketinfo)
+        timesheet: Расписание (Timesheet)
+        coordinates: Координаты (Coordinates)
+        location: Местоположение (Location)
 
     Example:
         >>> market = Market("12345")
         >>> market.market_info.marketname = "Farmers Market"
+
+        >>> data = {"id": 1, "marketname": "Рынок", "city": "Москва"}
+        >>> market = Market.from_dict(data)
     """
     def __init__(self, id, data = None):
         """Инициализирует рынок с указанным id.
@@ -87,8 +97,18 @@ class Market:
         """Возвращает строковое представление (id рынка)."""
         return str(self.id)
     @classmethod
-    #TODO ПРОВЕРИТЬ КАК ЭТО РАБОТАЕТ
     def from_dict(cls, data):
+        """Создаёт Market из словаря/Row с данными из БД.
+
+        Разделяет данные по группам (market_info, timesheet, coordinates, location)
+        и создаёт соответствующие dataclass-ы.
+
+        Args:
+            data: dict или sqlite3.Row с ключами из таблицы MARKETS
+
+        Returns:
+            Market: объект с заполненными полями
+        """
         market_info = {
             'marketname': data.get('marketname'),
             'score': data.get('score'),
@@ -122,8 +142,3 @@ class Market:
         market.coordinates = Coordinates(**coordinates)
         market.location = Location(**location)
         return market
-class MarketData:
-    def __init__(self, market_info):
-        self.market_list = {}
-        for market in market_info:
-            self.market_list.update({market['id']: Market.from_dict(market)})

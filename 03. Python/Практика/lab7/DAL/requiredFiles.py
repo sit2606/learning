@@ -13,7 +13,8 @@ requiredFiles — константы категорий для парсинга 
 import sqlite3
 
 from config import DATABASE_PATH
-from models.reference import Reference
+from models.entities.reference import Reference
+
 MARKET_INFO = {'MarketName'}  # Основная информация о рынке
 
 TIMESHEET_INFO = {'Season1Date',
@@ -116,6 +117,15 @@ REF_LIST = {'required_refs': {
 
 
 def prepare_refs():
+    """
+    Инициализирует справочники в SQLite.
+
+    Создаёт таблицы для всех справочников из REF_LIST['required_refs'],
+    затем заполняет простые справочники записями из REF_LIST['values'].
+
+    Returns:
+        None
+    """
     for item in REF_LIST['required_refs'].items():
         ref = Reference(item[0], item[1])
     for item in REF_LIST['values'].items():
@@ -123,6 +133,11 @@ def prepare_refs():
         for entry in item[1]:
             ref.add(entry)
 def create_user_table():
+    """
+    Создаёт таблицу USERS в SQLite (если не существует).
+
+    Структура таблицы: id, username, password, firstname, lastname, latitude, longitude.
+    """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -141,6 +156,12 @@ def create_user_table():
         print(e)
         print("Error in create_user_table")
 def create_market_table():
+    """
+    Создаёт таблицу MARKETS в SQLite (если не существует).
+
+    Структура таблицы: id, marketname, street, city, county, state, zip,
+    longitude, latitude, season1-4date/time, score.
+    """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -149,9 +170,9 @@ def create_market_table():
             marketname TEXT NOT NULL,
             street TEXT NOT NULL,
             city TEXT NOT NULL,
-            county INTEGER NOT NULL,
-            state INTEGER NOT NULL,
-            zip INTEGER NOT NULL,
+            county TEXT NOT NULL,
+            state TEXT NOT NULL,
+            zip TEXT NOT NULL,
             longitude REAL,
             latitude REAL,
             season1date TEXT,
@@ -170,6 +191,11 @@ def create_market_table():
         print(e)
         print("Error in create_market_table")
 def create_review_table():
+    """
+    Создаёт таблицу REVIEWS в SQLite (если не существует).
+
+    Структура таблицы: id, review_date, user_id, market_id, review_text, score.
+    """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()

@@ -403,6 +403,20 @@ def get_all_connections_by_market_id(reference_name, market_id):
     except:
         print("Error in read_connection_entry")
 def delete_all_connections_by_market_id(reference_name, market_id):
+    """
+    Удаляет все связи для указанного рынка из CSV-файла связей.
+
+    Читает файл, пропускает все строки с указанным market_id
+    и перезаписывает файл без них.
+
+    Args:
+        reference_name (str): Имя файла связи (без расширения .csv).
+        market_id: Идентификатор рынка для удаления связей.
+
+    Raises:
+        Exception: при ошибке чтения/записи файла выводит сообщение
+        "Error in delete_all_connections_by_market_id" в консоль.
+    """
     _reference_name = reference_name
     _market_id = str(market_id)
     new_file = []

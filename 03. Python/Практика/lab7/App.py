@@ -13,11 +13,13 @@ App — точка входа приложения для управления �
 """
 import csv
 
+from BusinessLogic.market_queries import get_markets_ordered_by_mode
 from DAL import userLib, filelib2, requiredFiles, userlib2, reviewlib2, datalib2
 from DAL.datalib2 import get_market, get_all_markets
 from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
-from models.market import MarketData, Market
+from models.collections.market_collection import MarketCollection
+from models.entities.market import Market
 
 
 def testing():
@@ -43,8 +45,12 @@ def testing():
     requiredFiles.create_market_table()
     requiredFiles.create_review_table()
     lst = filelib2.read_csv()
+    datalib2.add_many(lst)
     f = get_all_markets()
-    a = MarketData(f)
+    a = MarketCollection.from_list(f)
+    a.change_mode()
+    a.change_mode()
+    get_markets_ordered_by_mode('num')
     print('s')
 def user_lib_testing():
     """

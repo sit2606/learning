@@ -1,18 +1,18 @@
 """
-userLib — библиотека для управления пользователями.
+userlib2 — библиотека для управления пользователями в SQLite (версия 2).
 
 Модуль предоставляет CRUD-функции для работы с пользователями
-через CSV-файл files/USER_INFO.csv.
+через таблицу USERS в SQLite.
 
 Функции:
-- create_user(user): добавляет пользователя, возвращает UUID
-- read_user(user_id): читает пользователя по UUID
-- get_user(pattern, mode): читает пользователя по username (mode='username') или uid (mode='uid')
+- create_user(user): добавляет пользователя в таблицу USERS
+- read_user(user_id): читает пользователя по id
+- get_user(pattern, mode): читает пользователя по username (mode='username') или id (mode='uid')
 - update_user(user): обновляет данные пользователя
-- delete_user(user_id): удаляет пользователя по UUID
+- delete_user(user_id): удаляет пользователя по id
 
 Использование:
-    from DAL.userLib import create_user, read_user, get_user
+    from DAL.userlib2 import create_user, read_user, get_user
 """
 
 import csv
@@ -36,7 +36,14 @@ DEFAULT_USER = {
 from config import DATABASE_PATH
 
 def create_user(user = DEFAULT_USER):
+    """
+    Добавляет пользователя в таблицу USERS.
 
+    Args:
+        user (dict): Словарь с данными пользователя (user_name, password,
+            firstname, lastname, latitude, longitude).
+            По умолчанию используется DEFAULT_USER.
+    """
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute(
@@ -48,6 +55,15 @@ def create_user(user = DEFAULT_USER):
     conn.close()
 
 def read_user(user_id):
+    """
+    Читает данные пользователя по id из таблицы USERS.
+
+    Args:
+        user_id (int): ID пользователя.
+
+    Returns:
+        dict: данные пользователя или None если не найден.
+    """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         conn.row_factory = sqlite3.Row
@@ -64,6 +80,16 @@ def read_user(user_id):
         print(e)
         print("Error in read_user")
 def get_user(pattern=None, mode = 'username'):
+    """
+    Читает пользователя по username или id.
+
+    Args:
+        pattern: Значение для поиска (username или id).
+        mode: Режим поиска — 'username' (по логину) или 'uid' (по id).
+
+    Returns:
+        dict: данные пользователя или None если не найден.
+    """
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -92,6 +118,12 @@ def get_user(pattern=None, mode = 'username'):
                 print("Error in get_user")
 
 def update_user(user = DEFAULT_USER):
+    """
+    Обновляет данные пользователя в таблице USERS.
+
+    Args:
+        user (dict): Словарь с обновляемыми данными. Обязательное поле: id.
+    """
     _user = user
     try:
             conn = sqlite3.connect(DATABASE_PATH)
@@ -107,6 +139,12 @@ def update_user(user = DEFAULT_USER):
         print("Error in update_user")
 
 def delete_user(user_id):
+    """
+    Удаляет пользователя из таблицы USERS по id.
+
+    Args:
+        user_id (int): ID пользователя для удаления.
+    """
     _user_id = user_id
     try:
             conn = sqlite3.connect(DATABASE_PATH)

@@ -1,52 +1,24 @@
 """
-Модели для справочных данных.
+Справочники (Reference) — базовая сущность для работы с данными.
 
-Содержит класс Reference для работы со справочниками в SQLite.
-
-Типы справочников:
-    - Common: простые справочники (id, name)
-      MEDIA, GROCERY_TYPES, BANKING_INFO, CITY, COUNTY, STATE
-
-    - Connection: связующие справочники (market_id, reference_id, status)
-      MarketXSocialMedia, MarketXGrocery, MarketXBankingInfo
-
-Методы класса Reference:
-    __init__(name, reference_type) — создаёт таблицу
-    get_all_with_names() — словарь {name: id}
-    get_all_with_keys() — словарь {id: name}
-    add(data) — добавить одну запись
-    add_many(data) — batch-вставка
-    get_entry(...) — чтение записи
-    update(data) — обновить запись (Common)
-    get_connections(market_id) — все связи (Connection)
-    delete_connections(market_id) — удалить связи (Connection)
+Содержит класс Reference для управления справочниками в SQLite:
+- Common: простые справочники (id, name) — MEDIA, GROCERY_TYPES, BANKING_INFO, CITY и др.
+- Connection: связующие таблицы many-to-many — MarketXSocialMedia, MarketXGrocery и др.
 
 Использование:
-    from models.reference import Reference
+    >>> media = Reference("MEDIA")
+    >>> media.add("Instagram")
+    >>> media.get_all_with_names()
+    {'Facebook': 1, 'Twitter': 2, 'Instagram': 3}
 
-    # Простой справочник
-    media = Reference("MEDIA")
-    media.add("Instagram")
-    print(media.get_all_with_names())
-
-    # Связующий справочник
-    market_media = Reference("MarketXSocialMedia", "Connection")
-    market_media.add((1, 2, "active"))
-    print(market_media.get_connections(1))
+    >>> market_media = Reference("MarketXSocialMedia", "Connection")
+    >>> market_media.add((1, 3, "active"))
 """
 
-from DAL.referencelib2 import (
-    create_reference,
-    create_connection_reference,
-    get_reference_with_name_as_key,
-    get_reference_with_uid_as_key,
-    create_reference_entry,
-    create_connection_entry,
-    create_reference_entry_by_list,
-    create_connection_entry_by_list,
-    read_reference_entry,
-    read_connection_entry, update_reference_entry, get_all_connections_by_market_id, delete_all_connections_by_market_id
-)
+from DAL.referencelib2 import create_connection_reference, create_reference, get_reference_with_name_as_key, \
+    get_reference_with_uid_as_key, create_connection_entry, create_reference_entry, create_connection_entry_by_list, \
+    create_reference_entry_by_list, read_connection_entry, read_reference_entry, update_reference_entry, \
+    get_all_connections_by_market_id, delete_all_connections_by_market_id
 
 
 class Reference:

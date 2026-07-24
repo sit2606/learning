@@ -31,12 +31,14 @@ from UI.comparison_helper import COMPARISON_SIGNS
 
 
 def print_welcome():
+    """Выводит приветственное сообщение при запуске приложения."""
     print('======--------------------------------======')
     print('Добро пожаловать в приложение для просмотра')
     print('информации о фермерских рынках США')
     print('======--------------------------------======')
 
 def print_help():
+    """Выводит справку по всем доступным командам."""
     print('Доступные команды:')
     print('list_all - выводит таблицу со списком всех рынков')
     print('list - выводит таблицу рынков с пагинацией')
@@ -52,16 +54,30 @@ def print_help():
     print('logout - выйти из приложения')
     print('exit - завершает работу приложения')
 def print_table_header():
+    """Выводит шапку таблицы с русскими названиями колонок."""
     from UI.column_helper import  COLUMN_TO_SHOW
     header = ''
     for column in COLUMN_TO_SHOW:
         header += ' | ' + column
     print(header)
 def print_exit():
+    """Выводит сообщение о завершении работы приложения."""
     print('======--------------------------------======')
     print('Программа завершает работу!')
     print('======--------------------------------======')
 def print_list(markets_for_show, start_pos= 1, step = 10000, column_name = None):
+    """
+    Выводит список рынков с пагинацией.
+
+    Args:
+        markets_for_show (dict): Словарь рынков для отображения.
+        start_pos (int): Стартовая позиция (номер строки).
+        step (int): Количество строк на странице.
+        column_name (dict, optional): Информация о колонке сортировки {name, type}.
+
+    Returns:
+        tuple: (markets_for_show, end_pos, step) — markets_for_show, следующая позиция, шаг.
+    """
     print('======--------------------------------======')
     if column_name is not None:
         print(f'Список всех рынков (сортированный по столбцу "{COLUMNS[column_name['name']]}"):')
@@ -94,6 +110,13 @@ def print_header_numbers():
     print('расстояние - 9')
     print('======--------------------------------======')
 def print_detailed_market_info(market_info):
+    """
+    Выводит подробную информацию о рынке.
+
+    Args:
+        market_info (dict): Словарь с данными рынка, содержащий ключи:
+            'basic_info', 'media_info', 'bank_info', 'grocery_info'.
+    """
     print('======--------------------------------======')
     print('Основная информация')
     print('ID - ' + market_info['basic_info']['market_id'])
@@ -182,6 +205,7 @@ def get_user_coordinates_manually():
 
 
 def print_comparison_rules():
+    """Выводит инструкцию по использованию знаков сравнения для фильтрации."""
     print('======--------------------------------======')
     print('Введите критерий, по которому нужно отфильтровать выборку')
     print('Критерий вводится в виде формулы:')
@@ -194,6 +218,16 @@ def print_comparison_rules():
     print('> 30  выведет все записи, которые строго больше 30')
     print('Лучше всего отделить число от знака пробелом')
 def request_filter():
+    """
+    Запрашивает у пользователя критерий фильтрации рынков.
+
+    Для текстовых колонок запрашивает подстроку для поиска.
+    Для числовых — знак сравнения и значение.
+
+    Returns:
+        tuple: (column, filter_value) — номер колонки и критерий фильтрации,
+               или (None, None) при отмене.
+    """
     print_header_numbers()
     filter_input = True
     while filter_input:
