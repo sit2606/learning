@@ -47,7 +47,7 @@ class MarketCollection:
             base_market = market_info.popitem()
             if base_market[1].location.state.isnumeric():
                 self.ref_mode = 'id'
-            elif base_market[1].location.state.isaplha():
+            elif base_market[1].location.state.isalpha():
                 self.ref_mode = 'value'
     @classmethod
     def from_db(cls):
@@ -61,7 +61,6 @@ class MarketCollection:
         db_markets = get_all_markets()
         market_dict = {m['id']: Market.from_dict(m) for m in db_markets}
         return cls(market_info=market_dict)
-
     @classmethod
     def from_dict(cls, data):
         """Создаёт коллекцию из словаря {id: Market}.
@@ -73,7 +72,6 @@ class MarketCollection:
             MarketCollection
         """
         return cls(market_info=data)
-
     @classmethod
     def from_list(cls, market_list):
         """Создаёт коллекцию из списка Market или словарей.
@@ -86,6 +84,13 @@ class MarketCollection:
         """
         return cls({m['id']: Market.from_dict(m) for m in market_list})
     def change_mode(self):
+        """Переключает режим отображения локаций для всех рынков в коллекции.
+
+        - 'id' → 'value': заменяет числовые ID на названия из справочников
+        - 'value' → 'id': заменяет названия на числовые ID
+
+        Делегирует вызов Market.change_mode() для каждого рынка в коллекции.
+        """
         match self.ref_mode:
             case 'id':
                 city_ref = Reference('CITY').get_all_with_keys()
@@ -113,5 +118,11 @@ class MarketCollection:
                     market.location.street = street_ref[market.location.street]
                     market.location.zip = zip_ref[market.location.zip]
                 self.ref_mode = 'id'
+    def as_list(self):
+        """Конвертирует коллекцию в список Market.
 
+        Returns:
+            list[Market]: Список всех рынков в коллекции
+        """
+        return [m for m in self.market_dict.values()]
 

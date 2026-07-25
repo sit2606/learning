@@ -10,28 +10,12 @@
     - GROCERY_TYPES: типы продовольственных товаров
     - BANKING_INFO: банковские реквизиты
     - CITY, COUNTY, STATE: справочники местоположений (создаются автоматически)
-
-Алгоритм read_csv():
-    1. Загружает справочники (MEDIA, GROCERY_TYPES, BANKING_INFO) для сопоставления имён → ID
-    2. Читает Export.csv построчно, для каждой строки (рынка):
-       - Создаёт объект Market с market_info, timesheet, coordinates, location
-       - Заполняет поля через setattr() на основе ключей CSV
-       - Собирает связи many-to-many (SocialMedia, Grocery, BankingInfo)
-       - Собирает уникальные значения городов, округов, штатов, почтовых индексов, улиц
-    3. Сохраняет справочники местоположений в БД и получает их ID
-    4. Заменяет строковые значения локаций на ID из справочников
-    5. Сохраняет связи many-to-many в промежуточные таблицы
-    6. Возвращает список объектов Market с заполненными ID
-
-Особенности:
-    - Использует Reference class для работы со справочниками
-    - Значения координат приводятся к float (пустые строки → 0.0)
-    - Значения локаций приводятся к Capitalized виду
 """
 
 from DAL import requiredFiles
 import csv
 
+from models.collections.market_collection import MarketCollection
 from models.entities.market import Market
 from models.entities.reference import Reference
 
@@ -118,6 +102,7 @@ def read_csv():
                     location_dict[key].add(value)
                     if hasattr(market.location, key.lower()):
                         setattr(market.location, key.lower(), value)
+            market.ref_mode = 'value'
             market_dict[current_id] = market
         city = Reference('CITY')
         county = Reference('COUNTY')
@@ -129,19 +114,9 @@ def read_csv():
         state.add_many([(item,) for item in location_dict['State']])
         zip.add_many([(item,) for item in location_dict['zip']])
         street.add_many([(item,) for item in location_dict['street']])
-        location_dict['city'] =city.get_all_with_names()
-        location_dict['County'] =county.get_all_with_names()
-        location_dict['State'] = state.get_all_with_names()
-        location_dict['Zip'] = zip.get_all_with_names()
-        location_dict['street'] = street.get_all_with_names()
-        market_list =[]
-        for key in market_dict.keys():
-            market_dict[key].location.city  = location_dict['city'][market_dict[key].location.city]
-            market_dict[key].location.county  = location_dict['County'][market_dict[key].location.county]
-            market_dict[key].location.state = location_dict['State'][market_dict[key].location.state]
-            market_dict[key].location.zip = location_dict['Zip'][market_dict[key].location.zip]
-            market_dict[key].location.street = location_dict['street'][market_dict[key].location.street]
-            market_list.append(market_dict[key])
+        a = MarketCollection.from_dict(market_dict)
+        a.change_mode()
+        market_list = a.as_list()А 
         marketXsocial = Reference('MarketXSocialMedia', 'Connection')
         marketXgrocery = Reference('MarketXGrocery', 'Connection')
         marketXbankinginfo = Reference('MarketXBankingInfo', 'Connection')

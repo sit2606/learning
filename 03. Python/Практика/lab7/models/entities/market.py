@@ -18,6 +18,8 @@
 
 from dataclasses import dataclass
 
+from models.entities.reference import Reference
+
 
 @dataclass
 class Marketinfo:
@@ -93,6 +95,11 @@ class Market:
             self.coordinates = Coordinates(**data)
             self.market_info=Marketinfo(**data)
             self.location=Location(**data)
+        if self.location.state is not None:
+            if self.location.state.isnumeric():
+                self.ref_mode = 'id'
+            elif self.location.city.isalpha():
+                self.ref_mode = 'value'
     def __str__(self):
         """Возвращает строковое представление (id рынка)."""
         return str(self.id)
@@ -142,3 +149,51 @@ class Market:
         market.coordinates = Coordinates(**coordinates)
         market.location = Location(**location)
         return market
+    def get_as_dict(self):
+        """Конвертирует все поля рынка в плоский словарь.
+
+        Объединяет поля из Marketinfo, Timesheet, Coordinates, Location
+        в один словарь.
+
+        Returns:
+            dict: Словарь {имя_поля: значение}
+        """
+        info = {}
+        for fields in self.market_info, self.timesheet, self.coordinates, self.location:
+            for values in fields.__dict__:
+                info.update({values: getattr(fields, values)})
+        return info
+
+    def change_mode(self):
+        """Переключает режим отображения локаций (ID ↔ названия).
+
+        - 'id' → 'value': заменяет числовые ID на названия из справочников
+        - 'value' → 'id': заменяет названия на числовые ID
+
+        Использует справочники CITY, COUNTY, STATE, STREET, ZIP.
+        """
+        match self.ref_mode:
+            case 'id':
+                city_ref = Reference('CITY').get_all_with_keys()
+                county_ref = Reference('COUNTY').get_all_with_keys()
+                state_ref = Reference('STATE').get_all_with_keys()
+                street_ref = Reference('STREET').get_all_with_keys()
+                zip_ref = Reference('ZIP').get_all_with_keys()
+                self.location.city = city_ref[int(self.location.city)]
+                self.location.county = county_ref[int(self.location.county)]
+                self.location.state = state_ref[int(self.location.state)]
+                self.location.street = street_ref[int(self.location.street)]
+                self.location.zip = zip_ref[int(self.location.zip)]
+                self.ref_mode = 'value'
+            case 'value':
+                city_ref = Reference('CITY').get_all_with_names()
+                county_ref = Reference('COUNTY').get_all_with_names()
+                state_ref = Reference('STATE').get_all_with_names()
+                street_ref = Reference('STREET').get_all_with_names()
+                zip_ref = Reference('ZIP').get_all_with_names()
+                self.location.city = city_ref[self.location.city]
+                self.location.county = county_ref[self.location.county]
+                self.location.state = state_ref[self.location.state]
+                self.location.street = street_ref[self.location.street]
+                self.location.zip = zip_ref[self.location.zip]
+                self.ref_mode = 'id'

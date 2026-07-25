@@ -140,9 +140,10 @@ def get_market(market_id):
         cursor.execute(
             f"""SELECT * FROM MARKETS WHERE id = {market_id}"""
         )
-        result = cursor.fetchall()
+        entry = cursor.fetchone()
+        result = Market.from_dict({i : entry[i] for i in entry.keys()})
         conn.close()
-        print(result)
+        return result
     except Exception as e:
         print(e)
         print("Error in create_market")

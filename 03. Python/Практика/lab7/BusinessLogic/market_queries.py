@@ -4,8 +4,9 @@ market_queries — запросы к данным о фермерских рын
 Модуль содержит функции для получения, сортировки и фильтрации
 данных о рынках из базы данных.
 
+Использует MarketCollection для работы с данными.
+
 TODO: Перенести функции из marketList.py:
-    - get_all_markets_ordered_by_column(col, order, user) — сортировка по колонке
     - get_all_markets_filtered_by_column(col, filter, user) — фильтрация по колонке
     - get_market_by_id(market_id) — получение одного рынка по ID
     - get_market_references(market_id) — получение связей рынка
@@ -16,6 +17,17 @@ from models.collections.market_collection import MarketCollection
 
 
 def get_markets_ordered_by_mode(mode):
+    """Получает все рынки с резолвингом локаций и упорядочиванием.
+
+    Загружает рынки из БД, переключает режим локаций (ID → названия)
+    и формирует словарь с ключами 'num' (порядковый номер) или 'uid' (ID рынка).
+
+    Args:
+        mode: Режим ключевания — 'num' или 'uid'
+
+    Returns:
+        dict: Словарь {ключ: Market}
+    """
     market_base = MarketCollection.from_db()
     market_base.change_mode()
     num  = 1
@@ -28,7 +40,19 @@ def get_markets_ordered_by_mode(mode):
                 ordered_market_base.update({market_id: market_info})
         num += 1
     return ordered_market_base
-def get_all_markets_ordered_by_column(column_number, order = False, user = None):
+
+
+def get_all_markets_ordered_by_column(column_number, order=False, user=None):
+    """Получает данные о всех рынках, отсортированные по указанной колонке.
+
+    Args:
+        column_number (int): Номер колонки для сортировки (1-9)
+        order: Сортировка — 'a' (по возрастанию), 'd' (по убыванию)
+        user: Словарь пользователя (для колонки distance)
+
+    Returns:
+        tuple: (dict_рынков, column_info) или None (в процессе разработки)
+    """
     column = COLUMNS_INFO[column_number]
     match order:
         case 'a':
@@ -40,6 +64,7 @@ def get_all_markets_ordered_by_column(column_number, order = False, user = None)
         pass
         #market_base =  geoLib.get_distance(user, market_base)
     sorting_base = {}
+    return None
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[column['name']]})
     sorted_items = sorted(sorting_base.items(), key=lambda x: x[1], reverse=order)
