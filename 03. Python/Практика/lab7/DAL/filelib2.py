@@ -116,7 +116,7 @@ def read_csv():
         street.add_many([(item,) for item in location_dict['street']])
         a = MarketCollection.from_dict(market_dict)
         a.change_mode()
-        market_list = a.as_list()А 
+        market_list = a.as_list()
         marketXsocial = Reference('MarketXSocialMedia', 'Connection')
         marketXgrocery = Reference('MarketXGrocery', 'Connection')
         marketXbankinginfo = Reference('MarketXBankingInfo', 'Connection')

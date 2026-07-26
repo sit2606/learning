@@ -38,7 +38,7 @@ from datetime import datetime
 import bcrypt
 import getpass
 
-from BusinessLogic import geoLib
+
 from BusinessLogic.marketList import  get_all_markets, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
 from DAL import userLib, fileLib, dataLib, referenceLib

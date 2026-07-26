@@ -12,8 +12,10 @@ TODO: Перенести функции из marketList.py:
     - get_market_references(market_id) — получение связей рынка
     - prepare_ordered_list(markets) — переиндексация для пагинации
 """
+from DAL.datalib2 import get_market
 from UI.column_helper import COLUMNS_INFO
 from models.collections.market_collection import MarketCollection
+from models.entities.market import Market
 
 
 def get_markets_ordered_by_mode(mode):
@@ -60,11 +62,14 @@ def get_all_markets_ordered_by_column(column_number, order=False, user=None):
         case 'd':
             order = True
     market_base = get_markets_ordered_by_mode('num')
+    for m in market_base.keys():
+        dict_market = market_base[m].get_as_dict()
+        dict_market.update({'number' : m})
+        market_base[m]  = dict_market
     if column['name'] == 'distance':
         pass
         #market_base =  geoLib.get_distance(user, market_base)
     sorting_base = {}
-    return None
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[column['name']]})
     sorted_items = sorted(sorting_base.items(), key=lambda x: x[1], reverse=order)
@@ -72,3 +77,14 @@ def get_all_markets_ordered_by_column(column_number, order=False, user=None):
     for item_id in sorted_items:
         ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
     return ordered_market_base, column
+def prepare_ordered_list(markets):
+    """Переиндексация dict с 1 для корректной пагинации."""
+    markets_for_show = dict()
+    for index, (key, value) in enumerate(markets.items(), start = 1):
+        markets_for_show.update({index: value})
+    return markets_for_show
+
+def get_market_by_id(market_id):
+    market = get_market(market_id)
+    market = Market.get_as_dict(market)
+    print('s')

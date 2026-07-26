@@ -57,7 +57,16 @@ class Location:
     city: str = None
     state: str = None
     county: str = None
+@dataclass
+class BankInfo:
+    banking : dict = None
 
+@dataclass
+class MediaInfo:
+    media : dict = None
+@dataclass
+class GroceryInfo:
+    grocery : dict = None
 
 class Market:
     """Класс фермерского рынка.
@@ -90,11 +99,17 @@ class Market:
         self.timesheet = Timesheet()
         self.coordinates = Coordinates()
         self.location = Location()
+        self.banking_info = BankInfo()
+        self.media_info = MediaInfo()
+        self.grocery_info = GroceryInfo()
         if data is not None:
             self.timesheet = Timesheet(**data)
             self.coordinates = Coordinates(**data)
             self.market_info=Marketinfo(**data)
             self.location=Location(**data)
+            self.banking_info=BankInfo(**data)
+            self.media_info=MediaInfo(**data)
+            self.grocery_info=GroceryInfo(**data)
         if self.location.state is not None:
             if self.location.state.isnumeric():
                 self.ref_mode = 'id'
@@ -142,12 +157,20 @@ class Market:
             'zip': data.get('zip'),
             'street': data.get('street'),
         }
-
+        media = data.get('media_info')
+        media_info = {k:v for k, v in media.items()}
+        grocery = data.get('grocery_info')
+        grocery_info = {k:v for k, v in grocery.items()}
+        banking = data.get('banking_info')
+        banking_info = {k:v for k, v in banking.items()}
         market = cls(id=data['id'])
         market.market_info = Marketinfo(**market_info)
         market.timesheet = Timesheet(**timesheet)
         market.coordinates = Coordinates(**coordinates)
         market.location = Location(**location)
+        market.media_info = MediaInfo(**media_info)
+        market.grocery_info = GroceryInfo(**grocery_info)
+        market.banking_info = BankInfo(**banking_info)
         return market
     def get_as_dict(self):
         """Конвертирует все поля рынка в плоский словарь.
@@ -162,8 +185,9 @@ class Market:
         for fields in self.market_info, self.timesheet, self.coordinates, self.location:
             for values in fields.__dict__:
                 info.update({values: getattr(fields, values)})
-        return info
 
+        info.update({'market_id': self.id})
+        return info
     def change_mode(self):
         """Переключает режим отображения локаций (ID ↔ названия).
 

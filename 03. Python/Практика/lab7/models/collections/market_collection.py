@@ -126,3 +126,5 @@ class MarketCollection:
         """
         return [m for m in self.market_dict.values()]
 
+    def as_dict(self):
+        pass

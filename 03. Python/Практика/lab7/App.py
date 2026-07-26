@@ -13,7 +13,8 @@ App — точка входа приложения для управления �
 """
 import csv
 
-from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column
+from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column, \
+    get_market_by_id
 from DAL import userLib
 from DAL.datalib2 import get_all_markets, get_market
 from UI.uiLib import print_welcome
@@ -54,6 +55,7 @@ def testing():
     x = m.get_as_dict()
     get_markets_ordered_by_mode('num')
     get_all_markets_ordered_by_column(1)
+    get_market_by_id(1018261)
     print('s')
 def user_lib_testing():
     """
