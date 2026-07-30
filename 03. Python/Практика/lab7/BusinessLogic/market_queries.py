@@ -1,18 +1,21 @@
 """
-market_queries — запросы к данным о фермерских рынках.
+market_queries — запросы к данным о фермерских рынках (OOP-версия).
 
 Модуль содержит функции для получения, сортировки и фильтрации
-данных о рынках из базы данных.
+данных о рынках из базы данных SQLite.
 
-Использует MarketCollection для работы с данными.
+Функции:
+    get_markets_ordered_by_mode(mode) — все рынки с резолвингом локаций
+    get_all_markets_ordered_by_column(col, order, user) — сортировка по колонке
+    get_market_by_id(market_id) — получение одного рынка по ID со справочниками
+    get_all_markets_filtered_by_column(col, filter, user) — фильтрация по колонке
+    prepare_ordered_list(markets) — переиндексация для пагинации
 
-TODO: Перенести функции из marketList.py:
-    - get_all_markets_filtered_by_column(col, filter, user) — фильтрация по колонке
-    - get_market_by_id(market_id) — получение одного рынка по ID
-    - get_market_references(market_id) — получение связей рынка
-    - prepare_ordered_list(markets) — переиндексация для пагинации
+TODO:
+    - get_market_references(market_id) — получение связей рынка (в Market.from_db)
+    - distance — расчёт расстояния (geoLib.get_distance)
 """
-from DAL.datalib2 import get_market
+from BusinessLogic import processFilter
 from UI.column_helper import COLUMNS_INFO
 from models.collections.market_collection import MarketCollection
 from models.entities.market import Market
@@ -85,6 +88,44 @@ def prepare_ordered_list(markets):
     return markets_for_show
 
 def get_market_by_id(market_id):
-    market = get_market(market_id)
-    market = Market.get_as_dict(market)
-    print('s')
+    """Получает рынок по ID со всеми справочниками.
+
+    Делегирует вызов Market.from_db() — загружает из БД,
+    резолвит локации, загружает связи (banking, grocery, media).
+
+    Args:
+        market_id: ID рынка (FMID)
+
+    Returns:
+        Market: объект рынка с заполненными полями
+    """
+    return Market.from_db(market_id=market_id)
+
+def get_all_markets_filtered_by_column(column, filter=None, user=None):
+    """Фильтрует и сортирует рынки по колонке с критерием.
+
+    Получает все рынки через get_all_markets_ordered_by_column(),
+    применяет фильтр через processFilter.process(),
+    сортирует результат и переиндексирует для пагинации.
+
+    Args:
+        column (int): Номер колонки (1-9) из COLUMNS_INFO
+        filter: Критерий фильтрации. Для текстовых — строка (подстрока).
+                Для числовых — кортеж (знак_сравнения, значение_строка).
+        user: Словарь пользователя (для колонки distance)
+
+    Returns:
+        tuple: (dict_рынков, column_info) — отфильтрованный словарь
+               (с ключами от 1) и dict колонки {name, type}
+    """
+    market_list, column_info = get_all_markets_ordered_by_column(column, user=user)
+    market_base = processFilter.process(market_list, column, filter)
+    sorting_base = {}
+    for market_id, market_info in market_base.items():
+        sorting_base.update({market_id: market_info[column_info['name']]})
+    sorted_items = sorted(sorting_base.items(), key=lambda x: x[1])
+    ordered_market_base = dict()
+    for item_id in sorted_items:
+        ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
+    ordered_market_base = prepare_ordered_list(ordered_market_base)
+    return ordered_market_base, column_info

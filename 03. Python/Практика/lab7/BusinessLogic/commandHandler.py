@@ -39,13 +39,14 @@ import bcrypt
 import getpass
 
 
-from BusinessLogic.marketList import  get_all_markets, get_all_markets_ordered_by_column, \
+
+from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
-from DAL import userLib, fileLib, dataLib, referenceLib
+from DAL import userLib,  dataLib, referenceLib
 from DAL.reviewLib import create_review, calculate_score
-from DAL.userLib import get_user
 from UI import uiLib
-from UI.column_helper import COLUMNS_INFO, COLUMNS_INFO_REVERSED
+from UI.column_helper import COLUMNS_INFO
+from models.entities.user import User
 
 
 def command_help():
@@ -60,8 +61,7 @@ def command_exit():
 
 def command_list_all():
     """Возвращает (True, dict_всех_рынков)."""
-    return True, get_all_markets('num')
-
+    return True, get_markets_ordered_by_mode('num')
 
 def command_list():
     """
@@ -72,7 +72,7 @@ def command_list():
     start_num = int(start_input) if start_input else 1
     step_input = input('Введите  шаг: ').strip()
     step = int(step_input) if step_input else 10
-    return True, get_all_markets('num'), start_num, step
+    return True, get_markets_ordered_by_mode('num'), start_num, step
 
 
 def command_order(column = None, order = None, start_num = None, step = None):
@@ -141,22 +141,19 @@ def register_user():
             case 'stop':
                 return True, None
             case _:
-                user = get_user(user_name)
-                if user is not None:
+                user = User.from_db(username = user_name)
+                if user.username == user_name:
                     print('Пожалуйста, введите другой username или введите stop для завершения регистрации')
                 else:
-                    user = {}
-                    user.update({'user_name': user_name})
+                    user.username = user_name
                     user_password = getpass.getpass("Введите ваш пароль: ")
                     password_bytes = user_password.encode('utf-8')
                     salt = bcrypt.gensalt(rounds=12)
                     hashed_password = bcrypt.hashpw(password_bytes, salt)
                     user_password = hashed_password.decode('utf-8')
-                    user.update({'password': user_password})
-                    user_firstname = input('Введите Ваше имя ')
-                    user.update({'firstname': user_firstname})
-                    user_lastname = input('Введите Вашу фамилию ')
-                    user.update({'lastname': user_lastname})
+                    user.password = user_password
+                    user.firstname = input('Введите Ваше имя ')
+                    user.lastname = input('Введите Вашу фамилию ')
                     command = input('Вы хотите указать свои координаты?\n'
                                     'Введите `y` чтобы указать\n'
                                     'Введите `n` чтобы не указывать (координаты нужны, чтобы работала'
@@ -164,45 +161,27 @@ def register_user():
                     match command:
                         case 'y':
                             latitude, longitude = uiLib.get_user_coordinates_manually()
-                            if latitude is None or longitude is None:
-                                user.update({'latitude': '', 'longitude': ''})
-                            else:
-                                user.update({'latitude': str(latitude), 'longitude': str(longitude)})
+                            user.latitude = str(latitude)
+                            user.longitude = str(longitude)
                         case 'n':
-                                user.update({'latitude': '', 'longitude': ''})
+                            user.latitude, user.longitude = ('','')
                         case _:
                             print('Команда не распознана, вы сможете указать координаты позже')
-                            user.update({'latitude': '', 'longitude': ''})
-                    userLib.create_user(user)
-                    user = get_user(user_name)
+                            user.latitude, user.longitude = ('','')
+                    user.add_to_db()
                     print('Регистрация успешна! Добро пожаловать!')
                     return True, user
 def login_user(user):
-    """
-    Авторизация пользователя.
-
-    Если пользователь уже авторизован — выводит сообщение и возвращает текущего пользователя.
-    Иначе запрашивает логин и пароль, проверяет через bcrypt.
-
-    Args:
-        user: Текущий авторизованный пользователь или None.
-
-    Returns:
-        (True, user) — после успешной авторизации или если уже авторизован,
-        (True, None) — при ошибке (пользователь не найден или неверный пароль).
-    """
     if user is None:
-        user = {}
         user_name = input('Введите ваш логин: ')
-        user_in_base = get_user(user_name)
-        if user_in_base is None:
+        user_in_base = User.from_db(username = user_name)
+        if user_in_base.username != user_name:
             print('Пользователь не найден, попробуйте снова')
             return True, None
         else:
-            user.update({'user_name': user_name})
             user_password = getpass.getpass("Введите ваш пароль: ")
             password_bytes = user_password.encode('utf-8')
-            is_valid = bcrypt.checkpw(password_bytes, user_in_base['password'].encode('utf-8'))
+            is_valid = bcrypt.checkpw(password_bytes, user_in_base.password.encode('utf-8'))
             if is_valid:
                 print('Добро пожаловать!')
                 return True, user_in_base

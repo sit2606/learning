@@ -13,10 +13,11 @@ App — точка входа приложения для управления �
 """
 import csv
 
+from BusinessLogic.commandHandler import register_user
 from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column, \
     get_market_by_id
 from DAL import userLib
-from DAL.datalib2 import get_all_markets, get_market
+from DAL.datalib2 import get_all_markets, get_market, update_market
 from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
 from models.collections.market_collection import MarketCollection
@@ -49,13 +50,13 @@ def testing():
     datalib2.add_many(lst)
     f = get_all_markets()
     a = MarketCollection.from_list(f)
-    a.change_mode()
-    a.change_mode()
-    m = get_market(1018261)
-    x = m.get_as_dict()
+    n = Market.from_db(market_id=1018261)
+    n.banking_info.change_mode()
     get_markets_ordered_by_mode('num')
     get_all_markets_ordered_by_column(1)
     get_market_by_id(1018261)
+    register_user()
+    n.banking_info.change_mode()
     print('s')
 def user_lib_testing():
     """
@@ -94,7 +95,7 @@ def main():
     5. Цикл команд: приветствие, чтение и обработка команд
        с отслеживанием текущего пользователя (user = None при старте)
     """
-    testing()
+    #testing()
     file_creation()
     user_lib_testing()
     run_app = True

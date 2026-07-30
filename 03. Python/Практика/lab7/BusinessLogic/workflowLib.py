@@ -81,7 +81,7 @@ def get_command(user):
         command = input('Пожалуйста, введите команду: ').strip()
         return command
     else:
-        command = input(f'Привет, {str(user['firstname'])}! \nПожалуйста, введите команду: ').strip()
+        command = input(f'Привет, {str(user.firstname)}! \nПожалуйста, введите команду: ').strip()
         return command
 def proceed_command(command, user):
     """
@@ -146,7 +146,7 @@ def proceed_command(command, user):
                 is_run, market_info = commandHandler.command_show()
                 if market_info is None:
                     return is_run, user
-                uiLib.print_detailed_market_info(market_info)
+                uiLib.print_detailed_market_info(market_info.get_ui_dict())
                 should_continue = input('Если хотите увидеть отзывы на рынок, введите `y`\n'
                                         'Если хотите вернуться к вводу команд, нажмите Enter\n')
                 match should_continue:

@@ -8,3 +8,11 @@
 """
 
 DATABASE_PATH = 'database/base.db'
+
+DEFAULT_USER = {
+                'username': 'test',
+                'password': '',
+                'firstname': 'test_firstname',
+                'lastname': 'test_lastname',
+                'latitude': '',
+                'longitude': ''}

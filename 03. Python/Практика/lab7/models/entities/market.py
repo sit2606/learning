@@ -6,6 +6,9 @@
 - Timesheet: расписание по сезонам
 - Coordinates: географические координаты
 - Location: местоположение (город, округ, штат, индекс, улица)
+- BankInfo: банковские реквизиты (справочник)
+- MediaInfo: соцсети (справочник)
+- GroceryInfo: типы товаров (справочник)
 - Market: основной класс, объединяющий все группы
 
 Иерархия:
@@ -13,11 +16,25 @@
     ├── market_info: Marketinfo
     ├── timesheet: Timesheet
     ├── coordinates: Coordinates
-    └── location: Location
+    ├── location: Location
+    ├── banking_info: BankInfo
+    ├── media_info: MediaInfo
+    └── grocery_info: GroceryInfo
+
+Factory-методы:
+    Market.from_dict(data) — из словаря/Row
+    Market.from_db(market_id) — из БД с резолвингом справочников
+
+Методы:
+    get_as_dict() — конвертация в плоский словарь
+    change_mode() — переключение ID ↔ названия локаций
+    update() — сохранение в БД
 """
 
 from dataclasses import dataclass
 
+
+from DAL.referencelib2 import  get_all_connections_by_market_id
 from models.entities.reference import Reference
 
 
@@ -60,14 +77,76 @@ class Location:
 @dataclass
 class BankInfo:
     banking : dict = None
-
+    ref_mode :str = 'id'
+    def change_mode(self):
+        match self.ref_mode:
+            case 'id':
+                bank_ref = Reference('BANKING_INFO').get_all_with_keys()
+                new_banking = dict()
+                for key, value in self.banking.items():
+                    new_banking.update({
+                        bank_ref.get(key) : value
+                    })
+                self.banking = new_banking
+                self.ref_mode = 'value'
+            case 'value':
+                bank_ref = Reference('BANKING_INFO').get_all_with_names()
+                new_banking = dict()
+                for key, value in self.banking.items():
+                    new_banking.update({
+                        bank_ref.get(key) : value
+                    })
+                self.banking = new_banking
+                self.ref_mode = 'id'
 @dataclass
 class MediaInfo:
     media : dict = None
+    ref_mode: str = 'id'
+    def change_mode(self):
+        match self.ref_mode:
+            case 'id':
+                media_ref = Reference('MEDIA').get_all_with_keys()
+                new_media = dict()
+                for key, value in self.media.items():
+                    new_media.update({
+                        media_ref.get(key) : value
+                    })
+                self.media = new_media
+                self.ref_mode = 'value'
+            case 'value':
+                media_ref = Reference('MEDIA').get_all_with_names()
+                new_media = dict()
+                for key, value in self.media.items():
+                    new_media.update({
+                        media_ref.get(key) : value
+                    })
+                self.media = new_media
+                self.ref_mode = 'id'
 @dataclass
 class GroceryInfo:
     grocery : dict = None
+    ref_mode: str = 'id'
 
+    def change_mode(self):
+        match self.ref_mode:
+            case 'id':
+                grocery_ref = Reference('GROCERY_TYPES').get_all_with_keys()
+                new_grocery = dict()
+                for key, value in self.grocery.items():
+                    new_grocery.update({
+                        grocery_ref.get(key): value
+                    })
+                self.grocery = new_grocery
+                self.ref_mode = 'value'
+            case 'value':
+                grocery_ref = Reference('GROCERY_TYPES').get_all_with_names()
+                new_grocery = dict()
+                for key, value in self.grocery.items():
+                    new_grocery.update({
+                        grocery_ref.get(key): value
+                    })
+                self.grocery = new_grocery
+                self.ref_mode = 'id'
 class Market:
     """Класс фермерского рынка.
 
@@ -95,6 +174,7 @@ class Market:
             id: Уникальный идентификатор рынка
         """
         self.id = id
+        self.ref_mode = 'id'
         self.market_info = Marketinfo()
         self.timesheet = Timesheet()
         self.coordinates = Coordinates()
@@ -158,11 +238,20 @@ class Market:
             'street': data.get('street'),
         }
         media = data.get('media_info')
-        media_info = {k:v for k, v in media.items()}
+        if media is not None:
+            media_info = {k:v for k, v in media.items()}
+        else:
+            media_info = dict()
         grocery = data.get('grocery_info')
-        grocery_info = {k:v for k, v in grocery.items()}
+        if grocery is not None:
+            grocery_info = {k:v for k, v in grocery.items()}
+        else:
+            grocery_info = dict()
         banking = data.get('banking_info')
-        banking_info = {k:v for k, v in banking.items()}
+        if banking is not None:
+            banking_info = {k:v for k, v in banking.items()}
+        else:
+            banking_info = dict()
         market = cls(id=data['id'])
         market.market_info = Marketinfo(**market_info)
         market.timesheet = Timesheet(**timesheet)
@@ -185,8 +274,31 @@ class Market:
         for fields in self.market_info, self.timesheet, self.coordinates, self.location:
             for values in fields.__dict__:
                 info.update({values: getattr(fields, values)})
-
         info.update({'market_id': self.id})
+        return info
+    def get_ui_dict(self):
+        """Конвертирует все поля рынка в плоский словарь.
+
+        Объединяет поля из Marketinfo, Timesheet, Coordinates, Location
+        в один словарь.
+
+        Returns:
+            dict: Словарь {имя_поля: значение}
+        """
+        basic_info = {}
+        info = {}
+        for fields in self.market_info, self.timesheet, self.coordinates, self.location:
+            for values in fields.__dict__:
+                basic_info.update({values: getattr(fields, values)})
+        basic_info.update({'market_id': str(self.id)})
+        info.update({'basic_info': basic_info})
+        if self.banking_info is not None:
+            info.update({'bank_info': self.banking_info.banking})
+        if self.grocery_info is not None:
+            info.update({'grocery_info': self.grocery_info.grocery})
+        if self.media_info is not None:
+            info.update({'media_info': self.media_info.media})
+
         return info
     def change_mode(self):
         """Переключает режим отображения локаций (ID ↔ названия).
@@ -208,7 +320,11 @@ class Market:
                 self.location.state = state_ref[int(self.location.state)]
                 self.location.street = street_ref[int(self.location.street)]
                 self.location.zip = zip_ref[int(self.location.zip)]
+                self.banking_info.change_mode()
+                self.media_info.change_mode()
+                self.grocery_info.change_mode()
                 self.ref_mode = 'value'
+
             case 'value':
                 city_ref = Reference('CITY').get_all_with_names()
                 county_ref = Reference('COUNTY').get_all_with_names()
@@ -220,4 +336,46 @@ class Market:
                 self.location.state = state_ref[self.location.state]
                 self.location.street = street_ref[self.location.street]
                 self.location.zip = zip_ref[self.location.zip]
+                self.banking_info.change_mode()
+                self.media_info.change_mode()
+                self.grocery_info.change_mode()
                 self.ref_mode = 'id'
+
+    @classmethod
+    def from_db(cls, market_id):
+        """Загружает рынок по ID из БД с резолвингом справочников.
+
+        Создаёт Market через get_market(), переключает локации на названия (change_mode),
+        загружает связи из таблиц MarketXBankingInfo, MarketXGrocery, MarketXSocialMedia.
+
+        Args:
+            market_id: ID рынка (FMID)
+
+        Returns:
+            Market: объект с заполненными полями и справочниками
+
+        Example:
+            >>> market = Market.from_db(1018261)
+            >>> market.location.city  # "Santa Fe" вместо "42"
+        """
+        from DAL.datalib2 import get_market
+        market = get_market(market_id)
+        banking = get_all_connections_by_market_id("MarketXBankingInfo", market_id=market_id)
+        grocery = get_all_connections_by_market_id("MarketXGrocery", market_id=market_id)
+        media = get_all_connections_by_market_id("MarketXSocialMedia", market_id=market_id)
+        market.banking_info = BankInfo(banking)
+        market.grocery_info = GroceryInfo(grocery)
+        market.media_info = MediaInfo(media)
+        market.change_mode()
+        return market
+
+    def update(self):
+
+        """Сохраняет изменения рынка в БД.
+
+        Делегирует вызов DAL.datalib2.update_market(). Если ref_mode = 'value',
+        автоматически конвертирует названия обратно в ID перед записью.
+        """
+        from DAL.datalib2 import update_market
+        update_market(self)
+        

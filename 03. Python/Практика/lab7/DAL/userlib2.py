@@ -15,9 +15,9 @@ userlib2 — библиотека для управления пользоват
     from DAL.userlib2 import create_user, read_user, get_user
 """
 
-import csv
-import uuid
 import sqlite3
+
+from models.entities.user import User
 
 field_names = ['Id',
                'user_name',
@@ -26,16 +26,11 @@ field_names = ['Id',
                'lastname',
                'latitude',
                'longitude']
-DEFAULT_USER = {
-                'user_name': 'test',
-                'password': '',
-                'firstname': 'test_firstname',
-                'lastname': 'test_lastname',
-                'latitude': '',
-                'longitude': ''}
-from config import DATABASE_PATH
 
-def create_user(user = DEFAULT_USER):
+from config import DATABASE_PATH, DEFAULT_USER
+
+def create_user(user: User  = User(DEFAULT_USER)):
+
     """
     Добавляет пользователя в таблицу USERS.
 
@@ -48,37 +43,12 @@ def create_user(user = DEFAULT_USER):
     cursor = conn.cursor()
     cursor.execute(
         f"INSERT OR IGNORE INTO USERS ( username, password, firstname, lastname, latitude, longitude) VALUES (?,?,?,?,?,?)",
-        (user["user_name"], user["password"], user["firstname"],
-         user["lastname"], user["latitude"], user["longitude"]),
+        (user.username, user.password, user.firstname,
+         user.lastname, user.latitude, user.longitude),
     )
     conn.commit()
     conn.close()
 
-def read_user(user_id):
-    """
-    Читает данные пользователя по id из таблицы USERS.
-
-    Args:
-        user_id (int): ID пользователя.
-
-    Returns:
-        dict: данные пользователя или None если не найден.
-    """
-    try:
-        conn = sqlite3.connect(DATABASE_PATH)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-
-        cursor.execute(
-            f"SELECT * FROM USERS WHERE id = ?",
-            (user_id, )
-        )
-        entry = dict(cursor.fetchone())
-        conn.close()
-        return entry
-    except Exception as e:
-        print(e)
-        print("Error in read_user")
 def get_user(pattern=None, mode = 'username'):
     """
     Читает пользователя по username или id.
@@ -100,8 +70,12 @@ def get_user(pattern=None, mode = 'username'):
                     f"SELECT * FROM USERS WHERE username = ?",
                     (pattern,)
                 )
-                user = dict(cursor.fetchone())
-                return user
+                res = cursor.fetchone()
+                if res is not None:
+                    user = dict(res)
+                    return user
+                else:
+                    return DEFAULT_USER
             except Exception as e:
                 print(e)
                 print("Error in get_user")
@@ -117,7 +91,7 @@ def get_user(pattern=None, mode = 'username'):
                 print(e)
                 print("Error in get_user")
 
-def update_user(user = DEFAULT_USER):
+def update_user(user: User = User(DEFAULT_USER)):
     """
     Обновляет данные пользователя в таблице USERS.
 
@@ -130,7 +104,7 @@ def update_user(user = DEFAULT_USER):
             cursor = conn.cursor()
             cursor.execute(
                 f"UPDATE USERS SET username = ?, password = ?, firstname = ?, lastname = ?, latitude =? , longitude =?    WHERE id = ?",
-                (_user['username'],_user['password'],_user['firstname'],_user['lastname'], _user['latitude'], _user['longitude'], _user['id'])
+                (_user.username, _user.password, _user.firstname, _user.lastname, _user.latitude, _user.longitude, _user.id)
             )
             conn.commit()
             conn.close()
@@ -138,20 +112,15 @@ def update_user(user = DEFAULT_USER):
         print(e)
         print("Error in update_user")
 
-def delete_user(user_id):
-    """
-    Удаляет пользователя из таблицы USERS по id.
+def delete_user(user: User):
 
-    Args:
-        user_id (int): ID пользователя для удаления.
-    """
-    _user_id = user_id
+
     try:
             conn = sqlite3.connect(DATABASE_PATH)
             cursor = conn.cursor()
             cursor.execute(
                 f"DELETE FROM  USERS   WHERE id = ?",
-                (_user_id, )
+                (user.id, )
             )
             conn.commit()
             conn.close()

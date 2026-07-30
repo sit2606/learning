@@ -66,10 +66,14 @@ class MarketCollection:
         """Создаёт коллекцию из словаря {id: Market}.
 
         Args:
-            data: Словарь {id: Market}
+            data (dict): Словарь {id: Market}
 
         Returns:
-            MarketCollection
+            MarketCollection: коллекция, обёрнутая из переданного словаря
+
+        Example:
+            >>> markets = {1: Market(1), 2: Market(2)}
+            >>> collection = MarketCollection.from_dict(markets)
         """
         return cls(market_info=data)
     @classmethod

@@ -110,20 +110,6 @@ class Reference:
             return read_connection_entry(self.name, market_id, reference_id)
         else:
             return read_reference_entry(self.name, entry_uid, entry_name)
-    def update(self, data_to_update):
-        """Обновляет запись в справочнике (только для Common).
-
-        Args:
-            data_to_update (tuple): Кортеж (new_name, entry_id)
-
-        Returns:
-            None
-
-        Example:
-            >>> media = Reference("MEDIA")
-            >>> media.update(("Instagram Updated", 3))
-        """
-        return update_reference_entry(self.name, data_to_update)
 
     def get_connections(self, market_id):
         """Возвращает все связи для рынка (только для Connection).

@@ -4,9 +4,11 @@
 Содержит функции для CRUD-операций с таблицей MARKETS.
 
 Функции:
-    add_market — добавляет один рынок в базу
-    add_many — batch-вставка списка рынков
-    update_market — обновляет данные рынка
+    add_market(market) — добавляет один рынок в базу
+    add_many(markets) — batch-вставка списка рынков
+    update_market(market) — обновляет данные рынка
+    get_market(market_id) — получает один рынок по ID
+    get_all_markets() — получает все рынки (список dict)
 """
 
 import sqlite3
@@ -83,19 +85,22 @@ def add_many(markets: list[Market]):
         print(e)
         print("Error in add_many")
 
-def update_market(data_to_update):
+def update_market(market: Market):
     """Обновляет данные рынка в таблице MARKETS.
 
+    Если рынок в режиме 'value' (названия), автоматически конвертирует
+    обратно в ID через change_mode() перед записью.
+
     Args:
-        data_to_update (dict): Словарь с обновляемыми данными.
-            Обязательное поле: id
+        market (Market): Объект рынка с обновлёнными данными.
+            Обязательное поле: market.id
 
     Returns:
         None
     """
-    city = Reference('CITY')
-    county = Reference('COUNTY')
-    state = Reference('STATE')
+    if market.ref_mode == 'value' :
+        market.change_mode()
+
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()
@@ -107,6 +112,8 @@ def update_market(data_to_update):
             f"county = ?, "
             f"state = ?, "
             f"zip = ?, "
+            f"longitude = ?, "
+            f"latitude = ?, "
             f"season1date = ?, "
             f"season1time = ?, "
             f"season2date = ?, "
@@ -115,19 +122,19 @@ def update_market(data_to_update):
             f"season3time = ?, "
             f"season4date = ?, "
             f"season4time = ?, "
-            f"score = ?"
+            f"score = ? "
             f"WHERE id = ?",
-            (data_to_update['marketname'], data_to_update['street'], data_to_update['city'],
-             data_to_update['county'], data_to_update['state'], data_to_update['zip'],
-             data_to_update['season1date'], data_to_update['season1time'],
-             data_to_update['season2date'], data_to_update['season2time'],
-             data_to_update['season3date'], data_to_update['season3time'],
-             data_to_update['season4date'], data_to_update['season4time'],
-             data_to_update['score'],)
+            (market.market_info.marketname, market.location.street, market.location.city,
+             market.location.county, market.location.state, market.location.zip,
+             market.coordinates.longitude, market.coordinates.latitude,
+             market.timesheet.season1date, market.timesheet.season1time,
+             market.timesheet.season2date, market.timesheet.season2time,
+             market.timesheet.season3date, market.timesheet.season3time,
+             market.timesheet.season4date, market.timesheet.season4time,
+             market.market_info.score, market.id)
         )
         conn.commit()
         conn.close()
-
     except Exception as e:
         print(e)
         print("Error in update_market")
@@ -138,7 +145,8 @@ def get_market(market_id):
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute(
-            f"""SELECT * FROM MARKETS WHERE id = {market_id}"""
+            "SELECT * FROM MARKETS WHERE id = ?",
+            (market_id,)
         )
         entry = cursor.fetchone()
         result = Market.from_dict({i : entry[i] for i in entry.keys()})
@@ -146,7 +154,7 @@ def get_market(market_id):
         return result
     except Exception as e:
         print(e)
-        print("Error in create_market")
+        print("Error in get_market")
 
 def get_all_markets():
     try:
@@ -161,4 +169,4 @@ def get_all_markets():
         return result
     except Exception as e:
         print(e)
-        print("Error in create_market")
+        print("Error in get_all_markets")

@@ -270,6 +270,7 @@ def update_reference_entry(reference_name, data_to_update):
         print(e)
         print("Error in update_reference_entry")
 
+
 def create_connection_reference(reference_name):
     """Создаёт таблицу связующего справочника, если она не существует.
 
@@ -433,7 +434,7 @@ def get_all_connections_by_market_id(reference_name, market_id):
         conn.close()
         for row in entry:
             connections_dict[row["reference_id"]] = row["status"]
-        return {str(market_id): connections_dict}
+        return connections_dict
     except Exception as e:
         print(e)
         print("Error in get_all_connections_by_market_id")
