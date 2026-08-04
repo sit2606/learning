@@ -131,4 +131,6 @@ class MarketCollection:
         return [m for m in self.market_dict.values()]
 
     def as_dict(self):
-        pass
+        dict_ro_return = dict()
+        for i in self.market_dict.values():
+            print('s')

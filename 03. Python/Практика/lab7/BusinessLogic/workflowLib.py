@@ -110,6 +110,7 @@ def proceed_command(command, user):
             if market_list is None:
                 print('Ошибка. Попробуйте ещё раз')
             else:
+
                 uiLib.print_list(markets_for_show= market_list,start_pos=start_pos, step= step)
                 is_continue = True
                 while is_continue:
