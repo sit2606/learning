@@ -74,7 +74,10 @@ def get_all_markets_ordered_by_column(column_number, order=False, user=None):
     sorting_base = {}
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[column['name']]})
-    sorted_items = sorted(sorting_base.items(), key=lambda x: x[1], reverse=order)
+    print('s')
+    with_values = {k: v for k, v in sorting_base.items() if v is not None}
+    without_values = {k: v for k, v in sorting_base.items() if v is None}
+    sorted_items = list(sorted(with_values.items(), key=lambda x: x[1], reverse=order)) + list(without_values.items())
     ordered_market_base = dict()
     for item_id in sorted_items:
         ordered_market_base.update({item_id[0]: market_base[item_id[0]]})
