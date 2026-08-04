@@ -104,13 +104,16 @@ def proceed_command(command, user):
             if market_list is None:
                 print('Ошибка. Попробуйте ещё раз')
             else:
+                for k,i in market_list.items():
+                    market_list[k] = i.get_as_dict()
                 uiLib.print_list(market_list)
         case 'list':
             is_run, market_list, start_pos, step = commandHandler.command_list()
             if market_list is None:
                 print('Ошибка. Попробуйте ещё раз')
             else:
-
+                for k,i in market_list.items():
+                    market_list[k] = i.get_as_dict()
                 uiLib.print_list(markets_for_show= market_list,start_pos=start_pos, step= step)
                 is_continue = True
                 while is_continue:

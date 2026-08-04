@@ -15,7 +15,7 @@ TODO:
     - get_market_references(market_id) — получение связей рынка (в Market.from_db)
     - distance — расчёт расстояния (geoLib.get_distance)
 """
-from BusinessLogic import processFilter
+from BusinessLogic import processFilter, geoLib
 from UI.column_helper import COLUMNS_INFO
 from models.collections.market_collection import MarketCollection
 from models.entities.market import Market
@@ -70,8 +70,7 @@ def get_all_markets_ordered_by_column(column_number, order=False, user=None):
         dict_market.update({'number' : m})
         market_base[m]  = dict_market
     if column['name'] == 'distance':
-        pass
-        #market_base =  geoLib.get_distance(user, market_base)
+        market_base =  geoLib.get_distance(user, market_base)
     sorting_base = {}
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[column['name']]})

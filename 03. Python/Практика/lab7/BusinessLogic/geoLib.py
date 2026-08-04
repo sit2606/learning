@@ -64,8 +64,8 @@ def get_distance(user, market_base):
               или None при ошибке.
     """
     user_loc = dict()
-    user_loc['latitude'] = float(user['latitude'])
-    user_loc['longitude'] = float(user['longitude'])
+    user_loc['latitude'] = float(user.latitude)
+    user_loc['longitude'] = float(user.longitude)
     try:
         for key,market in market_base.items():
 
