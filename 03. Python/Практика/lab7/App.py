@@ -18,10 +18,13 @@ from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_ma
     get_market_by_id
 from DAL import userLib
 from DAL.datalib2 import get_all_markets, get_market, update_market
+from DAL.userlib2 import get_user
 from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
 from models.collections.market_collection import MarketCollection
 from models.entities.market import Market
+from models.entities.review import Review
+from models.entities.user import User
 
 
 def testing():
@@ -48,7 +51,17 @@ def testing():
     requiredFiles.create_review_table()
     lst = filelib2.read_csv()
     datalib2.add_many(lst)
-    f = get_all_markets()
+    n = Market.from_db(market_id=1018261)
+    usr = User.from_db('sedart')
+    r = Review(usr,n)
+    r.set_score(5)
+    r.set_text('this is text')
+    r.save_to_db()
+    n.calculate_score()
+    n.banking_info.change_mode()
+    get_markets_ordered_by_mode('num')
+    get_all_markets_ordered_by_column(1)
+    get_market_by_id(1018261)
     register_user()
     n.banking_info.change_mode()
     print('s')

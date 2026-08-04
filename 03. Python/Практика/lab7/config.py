@@ -10,6 +10,7 @@
 DATABASE_PATH = 'database/base.db'
 
 DEFAULT_USER = {
+                'id' :1000000,
                 'username': 'test',
                 'password': '',
                 'firstname': 'test_firstname',

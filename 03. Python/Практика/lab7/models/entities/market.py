@@ -378,4 +378,13 @@ class Market:
         """
         from DAL.datalib2 import update_market
         update_market(self)
-        
+    def calculate_score(self):
+        from DAL.reviewlib2 import get_review_by_market_id
+        from statistics import mean
+        reviews = get_review_by_market_id(self.id)
+        score = []
+        for review in reviews:
+            score.append(float(review['score']))
+        score = mean(score)
+        self.market_info.score = score
+        self.update()

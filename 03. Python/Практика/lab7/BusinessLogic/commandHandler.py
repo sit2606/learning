@@ -46,6 +46,7 @@ from DAL import userLib,  dataLib, referenceLib
 from DAL.reviewLib import create_review, calculate_score
 from UI import uiLib
 from UI.column_helper import COLUMNS_INFO
+from models.entities.review import Review
 from models.entities.user import User
 
 
@@ -245,16 +246,12 @@ def add_review(user):
                                     continue
                                 review_text = input('Введите дополнительный отзыв, или оставьте поле ввода пустым, если не хотите\n'
                                       'добавлять развёрнутый отзыв \n')
-                                review = {}
-                                review["Id"] = str(uuid.uuid4())
-                                review['review_date'] = str(datetime.now())
-                                review['user_id'] = user['Id']
-                                review['market_id'] = market_info['basic_info']['market_id']
-                                review['review_text'] = review_text
-                                review['score'] = score
-                                create_review(review)
+                                review = Review(user, market_info)
+                                review.set_text(review_text)
+                                review.set_score(score)
+                                review.save_to_db()
                                 print('Оценка успешно добавлена!')
-                                calculate_score(market_info['basic_info']['market_id'])
+                                market_info.calculate_score()
                                 return True, user
                             except ValueError:
                                 print('Оценка должна быть целым, положительным числом. Попробуйте снова')

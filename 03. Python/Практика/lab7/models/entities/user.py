@@ -27,7 +27,7 @@ class User:
         >>> user = User.from_db(1)  # загрузить из БД
     """
 
-    def __init__(self, id = '', user=DEFAULT_USER):
+    def __init__(self,  user=DEFAULT_USER):
         """Инициализирует пользователя.
 
         Args:
@@ -35,7 +35,7 @@ class User:
             user (dict): Словарь с данными пользователя.
                 По умолчанию DEFAULT_USER из config.py
         """
-        self.id = id
+        self.id = user['id']
         self.username = user['username']
         self.password = user['password']
         self.firstname = user['firstname']
