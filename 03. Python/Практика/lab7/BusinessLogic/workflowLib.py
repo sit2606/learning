@@ -40,6 +40,7 @@ from DAL import fileLib, requiredFiles, filelib2, datalib2
 from DAL.reviewLib import get_review_by_market_id
 from DAL.userLib import read_user
 from UI import uiLib
+from models.entities.user import User
 
 
 def directory_creation():
@@ -155,10 +156,14 @@ def proceed_command(command, user):
                                         'Если хотите вернуться к вводу команд, нажмите Enter\n')
                 match should_continue:
                     case 'y':
-                        reviews = get_review_by_market_id(market_info["basic_info"]["market_id"])
-                        for review in reviews:
-                            review_author = read_user(review["user_id"])
-                            review.update({"user_name": review_author["firstname"] + " " + review_author["lastname"]})
+                        review_collection = market_info.get_reviews()
+                        market_info = market_info.get_ui_dict()
+                        reviews = []
+                        for review in review_collection:
+                            review_author = User.from_db(review.user_id)
+                            rev = review.get_as_dict()
+                            rev.update({"user_name": review_author.firstname + " " + review_author.lastname})
+                            reviews.append(rev)
                         uiLib.print_market_reviews(reviews, market_info['basic_info']['score'])
                     case  _:
                         return is_run, user

@@ -42,7 +42,7 @@ import getpass
 
 from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
-from DAL import userLib,  dataLib, referenceLib
+from DAL import userLib, dataLib, referenceLib, referencelib2, reviewlib2
 from DAL.reviewLib import create_review, calculate_score
 from UI import uiLib
 from UI.column_helper import COLUMNS_INFO
@@ -331,11 +331,12 @@ def delete_market(user):
                                   'чтобы выйти из удаления\n')
                     match command:
                         case 'yes':
-                            dataLib.delete_market(market_info)
-                            referenceLib.delete_all_connections_by_market_id(market_id= market_info['basic_info']['market_id'],reference_name= 'MarketXBankingInfo')
-                            referenceLib.delete_all_connections_by_market_id(market_id= market_info['basic_info']['market_id'], reference_name='MarketXGrocery')
-                            referenceLib.delete_all_connections_by_market_id(market_id= market_info['basic_info']['market_id'],reference_name='MarketXSocialMedia')
-                            print(f'Рынок {market_info['basic_info']['market_id']} успешно удалён!')
+                            referencelib2.delete_all_connections_by_market_id(market_id= market_info.id,reference_name= 'MarketXBankingInfo')
+                            referencelib2.delete_all_connections_by_market_id(market_id= market_info.id, reference_name='MarketXGrocery')
+                            referencelib2.delete_all_connections_by_market_id(market_id= market_info.id,reference_name='MarketXSocialMedia')
+                            reviewlib2.delete_reviews_by_market_id(market_id= market_info.id)
+                            market_info.delete()
+                            print(f'Рынок {market_info.id} успешно удалён!')
                             return True, user
                         case 'back':
                             print('Удаление рынка прервано')

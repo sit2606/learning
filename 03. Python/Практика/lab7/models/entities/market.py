@@ -360,6 +360,8 @@ class Market:
         """
         from DAL.datalib2 import get_market
         market = get_market(market_id)
+        if market is None:
+            return None
         banking = get_all_connections_by_market_id("MarketXBankingInfo", market_id=market_id)
         grocery = get_all_connections_by_market_id("MarketXGrocery", market_id=market_id)
         media = get_all_connections_by_market_id("MarketXSocialMedia", market_id=market_id)
@@ -384,7 +386,13 @@ class Market:
         reviews = get_review_by_market_id(self.id)
         score = []
         for review in reviews:
-            score.append(float(review['score']))
+            score.append(float(review.score))
         score = mean(score)
         self.market_info.score = score
         self.update()
+    def get_reviews(self):
+        from DAL.reviewlib2 import get_review_by_market_id
+        return get_review_by_market_id(self.id)
+    def delete(self):
+        from DAL.datalib2 import delete_market
+        return delete_market(self.id)

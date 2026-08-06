@@ -16,6 +16,7 @@ from BusinessLogic.marketList import get_market_by_id, update_market_info
 from config import DATABASE_PATH
 
 
+
 def create_review(review):
     """Добавляет отзыв в таблицу REVIEWS.
 
@@ -40,8 +41,8 @@ def create_review(review):
     conn.commit()
     conn.close()
 
-
 def get_review_by_market_id(market_id):
+    from models.entities.review import Review
     """Читает все отзывы для указанного рынка.
 
     Args:
@@ -58,29 +59,20 @@ def get_review_by_market_id(market_id):
             "SELECT * FROM REVIEWS WHERE market_id = ?",
             (market_id,)
         )
-        entries = [dict(row) for row in cursor.fetchall()]
+        entries = [Review.from_dict(dict(row)) for row in cursor.fetchall()]
         conn.close()
         return entries
     except Exception as e:
         print(e)
         print("Error in get_review_by_market_id")
         return []
-def calculate_score(market_id):
-    """
-    Рассчитывает среднюю оценку рынка на основе отзывов и обновляет MARKET_INFO.csv.
 
-    Args:
-        market_id: ID рынка.
-
-    Returns:
-        dict: обновлённые данные рынка (market_info) с полем score.
-    """
-    reviews = get_review_by_market_id(market_id)
-    score = []
-    for review in reviews:
-        score.append(float(review['score']))
-    score = mean(score)
-    market_info = get_market_by_id(market_id)
-    market_info['basic_info'].update({'score': score})
-    update_market_info(market_info)
-    return market_info
+def delete_reviews_by_market_id(market_id):
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM REVIEWS WHERE market_id = ?",
+        (market_id,)
+    )
+    conn.commit()
+    conn.close()

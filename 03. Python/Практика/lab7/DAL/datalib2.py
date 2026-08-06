@@ -170,3 +170,16 @@ def get_all_markets():
     except Exception as e:
         print(e)
         print("Error in get_all_markets")
+def delete_market(market_id):
+    try:
+        conn = sqlite3.connect(DATABASE_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM MARKETS WHERE id = ?",
+            (market_id,)
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(e)
+        print("Error in delete_market")
