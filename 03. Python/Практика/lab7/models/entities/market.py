@@ -29,6 +29,9 @@ Factory-методы:
     get_as_dict() — конвертация в плоский словарь
     change_mode() — переключение ID ↔ названия локаций
     update() — сохранение в БД
+    calculate_score() — пересчёт средней оценки из отзывов
+    get_reviews() — получение всех отзывов рынка
+    delete() — удаление рынка из БД
 """
 
 from dataclasses import dataclass
@@ -381,6 +384,10 @@ class Market:
         from DAL.datalib2 import update_market
         update_market(self)
     def calculate_score(self):
+        """Пересчитывает среднюю оценку рынка на основе отзывов.
+
+        Загружает все отзывы, вычисляет среднее, обновляет score и сохраняет в БД.
+        """
         from DAL.reviewlib2 import get_review_by_market_id
         from statistics import mean
         reviews = get_review_by_market_id(self.id)
@@ -391,8 +398,14 @@ class Market:
         self.market_info.score = score
         self.update()
     def get_reviews(self):
+        """Возвращает все отзывы для данного рынка.
+
+        Returns:
+            list[Review]: Список объектов Review
+        """
         from DAL.reviewlib2 import get_review_by_market_id
         return get_review_by_market_id(self.id)
     def delete(self):
+        """Удаляет рынок из таблицы MARKETS."""
         from DAL.datalib2 import delete_market
         return delete_market(self.id)

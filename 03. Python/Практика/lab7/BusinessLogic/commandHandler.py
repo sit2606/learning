@@ -6,30 +6,26 @@ commandHandler — обработчики команд пользователя.
 - command_exit(): выход
 - command_list_all(): список всех рынков
 - command_list(): список с пагинацией
-- command_order(column, order): сортировка по колонке (с optional параметрами)
+- command_order(column, order): сортировка по колонке
 - command_show(): показ данных одного рынка (запрашивает ID внутри)
-- register_user(): регистрация нового пользователя (с запросом координат)
+- register_user(): регистрация нового пользователя
 - login_user(user): авторизация пользователя
 - logout_user(user): выход из системы
-- add_review(user): добавление отзыва на рынок
-- show_filtered(user): фильтрация рынков по колонке (через UI.request_filter)
+- add_review(user): добавление отзыва на рынок (через Review entity)
+- show_filtered(user): фильтрация рынков по колонке
 - update_user(user): обновление данных пользователя
 - delete_market(user): удаление рынка и его связей
 
 Зависимости:
-- uuid, datetime: генерация ID и дат
 - bcrypt, getpass: хеширование паролей
-- BusinessLogic.marketList: бизнес-логика рынков
-- BusinessLogic.geoLib: расчёт расстояний (для фильтрации distance)
-- DAL.userLib, DAL.reviewLib, DAL.dataLib, DAL.referenceLib: доступ к данным
+- BusinessLogic.market_queries: бизнес-логика рынков (OOP)
+- DAL.referencelib2, DAL.reviewlib2: доступ к данным
 - UI.uiLib: ввод координат, фильтра, обновление пользователя
-- UI.column_helper: COLUMNS_INFO для маппинга номеров колонок
+- models.entities.review.Review: сущность отзыва
+- models.entities.user.User: сущность пользователя
 
 Каждая функция возвращает кортеж (статус, данные) для передачи в UI.
 Вызывается из workflowLib.proceed_command().
-
-Использование:
-    from BusinessLogic.commandHandler import command_help, command_list_all
 """
 import uuid
 from datetime import datetime

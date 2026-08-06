@@ -139,6 +139,14 @@ def update_market(market: Market):
         print("Error in update_market")
 
 def get_market(market_id):
+    """Получает один рынок по ID из таблицы MARKETS.
+
+    Args:
+        market_id: ID рынка (FMID)
+
+    Returns:
+        Market: объект рынка
+    """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         conn.row_factory = sqlite3.Row
@@ -156,6 +164,11 @@ def get_market(market_id):
         print("Error in get_market")
 
 def get_all_markets():
+    """Получает все рынки из таблицы MARKETS.
+
+    Returns:
+        list[dict]: Список словарей с данными рынков
+    """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         conn.row_factory = sqlite3.Row
@@ -170,6 +183,11 @@ def get_all_markets():
         print(e)
         print("Error in get_all_markets")
 def delete_market(market_id):
+    """Удаляет рынок из таблицы MARKETS по ID.
+
+    Args:
+        market_id: ID рынка для удаления
+    """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
         cursor = conn.cursor()

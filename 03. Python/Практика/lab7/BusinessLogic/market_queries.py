@@ -74,6 +74,9 @@ def get_all_markets_ordered_by_column(column_number, order=False, user=None):
     sorting_base = {}
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[column['name']]})
+    # Разделяем на значения и None (рынки без отзывов/оценки).
+    # Python 3 не умеет сравнивать None с float, поэтому сортируем
+    # только рынки с реальными значениями, а None дописываем в конец.
     with_values = {k: v for k, v in sorting_base.items() if v is not None}
     without_values = {k: v for k, v in sorting_base.items() if v is None}
     sorted_items = list(sorted(with_values.items(), key=lambda x: x[1], reverse=order)) + list(without_values.items())

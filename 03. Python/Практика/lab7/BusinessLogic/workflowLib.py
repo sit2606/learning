@@ -4,10 +4,11 @@ workflowLib — модуль оркестрации рабочего проце�
 Зависимости:
 - os: работа с файловой системой
 - BusinessLogic.commandHandler: обработчики команд
-- DAL.fileLib: инициализация CSV-файлов
-- DAL.reviewLib: чтение отзывов
-- DAL.userLib: чтение данных пользователей
+- DAL.requiredFiles: инициализация таблиц и справочников
+- DAL.filelib2: импорт CSV в SQLite
+- DAL.datalib2: batch-вставка рынков
 - UI.uiLib: вывод в консоль
+- models.entities.user.User: сущность пользователя
 
 Основные функции:
 - directory_creation(): создание папки files/
@@ -58,6 +59,11 @@ def directory_creation():
         print(e)
         print("Error in directory_creation")
 def file_creation():
+    """Инициализирует таблицы и заполняет базу данных из CSV.
+
+    Создаёт справочники, таблицы MARKETS/REVIEWS/USERS,
+    импортирует данные из Export.csv и заполняет MARKETS.
+    """
     requiredFiles.prepare_refs()
     requiredFiles.create_market_table()
     requiredFiles.create_review_table()

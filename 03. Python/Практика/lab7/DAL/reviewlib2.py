@@ -4,9 +4,9 @@
 Содержит функции для CRUD-операций с таблицей REVIEWS.
 
 Функции:
-    create_review — добавляет отзыв
-    get_review_by_market_id — читает отзывы для рынка
-    calculate_score — рассчитывает среднюю оценку рынка
+    create_review(review) — добавляет отзыв в таблицу REVIEWS
+    get_review_by_market_id(market_id) — читает все отзывы для рынка (возвращает list[Review])
+    delete_reviews_by_market_id(market_id) — удаляет все отзывы для рынка
 """
 
 import sqlite3
@@ -47,7 +47,7 @@ def get_review_by_market_id(market_id):
         market_id: ID рынка для фильтрации
 
     Returns:
-        list[dict]: Список словарей с отзывами
+        list[Review]: Список объектов Review
     """
     try:
         conn = sqlite3.connect(DATABASE_PATH)
@@ -66,6 +66,11 @@ def get_review_by_market_id(market_id):
         return []
 
 def delete_reviews_by_market_id(market_id):
+    """Удаляет все отзывы для указанного рынка.
+
+    Args:
+        market_id: ID рынка
+    """
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute(
