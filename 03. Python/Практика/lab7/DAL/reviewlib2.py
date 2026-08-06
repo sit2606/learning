@@ -10,9 +10,7 @@
 """
 
 import sqlite3
-from statistics import mean
 
-from BusinessLogic.marketList import get_market_by_id, update_market_info
 from config import DATABASE_PATH
 
 

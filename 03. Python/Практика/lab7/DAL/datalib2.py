@@ -15,7 +15,6 @@ import sqlite3
 
 from config import DATABASE_PATH
 from models.entities.market import Market
-from models.entities.reference import Reference
 
 
 def add_market(market: Market):

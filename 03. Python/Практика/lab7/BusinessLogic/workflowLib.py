@@ -36,9 +36,8 @@ workflowLib — модуль оркестрации рабочего проце�
 import os
 
 from BusinessLogic import commandHandler
-from DAL import fileLib, requiredFiles, filelib2, datalib2
-from DAL.reviewLib import get_review_by_market_id
-from DAL.userLib import read_user
+from DAL import  requiredFiles, filelib2, datalib2
+
 from UI import uiLib
 from models.entities.user import User
 

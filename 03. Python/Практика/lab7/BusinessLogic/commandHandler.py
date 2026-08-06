@@ -42,8 +42,7 @@ import getpass
 
 from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
-from DAL import userLib, dataLib, referenceLib, referencelib2, reviewlib2
-from DAL.reviewLib import create_review, calculate_score
+from DAL import referencelib2, reviewlib2
 from UI import uiLib
 from UI.column_helper import COLUMNS_INFO
 from models.entities.review import Review

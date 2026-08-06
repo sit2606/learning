@@ -11,17 +11,10 @@ App — точка входа приложения для управления �
 Использование:
     python App.py
 """
-import csv
 
-from BusinessLogic.commandHandler import register_user
-from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column, \
-    get_market_by_id
-from DAL import userLib
-from DAL.datalib2 import get_all_markets, get_market, update_market
-from DAL.userlib2 import get_user
+
 from UI.uiLib import print_welcome
 from BusinessLogic.workflowLib import *
-from models.collections.market_collection import MarketCollection
 from models.entities.market import Market
 from models.entities.review import Review
 from models.entities.user import User
@@ -59,29 +52,6 @@ def testing():
     r.save_to_db()
     n.calculate_score()
     print('s')
-def user_lib_testing():
-    """
-    Демонстрация CRUD-операций с пользователями.
-
-    Проверяет, есть ли пользователи в файле. Если нет — создаёт тестовых
-    для проверки работы userLib.
-    """
-    with open(f"files/USER_INFO.csv", "r", newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-        len = 0
-        for row in reader:
-            len += 1
-        if len > 1:
-            pass
-        else:
-            requiredFiles.create_user_table()
-            test_user_uid = userLib.create_user()
-            test_user = userLib.read_user(test_user_uid)
-            test_user['firstname'] = 'TestIngs'
-            userLib.update_user(test_user)
-            test_user_to_delete = userLib.create_user()
-            userLib.create_user()
-            userLib.delete_user(test_user_to_delete)
 
 
 def main():
@@ -98,7 +68,6 @@ def main():
     """
    # testing()
     file_creation()
-    user_lib_testing()
     run_app = True
     print_welcome()
     user = None

@@ -25,7 +25,7 @@ uiLib — библиотека функций вывода и ввода в ко
 Использование:
     from UI.uiLib import print_welcome, print_help, print_list, request_filter
 """
-from DAL.userLib import get_user
+from DAL.userlib2 import get_user
 from UI.column_helper import COLUMNS, COLUMNS_INFO, COLUMN_TO_SHOW
 from UI.comparison_helper import COMPARISON_SIGNS
 
