@@ -47,7 +47,7 @@ def get_markets_ordered_by_mode(mode):
     return ordered_market_base
 
 
-def get_all_markets_ordered_by_column(column_number, order=False, user=None):
+def get_all_markets_ordered_by_column(column_number, order=False, coords=None):
     """Получает данные о всех рынках, отсортированные по указанной колонке.
 
     Args:
@@ -70,13 +70,10 @@ def get_all_markets_ordered_by_column(column_number, order=False, user=None):
         dict_market.update({'number' : m})
         market_base[m]  = dict_market
     if column['name'] == 'distance':
-        market_base =  geoLib.get_distance(user, market_base)
+        market_base =  geoLib.get_distance(coords, market_base)
     sorting_base = {}
     for market_id, market_info in market_base.items():
         sorting_base.update({market_id: market_info[column['name']]})
-    # Разделяем на значения и None (рынки без отзывов/оценки).
-    # Python 3 не умеет сравнивать None с float, поэтому сортируем
-    # только рынки с реальными значениями, а None дописываем в конец.
     with_values = {k: v for k, v in sorting_base.items() if v is not None}
     without_values = {k: v for k, v in sorting_base.items() if v is None}
     sorted_items = list(sorted(with_values.items(), key=lambda x: x[1], reverse=order)) + list(without_values.items())
@@ -105,7 +102,7 @@ def get_market_by_id(market_id):
     """
     return Market.from_db(market_id=market_id)
 
-def get_all_markets_filtered_by_column(column, filter=None, user=None):
+def get_all_markets_filtered_by_column(column, filter=None, coords=None):
     """Фильтрует и сортирует рынки по колонке с критерием.
 
     Получает все рынки через get_all_markets_ordered_by_column(),
@@ -122,7 +119,7 @@ def get_all_markets_filtered_by_column(column, filter=None, user=None):
         tuple: (dict_рынков, column_info) — отфильтрованный словарь
                (с ключами от 1) и dict колонки {name, type}
     """
-    market_list, column_info = get_all_markets_ordered_by_column(column, user=user)
+    market_list, column_info = get_all_markets_ordered_by_column(column, coords=coords)
     market_base = processFilter.process(market_list, column, filter)
     sorting_base = {}
     for market_id, market_info in market_base.items():

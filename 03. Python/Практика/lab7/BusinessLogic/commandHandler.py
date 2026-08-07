@@ -34,13 +34,13 @@ from datetime import datetime
 import bcrypt
 import getpass
 
-
-
+from BusinessLogic import geoLib
 from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
-from DAL import referencelib2, reviewlib2
+from DAL import referencelib2, reviewlib2, userlib2
 from UI import uiLib
 from UI.column_helper import COLUMNS_INFO
+from models.entities.reference import Reference
 from models.entities.review import Review
 from models.entities.user import User
 
@@ -271,7 +271,8 @@ def show_filtered(user):
     column, filter_value = uiLib.request_filter()
     if column is None and filter_value is None:
         return True, user
-    markets_to_show = get_all_markets_filtered_by_column(column, filter_value, user)
+    coords = {'latitude': user.latitude, 'longitude': user.longitude}
+    markets_to_show = get_all_markets_filtered_by_column(column, filter_value, coords)
 
     uiLib.print_list(markets_to_show[0], column_name=COLUMNS_INFO[column])
     return True, user
@@ -293,7 +294,7 @@ def update_user(user):
         print('Чтобы изменить пользователя, вы должны войти в Систему.')
         return True, user
     user = uiLib.request_user_updates(user)
-    userLib.update_user(user)
+    userlib2.update_user(user)
     return True, user
 
 
@@ -339,3 +340,19 @@ def delete_market(user):
                         case _:
                             print('Команда не распознана')
     return None
+
+
+def command_zip():
+    postalcode = input('Введите индекс: ')
+    ref = Reference("ZIP")
+    from_base = ref.get_entry(entry_name = postalcode)
+    if from_base is None:
+        print('Неверный индекс')
+        return True
+    else:
+        coords = {}
+        coords['latitude'], coords['longitude'] = geoLib.get_zip_coords(postalcode)
+        dist = input('Введите радиус поиска: ')
+    markets_to_show = get_all_markets_filtered_by_column(9, ('<', dist), coords)
+    uiLib.print_list(markets_to_show[0], column_name=COLUMNS_INFO[9])
+    return True

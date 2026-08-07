@@ -71,3 +71,14 @@ class User:
         from DAL import userlib2
         """Удаляет пользователя из таблицы USERS."""
         userlib2.delete_user(self)
+
+    def get_as_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'password': self.password,
+            'first_name': self.firstname,
+            'last_name': self.lastname,
+            'latitude': self.latitude,
+            'longitude': self.longitude
+        }

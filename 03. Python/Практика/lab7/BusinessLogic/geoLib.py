@@ -49,7 +49,7 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
          + math.cos(lat1_r) * math.cos(lat2_r) * math.sin(dlon / 2) ** 2)
 
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-def get_distance(user, market_base):
+def get_distance(coords, market_base):
     """
     Рассчитывает расстояние от пользователя до каждого рынка.
 
@@ -64,8 +64,8 @@ def get_distance(user, market_base):
               или None при ошибке.
     """
     user_loc = dict()
-    user_loc['latitude'] = float(user.latitude)
-    user_loc['longitude'] = float(user.longitude)
+    user_loc['latitude'] = float(coords['latitude'])
+    user_loc['longitude'] = float(coords['longitude'])
     try:
         for key,market in market_base.items():
 
@@ -75,3 +75,12 @@ def get_distance(user, market_base):
         return market_base
     except Exception as e:
             print(e)
+def get_zip_coords(postalcode):
+    from geopy.geocoders import Nominatim
+
+    geolocator = Nominatim(user_agent="my-app/1.0")
+    location = geolocator.geocode({"postalcode": postalcode, "country": "US"})
+    if location:
+        return location.latitude, location.longitude
+    else:
+        return None

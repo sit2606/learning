@@ -191,6 +191,8 @@ def proceed_command(command, user):
         case 'exit':
             uiLib.print_exit()
             is_run = commandHandler.command_exit()
+        case 'zip':
+            is_run = commandHandler.command_zip()
         case _:
             print('Такой команды нет. Введите help, чтобы вывести список всех команд')
     return is_run, user

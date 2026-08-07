@@ -52,6 +52,7 @@ def print_help():
     print('update_user - обновление пользовательских данных')
     print('delete - удаление информации о рынке')
     print('logout - выйти из приложения')
+    print('zip - позволяет вести поиск рынков в некотором радиусе от заданного индекса')
     print('exit - завершает работу приложения')
 def print_table_header():
     """Выводит шапку таблицы с русскими названиями колонок."""
@@ -298,12 +299,12 @@ def request_user_updates(user):
     """
     updates_process = True
     while updates_process:
-        print(f'1. Ваш username {user["user_name"]}'
-              f'\n2. Ваше имя {user["firstname"]}'
-              f'\n3. Ваша фамилия {user["lastname"]}'
+        print(f'1. Ваш username {user.username}'
+              f'\n2. Ваше имя {user.firstname}'
+              f'\n3. Ваша фамилия {user.lastname}'
               f'\n4. Ваши координаты:\n'
-              f'широта {user["latitude"]}\n'
-              f'долгота {user["longitude"]}')
+              f'широта {user.latitude}\n'
+              f'долгота {user.longitude}')
         command = input('Введите, какой пункт вы хотите изменить: '
                         'Введите `b`, чтобы выйти без изменений\n')
         match command:
@@ -326,21 +327,21 @@ def request_user_updates(user):
             case '2':
                 print('Вы выбрали изменить имя')
                 new_name = input('Введите новое имя: ')
-                user.update({'firstname': new_name})
+                user.firstname =  new_name
                 print('Имя обновлено!')
                 return user
             case '3':
                 print('Вы выбрали изменить фамилию')
                 new_name = input('Введите новую фамилию: ')
-                user.update({'lastname': new_name})
+                user.lastname =  new_name
                 print('Фамилия обновлена!')
                 return user
             case '4':
                 print('Вы выбрали изменить координаты')
                 coords = get_user_coordinates_manually()
                 if coords[0] is not None and coords[1] is not None:
-                    user.update({'latitude': coords[0]})
-                    user.update({'longitude': coords[1]})
+                    user.latitude =  coords[0]
+                    user.longitude =  coords[1]
                     print('Координаты обновлены!')
                     return user
                 else:
