@@ -6,7 +6,7 @@
 
 Attributes:
     id: Уникальный идентификатор пользователя
-    user_name: Логин
+    username: Логин
     password: Хешированный пароль
     firstname: Имя
     lastname: Фамилия
@@ -27,12 +27,12 @@ class User:
         >>> user = User.from_db(1)  # загрузить из БД
     """
 
-    def __init__(self,  user=DEFAULT_USER):
-        """Инициализирует пользователя.
+    def __init__(self, user=DEFAULT_USER):
+        """Инициализирует пользователя из словаря.
 
         Args:
-            id: Уникальный идентификатор
-            user (dict): Словарь с данными пользователя.
+            user (dict): Словарь с ключами id, username, password,
+                firstname, lastname, latitude, longitude.
                 По умолчанию DEFAULT_USER из config.py
         """
         self.id = user['id']

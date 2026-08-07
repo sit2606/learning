@@ -60,10 +60,12 @@
 ### Автоматическая настройка
 
 При первом запуске приложение автоматически:
-- Создаёт директорию `files/`
-- Парсит `Export.csv` ( ~1700 записей)
-- Создаёт CSV-файлы: MARKET_INFO.csv, USER_INFO.csv, REFERENCE_BASE.csv, REVIEWS.csv
-- Инициализирует справочники: MEDIA.csv, GROCERY_TYPES.csv, BANKING_INFO.csv
+- Создаёт SQLite-базу `database/base.db`
+- Создаёт таблицы: MARKETS, USERS, REVIEWS
+- Создаёт справочники: CITY, COUNTY, STATE, ZIP, STREET, MEDIA, GROCERY_TYPES, BANKING_INFO
+- Создаёт связующие таблицы: MarketXSocialMedia, MarketXGrocery, MarketXBankingInfo
+- Заполняет справочники значениями из CSV-констант
+- Импортирует ~1700 рынков из `Export.csv`
 
 ### Первый запуск
 
@@ -75,7 +77,7 @@
 
 ## Архитектура приложения
 
-### Трёхуровневая архитектура
+### Четырёхуровневая архитектура
 
 ```
 ┌─────────────────────────────────────────┐
@@ -88,23 +90,34 @@
 │            BusinessLogic                 │
 │  Бизнес-логика, обработка команд        │
 │  (workflowLib, commandHandler,           │
-│   marketList, processFilter, geoLib)     │
+│   market_queries, processFilter, geoLib) │
+└──────────────────┬──────────────────────┘
+                   │
+┌──────────────────▼──────────────────────┐
+│              models                      │
+│  Сущности и коллекции (OOP)             │
+│  (Market, User, Review, Reference,      │
+│   MarketCollection)                      │
 └──────────────────┬──────────────────────┘
                    │
 ┌──────────────────▼──────────────────────┐
 │                DAL                       │
-│  Доступ к данным, CRUD-операции         │
-│  (fileLib, referenceLib, dataLib,        │
-│   userLib, reviewLib, requiredFiles)     │
+│  Доступ к данным (SQLite)               │
+│  (datalib2, referencelib2, reviewlib2,  │
+│   userlib2, filelib2, requiredFiles)    │
 └─────────────────────────────────────────┘
 ```
+
+### Хранение данных
+
+Данные хранятся в SQLite-базе `database/base.db`. Справочники (CITY, COUNTY, STATE и др.) хранятся в отдельных таблицах с полями `id` (INTEGER PK) и `name` (TEXT UNIQUE). Связи между рынками и справочниками — в связующих таблицах с составным ключом `(market_id, reference_id)`.
 
 ### Потоки данных
 
 **Просмотр рынков:**
 ```
 user → get_command() → proceed_command('list') → command_list()
-    → get_all_markets('num') → print_list()
+    → MarketCollection.from_db() → change_mode() → print_list()
 ```
 
 **Фильтрация по расстоянию:**
@@ -117,8 +130,8 @@ user → proceed_command('filter') → show_filtered(user)
 **Добавление отзыва:**
 ```
 user → proceed_command('review') → add_review(user)
-    → command_show() → input(оценка, текст) → create_review()
-    → calculate_score() → update_market_info()
+    → command_show() → Review(user, market) → save_to_db()
+    → market.calculate_score() → market.update()
 ```
 
 ---
@@ -183,136 +196,6 @@ def print_help():
     print('new_command - описание новой команды')
 ```
 
-### Шаг 5: Добавить константу перевода (опционально)
-
-Если команда работает с колонками, добавьте перевод в `column_helper.py`:
-
-```python
-# UI/column_helper.py
-
-COLUMNS = {
-    # ... существующие колонки ...
-    'new_column': 'новая колонка'
-}
-```
-
-### Пример: команда show
-
-Команда `show` выводит данные одного рынка по Id:
-
-1. `commandHandler.command_show()` — запрашивает ID у пользователя, получает данные через `get_market_by_id()`
-2. `workflowLib.proceed_command('show', user)` — вызывает обработчик
-3. `uiLib.print_detailed_market_info(market_info)` — выводит подробную информацию
-
----
-
-## Добавление новой колонки в Export.csv
-
-### Шаг 1: Определить категорию
-
-Решите, к какой категории относится колонка:
-
-| Категория | Назначение | Файл связей |
-|-----------|------------|-------------|
-| MARKET_INFO | Основная информация | нет (в MARKET_INFO.csv) |
-| COORDINATES | Координаты | нет (в MARKET_INFO.csv) |
-| TIMESHEET_INFO | Расписание | нет (в MARKET_INFO.csv) |
-| MEDIA | Соцсети | MarketXSocialMedia.csv |
-| GROCERY_TYPES | Товары | MarketXGrocery.csv |
-| BANKING_INFO | Оплата | MarketXBankingInfo.csv |
-| LOCATION | Местоположение | CITY/COUNTY/STATE.csv |
-
-### Шаг 2: Добавить колонку в requiredFiles.py
-
-```python
-# DAL/requiredFiles.py
-
-# Если колонка относится к существующей категории:
-MEDIA = {
-    # ... существующие колонки ...
-    'Instagram'  # новая колонка
-}
-
-# Если колонка — новая категория:
-NEW_CATEGORY = {'NewColumn1', 'NewColumn2'}
-```
-
-### Шаг 3: Если новая категория — добавить в FILES_TO_CHECK
-
-```python
-# DAL/requiredFiles.py
-
-FILES_TO_CHECK = {
-    # ... существующие файлы ...
-    'NEW_CATEGORY'  # имя CSV-файла связей
-}
-```
-
-### Шаг 4: Если новая категория — обработать в fileLib.py
-
-Добавьте обработку в `read_csv()`:
-
-```python
-# DAL/fileLib.py
-
-def read_csv():
-    # ... существующий код ...
-    new_category_list = []
-
-    for row in reader:
-        # ... существующая обработка ...
-        if key in requiredFiles.NEW_CATEGORY:
-            reference_id = new_reference[key]
-            new_category_list.append([current_id, reference_id, value])
-
-    # После цикла — батчевая запись
-    create_connection_entry_by_list('NewCategoryXMarket', new_category_list)
-```
-
-### Шаг 5: Если новая категория — добавить справочник в REF_LIST
-
-```python
-# DAL/fileLib.py
-
-REF_LIST = [
-    {'MEDIA': requiredFiles.MEDIA},
-    {'GROCERY_TYPES': requiredFiles.GROCERY_TYPES},
-    {'BANKING_INFO': requiredFiles.BANKING_INFO},
-    {'NEW_CATEGORY': requiredFiles.NEW_CATEGORY}  # новый справочник
-]
-```
-
-### Шаг 6: Если новая категория — обработать в marketList.py
-
-Добавьте резолвинг ID → имена:
-
-```python
-# BusinessLogic/marketList.py
-
-def get_all_markets(mode):
-    # ... существующий код ...
-    new_reference = get_reference_with_uid_as_key('NEW_CATEGORY', 'Common')
-
-    for market_id, market_info in market_base.items():
-        # ... существующий резолвинг ...
-        if 'new_column' in market_info:
-            market_info['new_column'] = new_reference[market_info['new_column']]
-```
-
-### Шаг 7: Обновить MARKET_INFO.csv
-
-Если колонка должна попасть в итоговый файл, добавьте в `create_market_base()`:
-
-```python
-# DAL/fileLib.py
-
-def create_market_base(market_info):
-    field_names = [
-        # ... существующие поля ...
-        'new_column'  # новое поле
-    ]
-```
-
 ---
 
 ## Добавление нового справочника
@@ -325,131 +208,119 @@ def create_market_base(market_info):
 NEW_REFERENCE = {'Value1', 'Value2', 'Value3'}
 ```
 
-### Шаг 2: Добавить в REF_LIST в fileLib.py
-
-```python
-# DAL/fileLib.py
-
-REF_LIST = [
-    # ... существующие справочники ...
-    {'NEW_REFERENCE': requiredFiles.NEW_REFERENCE}
-]
-```
-
-### Шаг 3: Добавить в FILES_TO_CHECK
+### Шаг 2: Добавить в REF_LIST в requiredFiles.py
 
 ```python
 # DAL/requiredFiles.py
 
-FILES_TO_CHECK = {
-    # ... существующие файлы ...
-    'NEW_REFERENCE'
+REF_LIST = {
+    'required_refs': {
+        # ... существующие справочники ...
+        'NEW_REFERENCE': 'Common',
+    },
+    'values': {
+        # ... существующие значения ...
+        'NEW_REFERENCE': NEW_REFERENCE,
+    }
 }
 ```
 
-### Шаг 4: Обновить Reference_Base.csv
+### Шаг 3: Обработать в filelib2.py
 
-Файл создается автоматически через `create_reference_base()` при пересоздании данных.
-
----
-
-## Добавление нового метода в referenceLib
-
-### Шаг 1: Создать функцию
+Если справочник связан с рынками через CSV-колонку, добавьте обработку в `read_csv()`:
 
 ```python
-# DAL/referenceLib.py
+# DAL/filelib2.py
 
-def new_method(reference_name, params):
-    """
-    Описание метода.
+def read_csv():
+    # ... существующий код ...
+    new_reference = Reference('NEW_REFERENCE')
+    new_reference_dict = new_reference.get_all_with_names()
+    NewXMarket = []
 
-    Args:
-        reference_name (str): Имя справочника.
-        params: Параметры.
+    for row in reader:
+        # ... существующая обработка ...
+        if key in requiredFiles.NEW_REFERENCE:
+            reference_id = new_reference_dict[key]
+            NewXMarket.append([current_id, reference_id, value])
 
-    Returns:
-        Тип возвращаемого значения.
-    """
-    # Реализация
-```
-
-### Шаг 2: Обновить модульный docstring
-
-Добавьте описание в документацию модуля:
-
-```python
-"""
-referenceLib — библиотека для управления справочниками и связями.
-
-Основные функции:
-- ...
-- new_method(): описание нового метода
-"""
+    # После цикла — батчевая запись связи
+    new_x_market = Reference('NewXMarket', 'Connection')
+    new_x_market.add_many(NewXMarket)
 ```
 
 ---
 
-## Добавление нового типа сущности (например, отзывы)
+## Добавление новой сущности
 
-### Шаг 1: Создать модуль в DAL/
+### Шаг 1: Создать модуль в models/entities/
 
-Создайте файл `DAL/newEntityLib.py` с функциями CRUD:
-
-```python
-# DAL/newEntityLib.py
-
-"""
-newEntityLib — библиотека для работы с новыми сущностями.
-
-Основные функции:
-- create_entity(entity): добавление сущности
-- read_entity(id): чтение сущности
-- update_entity(entity): обновление сущности
-- delete_entity(id): удаление сущности
-"""
-import csv
-
-def create_entity(entity):
-    """Добавляет сущность в CSV-файл."""
-    field_names = ['Id', 'field1', 'field2']
-    file_path = "files/NEW_ENTITY.csv"
-    try:
-        with open(file_path, "a", newline="", encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=field_names)
-            writer.writerow(entity)
-    except Exception as e:
-        print(e)
-        print("Error in create_entity")
-```
-
-### Шаг 2: Добавить создание CSV-файла в fileLib.py
+Создайте файл `models/entities/new_entity.py`:
 
 ```python
-# DAL/fileLib.py
+# models/entities/new_entity.py
 
-def create_new_entity_base():
-    """Создаёт CSV-файл для новых сущностей."""
-    _reference_name = 'NEW_ENTITY'
-    field_names = ['Id', 'field1', 'field2']
-    try:
-        with open(f"files/{_reference_name}.csv", "w", newline="", encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=field_names)
-            writer.writeheader()
-    except Exception as e:
-        print(e)
-        print("Error in create_new_entity_base")
+class NewEntity:
+    """Сущность нового типа."""
+
+    def __init__(self, id=None):
+        self.id = id
+
+    def save_to_db(self):
+        """Сохраняет сущность в БД."""
+        from DAL.new_entity_lib import create_new_entity
+        create_new_entity(self)
+
+    @classmethod
+    def from_dict(cls, data):
+        """Создаёт сущность из словаря (данные из БД)."""
+        entity = cls(id=data['id'])
+        # ... заполнение полей ...
+        return entity
+
+    def get_as_dict(self):
+        """Конвертирует сущность в словарь."""
+        return {'id': self.id}
 ```
 
-### Шаг 3: Добавить в requiredFiles.py
+### Шаг 2: Создать DAL-модуль
+
+Создайте файл `DAL/new_entity_lib.py` с функциями CRUD:
+
+```python
+# DAL/new_entity_lib.py
+
+import sqlite3
+from config import DATABASE_PATH
+
+def create_new_entity(entity):
+    """Добавляет сущность в таблицу."""
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT OR IGNORE INTO NEW_ENTITY (...) VALUES (...)",
+        (entity.field1, entity.field2)
+    )
+    conn.commit()
+    conn.close()
+```
+
+### Шаг 3: Создать таблицу в requiredFiles.py
 
 ```python
 # DAL/requiredFiles.py
 
-FILES_TO_CHECK = {
-    # ... существующие файлы ...
-    'NEW_ENTITY'
-}
+def create_new_entity_table():
+    """Создаёт таблицу NEW_ENTITY (если не существует)."""
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS NEW_ENTITY (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        field1 TEXT NOT NULL,
+        field2 TEXT
+    )''')
+    conn.commit()
+    conn.close()
 ```
 
 ### Шаг 4: Вызвать создание в workflowLib.py
@@ -459,8 +330,7 @@ FILES_TO_CHECK = {
 
 def file_creation():
     # ... существующий код ...
-    fileLib.create_new_entity_base()
-    print('New entity base successfully created...')
+    requiredFiles.create_new_entity_table()
 ```
 
 ### Шаг 5: Создать обработчик в commandHandler.py
@@ -469,27 +339,11 @@ def file_creation():
 # BusinessLogic/commandHandler.py
 
 def add_entity(user):
-    """
-    Добавление новой сущности.
-
-    Args:
-        user: Текущий авторизованный пользователь или None.
-
-    Returns:
-        (True, user) — после успешного добавления.
-    """
+    """Добавление новой сущности."""
     if user is None:
         print('Требуется авторизация.')
         return True, user
-
-    entity = {}
-    entity['Id'] = str(uuid.uuid4())
-    entity['field1'] = input('Введите field1: ')
-    entity['field2'] = input('Введите field2: ')
-
-    from DAL.newEntityLib import create_entity
-    create_entity(entity)
-    print('Сущность успешно добавлена!')
+    # ... создание и сохранение ...
     return True, user
 ```
 
@@ -499,79 +353,92 @@ def add_entity(user):
 # BusinessLogic/workflowLib.py
 
 def proceed_command(command, user):
-    # ... существующий код ...
     match command:
         # ... существующие команды ...
         case 'new_entity':
             is_run, user = commandHandler.add_entity(user)
-        # ...
-```
-
-### Шаг 7: Обновить справку в uiLib.py
-
-```python
-# UI/uiLib.py
-
-def print_help():
-    # ... существующий код ...
-    print('new_entity - описание новой команды')
 ```
 
 ---
 
-## Структура данных
+## Структура данных (SQLite)
 
-### CSV-файлы справочников (Id, Name)
-
-```
-Id,Name
-uuid1,Value1
-uuid2,Value2
-```
-
-### CSV-файлы связей (market_id, reference_id, status)
-
-```
-market_id,reference_id,status
-fmid1,uuid1,True
-fmid2,uuid2,False
+### Справочники (Common)
+```sql
+CREATE TABLE CITY (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL
+);
 ```
 
-### MARKET_INFO.csv
-
-```
-market_id,marketname,street,city,county,state,zip,season1date,season1time,...
-fmid1,Market Name,123 St,City,County,State,12345,2024-01-01,09:00,...
-```
-
-### USER_INFO.csv
-
-```
-Id,user_name,password,firstname,lastname,latitude,longitude
-uuid1,admin,$2b$...,Admin,Admin,40.7128,-74.0060
+### Связующие таблицы (Connection)
+```sql
+CREATE TABLE MarketXSocialMedia (
+    market_id INTEGER NOT NULL,
+    reference_id INTEGER NOT NULL,
+    status TEXT,
+    PRIMARY KEY (market_id, reference_id)
+);
 ```
 
-### REVIEWS.csv
-
+### MARKETS
+```sql
+CREATE TABLE MARKETS (
+    id INTEGER PRIMARY KEY,
+    marketname TEXT NOT NULL,
+    street TEXT NOT NULL,
+    city TEXT NOT NULL,
+    county TEXT NOT NULL,
+    state TEXT NOT NULL,
+    zip TEXT NOT NULL,
+    longitude REAL,
+    latitude REAL,
+    season1date TEXT, season1time TEXT,
+    season2date TEXT, season2time TEXT,
+    season3date TEXT, season3time TEXT,
+    season4date TEXT, season4time TEXT,
+    score REAL
+);
 ```
-Id,review_date,user_id,market_id,review_text,score
-uuid1,2024-01-01 12:00:00,uuid_user1,uuid_market1,Отличный рынок!,5
+
+### USERS
+```sql
+CREATE TABLE USERS (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    firstname TEXT NOT NULL,
+    lastname TEXT NOT NULL,
+    latitude REAL,
+    longitude REAL
+);
+```
+
+### REVIEWS
+```sql
+CREATE TABLE REVIEWS (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    review_date TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+    market_id INTEGER NOT NULL,
+    review_text TEXT,
+    score REAL
+);
 ```
 
 ---
-
 
 ## Система сессий (авторизация)
 
-Приложение поддерживает отслеживание текущего пользователя через объект `user`:
+Приложение поддерживает отслеживание текущего пользователя через объект `user` (экземпляр `User` или `None`):
 
 - `user = None` — пользователь не авторизован
-- `user = {...}` — словарь с данными пользователя (Id, user_name, firstname, lastname, latitude, longitude)
+- `user = User(...)` — объект с данными пользователя
 
 ### Поток авторизации
 
-1. **Регистрация** (`register`) — создаёт пользователя, возвращает `user`
-2. **Вход** (`login`) — проверяет логин/пароль, возвращает `user` или `None`
+1. **Регистрация** (`register`) — создаёт пользователя в USERS, возвращает `User`
+2. **Вход** (`login`) — проверяет логин/пароль через bcrypt, возвращает `User` или `None`
 3. **Выход** (`logout`) — сбрасывает `user` в `None`
 
 ### Передача user между функциями
@@ -601,27 +468,11 @@ def proceed_command(command, user):
 
 | Ошибка | Причина | Решение |
 |--------|---------|---------|
-| `KeyError` в marketList | Колонка не добавлена в columns dict | Добавить маппинг номер → имя |
-| `FileNotFoundError` | Файл не создан | Проверить FILES_TO_CHECK и REF_LIST |
-| `NoneType` в read_csv | Справочник не инициализирован | Вызвать prepare_ref() перед read_csv() |
-| Дубли в связях | Повторный вызов read_csv | Очищать файлы перед пересозданием |
-| `KeyError` в get_market_by_id | Рынок не найден в MARKET_INFO.csv | Проверить market_id, пересоздать файлы |
-| `Error in create_reference_base` | Папка files/ не создана | Вызвать directory_creation() перед file_creation() |
-| `Invalid salt` при login | Пароль не хеширован или пустой | Проверить хеширование через bcrypt при регистрации |
-
----
-
-## Скриншоты интерфейса
-
-### Запуск, регистрация и список рынков
-
-При первом запуске приложение выводит приветствие и提醒 о необходимости авторизации. Пользователь может зарегистрироваться (`register`), войти (`login`) и просматривать списки рынков (`list`, `list_all`):
-
-![Запуск приложения, регистрация и список рынков](документация/Pasted%20image%2020260713233509.png)
-
-### Обзор функциональности приложения
-
-Полный перечень возможностей: чтение CSV, DML-операции с рынками, управление пользователями, постраничный вывод, детальная информация, фильтрация, сортировка, расчёт дистанции, отзывы
+| `TypeError: '<' not supported between NoneType` | Рынок без оценки при сортировке | None-рынки отделяются и идут в конец |
+| `sqlite3.OperationalError: no such table` | Таблица не создана | Проверить requiredFiles.prepare_refs() |
+| `ImportError: cannot import name` | Циклический импорт | Использовать lazy import внутри функции |
+| `Invalid salt` при login | Пароль не хеширован | Проверить bcrypt при регистрации |
+| `KeyError` в change_mode | Справочник не заполнен | Вызвать prepare_refs() перед импортом |
 
 ---
 
@@ -631,20 +482,15 @@ def proceed_command(command, user):
 
 1. Установить Python 3.10+, клонировать репозиторий, создать venv, установить зависимости
 2. Поместить `Export.csv` в корневую директорию
-3. Запустить `python App.py` — приложение само создаст `files/` и все CSV-файлы
+3. Запустить `python App.py` — приложение само создаст `database/base.db` и все таблицы
 
 ### Эксплуатация
 
-- Данные хранятся в CSV-файлах в папке `files/`
+- Данные хранятся в SQLite-базе `database/base.db`
 - Пользователи и отзывы добавляются через интерфейс приложения
-- Резервное копирование: регулярно копировать папку `files/`
+- Резервное копирование: копировать `database/base.db`
 
 ### Обновление
 
 - При добавлении нового функционала — следовать инструкции в разделе "Добавление новой команды"
-- При изменении структуры CSV — пересоздать файлы (удалить `files/` и запустить заново)
-
-### Отладка
-
-- Логи ошибок выводятся в консоль
-- Частые ошибки описаны в таблице выше
+- При изменении структуры таблиц — удалить `database/base.db` и запустить заново

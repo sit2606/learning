@@ -13,34 +13,37 @@
 
 ## Сделано (26.07)
 - **market.py**: добавлены dataclass-ы BankInfo, MediaInfo, GroceryInfo
-- **market.py**: добавлен `Market.from_db(market_id)` — загрузка из БД со всеми справочниками (локации + связи)
-- **market.py**: добавлен `Market.update()` — сохранение в БД через datalib2
-- **market.py**: `__init__` теперь инициализирует `ref_mode = 'id'` в начале
-- **datalib2.py**: `update_market()` переделан с dict на Market (автоматическая конвертация ref_mode)
-- **market_queries.py**: `get_market_by_id()` исправлен — теперь вызывает `Market.from_db()`
+- **market.py**: добавлен `Market.from_db(market_id)` — загрузка из БД со всеми справочниками
+- **market.py**: добавлен `Market.update()` — сохранение в БД
+- **market.py**: добавлен `Market.calculate_score()` — пересчёт оценки из отзывов
+- **market.py**: добавлен `Market.get_reviews()` — получение отзывов
+- **market.py**: добавлен `Market.delete()` — удаление рынка
+- **datalib2.py**: `update_market()` переделан с dict на Market
+- **datalib2.py**: добавлен `delete_market()`
+- **market_queries.py**: `get_market_by_id()` исправлен — вызывает `Market.from_db()`
 - **market_queries.py**: `get_all_markets_filtered_by_column()` перенесён из marketList
-- **user.py**: добавлены docstrings ко всем методам
-- **review.py**: исправлена синтаксическая ошибка (было `idGhjdthm`)
+- **market_queries.py**: исправлена сортировка с None-значениями (score)
+- **review.py**: полная реализация — `__init__`, `set_text`, `set_score`, `save_to_db`, `from_dict`, `get_as_dict`
+- **user.py**: `__init__` принимает dict (убран отдельный id-параметр)
+- **user.py**: `from_db()` поддерживает поиск по user_id и username
+- **user.py**: добавлен `get_as_dict()`
+
+## Сделано (27.07)
+- Удалены старые CSV-модули: marketList.py, dataLib.py, fileLib.py, referenceLib.py, reviewLib.py, userLib.py
+- commandHandler.py переведён на OOP-модули (Review, User, market_queries)
+- workflowLib.py переведён на OOP (User.from_db вместо dict)
+- reviewlib2.py: `get_review_by_market_id()` возвращает `list[Review]`
+- reviewlib2.py: добавлен `delete_reviews_by_market_id()`
+- config.py: DEFAULT_USER содержит 'id'
 
 ## Исправленные баги
-- **datalib2.py:121**: пропущен пробел перед `WHERE` в UPDATE-запросе
-- **datalib2.py:143**: SQL injection через f-string → заменён на параметризованный запрос
-- **datalib2.py:150,167**: текст ошибки "Error in create_market" → исправлен на правильные имена функций
-- **review.py:3**: синтаксическая ошибка `idGhjdthm` → исправлено
-
-## Обновлена документация
-- **market.py**: модульный docstring (добавлены новые dataclass-ы и методы), docstrings для `from_db()`, `update()`
-- **datalib2.py**: модульный docstring (добавлены get_market, get_all_markets), docstring для update_market (подпись изменена с dict на Market)
-- **market_queries.py**: модульный docstring (отмечены мигрированные функции), docstrings для get_market_by_id, get_all_markets_filtered_by_column
-- **user.py**: полные docstrings для модуля, класса и всех методов
-- **market_collection.py**: улучшен docstring для from_dict
+- **datalib2.py**: пропущен пробел перед `WHERE` в UPDATE-запросе
+- **datalib2.py**: SQL injection через f-string → параметризованный запрос
+- **datalib2.py**: неправильные тексты ошибок в get_market/get_all_markets
+- **market_queries.py**: TypeError при сортировке с None (score) → разделение на with/without values
 
 ## Не сделано
-- `get_all_markets_ordered_by_column` — сортировка закомментирована, distance не работает
-- `MARKETS` таблица: street TEXT, city TEXT → должны быть INTEGER (FK)
-- `reviewlib2.calculate_score()` — вызывает старые функции из marketList
-- `commandHandler.py` — использует старый marketList, не market_queries
-- `user.py` — `from_db` и `update_db` — @staticmethod vs обычный метод (обсуждаем)
-- `review.py` — заготовка, нужна полная реализация
-- MARKETS table column types: street, city → INTEGER (FK)
-- Full OOP rewrite of remaining BusinessLogic functions
+- MARKETS таблица: street, city хранятся как TEXT, а должны быть INTEGER (FK на справочники)
+- distance — расчёт расстояния (geoLib.get_distance) не интегрирован в market_queries
+- `userlib2.delete_user()` — нет docstring
+- Тесты (tests.py)

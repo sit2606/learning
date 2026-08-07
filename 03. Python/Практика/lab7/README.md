@@ -2,7 +2,9 @@
 
 ## Описание
 
-Приложение для парсинга CSV-датасета фермерских рынков (Export.csv), создания справочников и связывания данных через промежуточные CSV-файлы. Построено по трёхуровневой архитектуре: UI → BusinessLogic → DAL.
+Приложение для управления данными о фермерских рынках США. Загружает CSV-датасет (Export.csv) в SQLite-базу, предоставляет интерфейс для просмотра, поиска, фильтрации, сортировки и отзывов.
+
+Архитектура: UI → BusinessLogic → DAL + models (OOP).
 
 ### Возможности приложения
 
@@ -14,6 +16,7 @@
 - Регистрация и авторизация пользователей
 - Добавление отзывов с оценкой 1-5
 - Обновление данных пользователя (логин, имя, фамилия, координаты)
+- Удаление рынков
 
 ---
 
@@ -61,10 +64,10 @@ python App.py
 ### Автоматическая инициализация
 
 При первом запуске приложение автоматически:
-- Создаёт папку `files/`
-- Парсит `Export.csv` и создаёт CSV-файлы
-- Инициализирует справочники (MEDIA, GROCERY_TYPES, BANKING_INFO)
-- Создаёт файлы пользователей и отзывов
+- Создаёт SQLite-базу `database/base.db`
+- Создаёт таблицы: MARKETS, USERS, REVIEWS, справочники (CITY, COUNTY, STATE, ZIP, STREET, MEDIA, GROCERY_TYPES, BANKING_INFO) и связующие таблицы
+- Инициализирует справочники из CSV-констант
+- Импортирует данные из `Export.csv` в таблицу MARKETS
 
 ---
 
@@ -73,24 +76,34 @@ python App.py
 ```
 lab7/
 ├── App.py                          # Точка входа приложения
+├── config.py                       # DATABASE_PATH, DEFAULT_USER
 ├── BusinessLogic/                  # Слой бизнес-логики
 │   ├── workflowLib.py              # Оркестрация процесса и обработка команд
 │   ├── commandHandler.py           # Обработчики команд
-│   ├── marketList.py               # Бизнес-логика получения списка рынков
+│   ├── market_queries.py           # OOP-запросы к рынкам (сортировка, фильтрация)
 │   ├── processFilter.py            # Обработка фильтрации рынков
 │   └── geoLib.py                   # Библиотека геоданных и расчёта дистанций
 ├── DAL/                            # Слой доступа к данным (Data Access Layer)
-│   ├── fileLib.py                  # Парсинг Export.csv, инициализация справочников
-│   ├── referenceLib.py             # CRUD-операции со справочниками и связями
-│   ├── dataLib.py                  # CRUD-операции с рынками
-│   ├── userLib.py                  # CRUD-операции с пользователями
-│   ├── reviewLib.py                # CRUD-операции с отзывами
-│   └── requiredFiles.py            # Константы категорий и список файлов
+│   ├── datalib2.py                 # CRUD-операции с рынками (SQLite)
+│   ├── referencelib2.py            # CRUD-операции со справочниками и связями (SQLite)
+│   ├── reviewlib2.py               # CRUD-операции с отзывами (SQLite)
+│   ├── userlib2.py                 # CRUD-операции с пользователями (SQLite)
+│   ├── filelib2.py                 # Импорт Export.csv → SQLite
+│   └── requiredFiles.py            # Константы категорий, создание таблиц
+├── models/                         # Слой сущностей (OOP)
+│   ├── entities/
+│   │   ├── market.py               # Market + dataclass-ы (Marketinfo, Timesheet, Coordinates, Location, BankInfo, MediaInfo, GroceryInfo)
+│   │   ├── reference.py            # Reference — обёртка над справочниками
+│   │   ├── review.py               # Review — сущность отзыва
+│   │   └── user.py                 # User — сущность пользователя
+│   └── collections/
+│       └── market_collection.py    # MarketCollection — коллекция рынков
 ├── UI/                             # Слой интерфейса пользователя
 │   ├── uiLib.py                    # Функции вывода и ввода в консоль
 │   ├── column_helper.py            # Словари перевода названий колонок и описания типов
 │   └── comparison_helper.py        # Константы знаков сравнения для фильтрации
-├── files/                          # CSV-файлы (справочники, связи, данные)
+├── database/                       # SQLite-база данных
+│   └── base.db
 ├── документация/                   # Диаграммы и пользовательские истории
 ├── Задание.md                      # Техническое задание
 ├── .gitignore                      # Исключения Git
@@ -126,6 +139,7 @@ python App.py
 | `review` | Добавление отзыва на рынок | Да |
 | `update_user` | Обновление данных пользователя | Да |
 | `delete` | Удаление рынка и его связей | Да |
+| `zip` | Поиск рынков в радиусе от почтового индекса | Нет |
 | `exit` | Выход из приложения | Нет |
 
 ### Просмотр списка рынков
@@ -163,6 +177,13 @@ python App.py
 3. Для числовых колонок: введите формулу (например, `> 100`, `< 50`, `= 0`)
 4. Для расстояния (колонка 9): фильтрация по км от вашего местоположения
 
+### Поиск по почтовому индексу
+
+**Команда `zip`** — поиск рынков в радиусе от ZIP-кода:
+1. Введите почтовый индекс (например, `87501`)
+2. Введите радиус поиска в км
+3. Приложение покажет все рынки в указанном радиусе
+
 ### Работа с отзывами
 
 **Команда `review`** — добавление отзыва (требуется авторизация):
@@ -195,16 +216,6 @@ python App.py
 
 ---
 
-## Скриншоты интерфейса
-
-### Запуск приложения, регистрация и список рынков
-
-При запуске выводится приветствие и подсказка о необходимости авторизации. Команда `list` выводит таблицу рынков с пагинацией:
-
-![Запуск приложения и список рынков](документация/Pasted%20image%2020260713233509.png)
-
----
-
 ## Архитектура
 
 ```
@@ -216,81 +227,67 @@ App.py
  │    └── comparison_helper.py        — COMPARISON_SIGNS (знаки сравнения для фильтров)
  │
  ├── BusinessLogic/
- │    ├── workflowLib.py            — оркестрация, командный цикл, вызов UI
- │    ├── commandHandler.py         — обработчики команд (ввод + бизнес-логика)
- │    ├── marketList.py             — бизнес-логика списка рынков
- │    ├── processFilter.py          — обработка фильтрации
- │    └── geoLib.py                 — геоданные и расчёт дистанций
+ │    ├── workflowLib.py              — оркестрация, командный цикл, вызов UI
+ │    ├── commandHandler.py           — обработчики команд (ввод + бизнес-логика)
+ │    ├── market_queries.py           — OOP-запросы к рынкам (сортировка, фильтрация)
+ │    ├── processFilter.py            — обработка фильтрации
+ │    └── geoLib.py                   — геоданные и расчёт дистанций
+ │
+ ├── models/
+ │    ├── entities/
+ │    │    ├── market.py              — Market, Marketinfo, Timesheet, Coordinates, Location, BankInfo, MediaInfo, GroceryInfo
+ │    │    ├── reference.py           — Reference (Common + Connection)
+ │    │    ├── review.py              — Review
+ │    │    └── user.py                — User
+ │    └── collections/
+ │         └── market_collection.py   — MarketCollection
  │
  └── DAL/
-      ├── fileLib.py                — парсинг CSV, инициализация, чтение данных
-      ├── referenceLib.py           — CRUD справочников и связей
-      ├── dataLib.py                — CRUD рынков
-      ├── userLib.py                — CRUD пользователей
-      ├── reviewLib.py              — CRUD отзывов
-      └── requiredFiles.py          — константы
+      ├── datalib2.py                 — CRUD рынков (SQLite)
+      ├── referencelib2.py            — CRUD справочников и связей (SQLite)
+      ├── reviewlib2.py               — CRUD отзывов (SQLite)
+      ├── userlib2.py                 — CRUD пользователей (SQLite)
+      ├── filelib2.py                 — импорт CSV → SQLite
+      └── requiredFiles.py            — константы, создание таблиц
 ```
 
-Зависимости: `App.py` → `BusinessLogic` + `UI` → `DAL`
+Зависимости: `App.py` → `BusinessLogic` + `UI` → `models` → `DAL`
 
 ---
 
-## Схема данных
+## Схема данных (SQLite)
 
+### Таблица MARKETS
 ```
-App.py
- ├─ testing()                        → тестирование новых функций
- ├─ directory_creation()             → files/
- ├─ file_creation()                  → CSV-файлы (MARKET_INFO, USER_INFO, Reference_Base, REVIEWS)
- ├─ user_lib_testing()               → DAL/userLib (CRUD) → files/USER_INFO.csv
- ├─ print_welcome()                  → UI/uiLib
- └─ цикл команд (с user = None):
-         │
-         ├─ get_command(user)        → BusinessLogic/workflowLib
-         └─ proceed_command(cmd, user) → BusinessLogic/workflowLib
-                 │
-                 ├─ 'help'       → commandHandler.command_help() → True
-                 │                   → uiLib.print_help()
-                 │
-                 ├─ 'list_all'   → commandHandler.command_list_all() → (True, markets)
-                 │                   → marketList.get_all_markets('num')
-                 │                   → uiLib.print_list(markets)
-                 │
-                 ├─ 'list'       → commandHandler.command_list() → (True, markets, start, step)
-                 │                   → marketList.get_all_markets('num')
-                 │                   → uiLib.print_list(markets, start, step)
-                 │
-                 ├─ 'order'      → commandHandler.command_order() → (True, markets, col, order)
-                 │                   → marketList.get_all_markets_ordered_by_column()
-                 │                   → uiLib.print_list(markets, col_name)
-                 │
-                 ├─ 'show'       → commandHandler.command_show() → (True, market_info)
-                 │                   → marketList.get_market_by_id(market_id)
-                 │                   → (опционально) get_review_by_market_id() → print_market_reviews()
-                 │
-                 ├─ 'filter'     → commandHandler.show_filtered(user) → (True, user)
-                 │                   → uiLib.request_filter()
-                 │                   → marketList.get_all_markets_filtered_by_column()
-                 │
-                 ├─ 'register'   → commandHandler.register_user() → (True, user)
-                 │                   → uiLib.get_user_coordinates_manually()
-                 │
-                 ├─ 'login'      → commandHandler.login_user(user) → (True, user)
-                 │
-                 ├─ 'logout'     → commandHandler.logout_user(user) → (True, None)
-                 │
-                 ├─ 'review'     → commandHandler.add_review(user) → (True, user)
-                 │                   → reviewLib.create_review(review)
-                 │
-                 ├─ 'update_user' → commandHandler.update_user(user) → (True, user)
-                 │                   → uiLib.request_user_updates(user)
-                 │
-                 ├─ 'delete'    → commandHandler.delete_market(user) → (True, user)
-                 │                   → dataLib.delete_market(market_info)
-                 │                   → referenceLib.delete_all_connections_by_market_id()
-                 │
-                 └─ 'exit'       → commandHandler.command_exit() → False
-                                     → uiLib.print_exit()
+id (INTEGER PK), marketname, street, city, county, state, zip,
+longitude (REAL), latitude (REAL),
+season1date, season1time, ..., season4date, season4time,
+score (REAL)
+```
+
+### Справочники (Common)
+```
+CITY, COUNTY, STATE, ZIP, STREET: id (INTEGER PK), name (TEXT UNIQUE)
+MEDIA, GROCERY_TYPES, BANKING_INFO: id (INTEGER PK), name (TEXT UNIQUE)
+```
+
+### Связующие таблицы (Connection)
+```
+MarketXSocialMedia, MarketXGrocery, MarketXBankingInfo:
+  market_id (INTEGER), reference_id (INTEGER), status (TEXT)
+  PRIMARY KEY (market_id, reference_id)
+```
+
+### Таблица USERS
+```
+id (INTEGER PK AUTOINCREMENT), username (TEXT UNIQUE), password (TEXT),
+firstname, lastname, latitude (REAL), longitude (REAL)
+```
+
+### Таблица REVIEWS
+```
+id (INTEGER PK AUTOINCREMENT), review_date (TEXT), user_id (INTEGER),
+market_id (INTEGER), review_text (TEXT), score (REAL)
 ```
 
 ---
@@ -298,7 +295,7 @@ App.py
 ## Требования
 
 - Python 3.10+
-- Стандартная библиотека: `csv`, `uuid`, `os`, `getpass`, `statistics`, `math`
+- Стандартная библиотека: `csv`, `uuid`, `os`, `getpass`, `statistics`, `math`, `sqlite3`, `dataclasses`, `datetime`
 
 ## Установка зависимостей
 
@@ -309,6 +306,7 @@ pip install -r requirements.txt
 | Пакет | Версия | Назначение |
 |-------|--------|------------|
 | bcrypt | ≥ 4.0 | Хеширование паролей пользователей |
+| geopy | ≥ 2.4 | Геокодирование по почтовому индексу (get_zip_coords) |
 
 ---
 
