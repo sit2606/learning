@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "03. Python/2026-07-27 Python  Лекция 19.md",
+                "file": "03. Python/2026-07-30 Python  Лекция 20.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2026-07-27 Python  Лекция 19"
+              "title": "2026-07-30 Python  Лекция 20"
             }
           }
         ]
@@ -201,8 +201,9 @@
   },
   "active": "8759540bdda090ab",
   "lastOpenFiles": [
-    "03. Python/2026-07-23 Python  Лекция 18.md",
     "03. Python/2026-07-27 Python  Лекция 19.md",
+    "03. Python/2026-07-30 Python  Лекция 20.md",
+    "03. Python/2026-07-23 Python  Лекция 18.md",
     "03. Python/2026-07-22 Python  Лекция 17.md",
     "03. Python/2026-07-20 Python  Лекция 16.md",
     "03. Python/2026-07-16 Python  Лекция 15.md",
@@ -245,7 +246,6 @@
     "03. Python/Практика/lab7/документация/2026-06-29 16.10 Пользовательские истории.md",
     "03. Python/Практика/lab7/документация/Изменения после 2026-06-29.md",
     "03. Python/Практика/lab7/документация/2026-06-29 16.23.31 сущности.md",
-    "03. Python/Практика/lab4_3.md",
-    "README.md"
+    "03. Python/Практика/lab4_3.md"
   ]
 }
