@@ -5,7 +5,7 @@ comparison_helper — константы знаков сравнения для 
 в функции request_filter() для ввода критериев фильтрации.
 
 Использование:
-    from UI.comparison_helper import COMPARISON_SIGNS
+    from view.comparison_helper import COMPARISON_SIGNS
 """
 COMPARISON_SIGNS =[
     '>',

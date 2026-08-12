@@ -16,7 +16,7 @@ TODO:
     - distance — расчёт расстояния (geoLib.get_distance)
 """
 from BusinessLogic import processFilter, geoLib
-from UI.column_helper import COLUMNS_INFO
+from view.helpers.column_helper import COLUMNS_INFO
 from models.collections.market_collection import MarketCollection
 from models.entities.market import Market
 
@@ -45,6 +45,8 @@ def get_markets_ordered_by_mode(mode):
                 ordered_market_base.update({market_id: market_info})
         num += 1
     return ordered_market_base
+
+
 
 
 def get_all_markets_ordered_by_column(column_number, order=False, coords=None):

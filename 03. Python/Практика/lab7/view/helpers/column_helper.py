@@ -13,7 +13,7 @@ column_helper — словари для перевода названий кол
 7 — zip (п. индекс), 8 — score (ср. оценка), 9 — distance (расстояние в км)
 
 Использование:
-    from UI.column_helper import COLUMNS, COLUMNS_INFO, COLUMN_TO_SHOW
+    from view.column_helper import COLUMNS, COLUMNS_INFO, COLUMN_TO_SHOW
 """
 COLUMNS = {
     'number' : 'Номер',

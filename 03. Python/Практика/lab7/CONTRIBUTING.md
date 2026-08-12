@@ -156,7 +156,7 @@ def command_new_command():
 Добавьте новую ветку в `match` внутри `proceed_command()`. Функция принимает `command` и `user`:
 
 ```python
-# BusinessLogic/workflowLib.py
+# BusinessLogic/workflow.py
 
 def proceed_command(command, user):
     is_run = True
@@ -177,7 +177,7 @@ def proceed_command(command, user):
 Создайте функцию для отображения результатов:
 
 ```python
-# UI/uiLib.py
+# view/uiLib.py
 
 def print_new_command(data):
     print('======--------------------------------======')
@@ -326,7 +326,7 @@ def create_new_entity_table():
 ### Шаг 4: Вызвать создание в workflowLib.py
 
 ```python
-# BusinessLogic/workflowLib.py
+# BusinessLogic/workflow.py
 
 def file_creation():
     # ... существующий код ...
@@ -350,7 +350,7 @@ def add_entity(user):
 ### Шаг 6: Добавить команду в workflowLib.py
 
 ```python
-# BusinessLogic/workflowLib.py
+# BusinessLogic/workflow.py
 
 def proceed_command(command, user):
     match command:
@@ -454,7 +454,7 @@ def add_review(user):
     # ... работа с user ...
     return True, user
 
-# workflowLib.py
+# workflow.py
 def proceed_command(command, user):
     match command:
         case 'review':

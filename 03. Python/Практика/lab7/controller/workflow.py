@@ -7,7 +7,7 @@ workflowLib — модуль оркестрации рабочего проце�
 - DAL.requiredFiles: инициализация таблиц и справочников
 - DAL.filelib2: импорт CSV в SQLite
 - DAL.datalib2: batch-вставка рынков
-- UI.uiLib: вывод в консоль
+- view.uiLib: вывод в консоль
 - models.entities.user.User: сущность пользователя
 
 Основные функции:
@@ -37,10 +37,10 @@ workflowLib — модуль оркестрации рабочего проце�
 """
 import os
 
-from BusinessLogic import commandHandler
+from controller import commandHandler
 from DAL import  requiredFiles, filelib2, datalib2
 
-from UI import uiLib
+from view import uiLib
 from models.entities.user import User
 
 
@@ -83,13 +83,8 @@ def get_command(user):
     Returns:
         str: введённая пользователем команда.
     """
-    if user is None:
-        print('Часть функций недоступна, неавторизованным пользователям.\nИспользуйте `login` чтобы войти')
-        command = input('Пожалуйста, введите команду: ').strip()
-        return command
-    else:
-        command = input(f'Привет, {str(user.firstname)}! \nПожалуйста, введите команду: ').strip()
-        return command
+    command =  commandHandler.get_command(user)
+    return command
 def proceed_command(command, user):
     """
     Обрабатывает команду пользователя и возвращает состояние сессии.
@@ -104,77 +99,15 @@ def proceed_command(command, user):
     is_run = True
     match command:
         case 'help':
-            uiLib.print_help()
             is_run = commandHandler.command_help()
         case 'list_all':
-            is_run, market_list = commandHandler.command_list_all()
-            if market_list is None:
-                print('Ошибка. Попробуйте ещё раз')
-            else:
-                for k,i in market_list.items():
-                    market_list[k] = i.get_as_dict()
-                uiLib.print_list(market_list)
+            is_run = commandHandler.command_list_all()
         case 'list':
-            is_run, market_list, start_pos, step = commandHandler.command_list()
-            if market_list is None:
-                print('Ошибка. Попробуйте ещё раз')
-            else:
-                for k,i in market_list.items():
-                    market_list[k] = i.get_as_dict()
-                uiLib.print_list(markets_for_show= market_list,start_pos=start_pos, step= step)
-                is_continue = True
-                while is_continue:
-                    continue_command = input('Желаете продолжить? Введите \'y\' для продолжения, или \'n\' для завершения: ')
-                    match continue_command:
-                        case 'y':
-                            market_list, start_pos, step = uiLib.print_list(markets_for_show=market_list,
-                                                                            step= step,start_pos=start_pos)
-                        case 'n':
-                            is_continue = False
-                        case _:
-                            print('Ошибка ввода')
+            is_run= commandHandler.command_list()
         case 'order':
-            uiLib.print_header_numbers()
-            uiLib.print_table_header()
-            is_run, market_list, column, order = commandHandler.command_order()
-            if market_list is None:
-                print('Ошибка. Попробуйте ещё раз')
-            else:
-                ordered_list, position, step = uiLib.print_list(markets_for_show=market_list, column_name= column, step= 10)
-                is_continue = True
-                while is_continue:
-                    continue_command = input('Желаете продолжить? Введите \'y\' для продолжения, или \'n\' для завершения: ')
-                    match continue_command:
-                        case 'y':
-                            ordered_list, position, step = uiLib.print_list(markets_for_show=ordered_list, column_name= column,
-                                                                            step= step,start_pos=position)
-                        case 'n':
-                            is_continue = False
-                        case _:
-                            print('Ошибка ввода')
+            is_run = commandHandler.command_order()
         case 'show':
-            try:
-                is_run, market_info = commandHandler.command_show()
-                if market_info is None:
-                    return is_run, user
-                uiLib.print_detailed_market_info(market_info.get_ui_dict())
-                should_continue = input('Если хотите увидеть отзывы на рынок, введите `y`\n'
-                                        'Если хотите вернуться к вводу команд, нажмите Enter\n')
-                match should_continue:
-                    case 'y':
-                        review_collection = market_info.get_reviews()
-                        market_info = market_info.get_ui_dict()
-                        reviews = []
-                        for review in review_collection:
-                            review_author = User.from_db(review.user_id)
-                            rev = review.get_as_dict()
-                            rev.update({"user_name": review_author.firstname + " " + review_author.lastname})
-                            reviews.append(rev)
-                        uiLib.print_market_reviews(reviews, market_info['basic_info']['score'])
-                    case  _:
-                        return is_run, user
-            except ValueError:
-                print('Пожалуйста, введите число.')
+            is_run = commandHandler.command_show()
         case 'register':
             is_run, user = commandHandler.register_user()
         case 'login':
@@ -190,10 +123,9 @@ def proceed_command(command, user):
         case 'delete':
             is_run, user = commandHandler.delete_market(user)
         case 'exit':
-            uiLib.print_exit()
             is_run = commandHandler.command_exit()
         case 'zip':
             is_run = commandHandler.command_zip()
         case _:
-            print('Такой команды нет. Введите help, чтобы вывести список всех команд')
+            is_run = commandHandler.unknown_command()
     return is_run, user

@@ -20,16 +20,13 @@ commandHandler — обработчики команд пользователя.
 - bcrypt, getpass: хеширование паролей
 - BusinessLogic.market_queries: бизнес-логика рынков (OOP)
 - DAL.referencelib2, DAL.reviewlib2: доступ к данным
-- UI.uiLib: ввод координат, фильтра, обновление пользователя
+- view.uiLib: ввод координат, фильтра, обновление пользователя
 - models.entities.review.Review: сущность отзыва
 - models.entities.user.User: сущность пользователя
 
-Каждая функция возвращает кортеж (статус, данные) для передачи в UI.
+Каждая функция возвращает кортеж (статус, данные) для передачи в view.
 Вызывается из workflowLib.proceed_command().
 """
-import uuid
-from datetime import datetime
-
 
 import bcrypt
 import getpass
@@ -38,8 +35,8 @@ from BusinessLogic import geoLib
 from BusinessLogic.market_queries import get_markets_ordered_by_mode, get_all_markets_ordered_by_column, \
     prepare_ordered_list, get_market_by_id, get_all_markets_filtered_by_column
 from DAL import referencelib2, reviewlib2, userlib2
-from UI import uiLib
-from UI.column_helper import COLUMNS_INFO
+from view import uiLib
+from view.helpers.column_helper import COLUMNS_INFO
 from models.entities.reference import Reference
 from models.entities.review import Review
 from models.entities.user import User
@@ -47,28 +44,53 @@ from models.entities.user import User
 
 def command_help():
     """Возвращает True для продолжения работы."""
+    uiLib.print_help()
     return True
 
 
 def command_exit():
     """Возвращает False для завершения работы."""
+    uiLib.print_exit()
     return False
 
 
 def command_list_all():
     """Возвращает (True, dict_всех_рынков)."""
-    return True, get_markets_ordered_by_mode('num')
+    market_list =  get_markets_ordered_by_mode('num')
+    if market_list is None:
+        print('Ошибка. Попробуйте ещё раз')
+    else:
+        for k, i in market_list.items():
+            market_list[k] = i.get_as_dict()
+        uiLib.print_list(market_list)
+    return True
 
 def command_list():
     """
     Запрашивает у пользователя стартовую позицию и шаг.
     Возвращает (True, dict_рынков_с_нумерацией, старт, шаг).
     """
-    start_input = input('Введите стартовый номер: ').strip()
-    start_num = int(start_input) if start_input else 1
-    step_input = input('Введите  шаг: ').strip()
-    step = int(step_input) if step_input else 10
-    return True, get_markets_ordered_by_mode('num'), start_num, step
+    start_pos, step  = uiLib.request_start_and_step()
+    market_list = get_markets_ordered_by_mode('num')
+    if market_list is None:
+        uiLib.print_input_error()
+        return True
+    else:
+        for k, i in market_list.items():
+            market_list[k] = i.get_as_dict()
+    uiLib.print_list(markets_for_show=market_list, start_pos=start_pos, step=step)
+    is_continue = True
+    while is_continue:
+        continue_command = uiLib.request_continue()
+        match continue_command:
+            case 'y':
+                market_list, start_pos, step = uiLib.print_list(markets_for_show=market_list,
+                                                                step=step, start_pos=start_pos)
+            case 'n':
+                is_continue = False
+            case _:
+                uiLib.print_input_error()
+    return True
 
 
 def command_order(column = None, order = None, start_num = None, step = None):
@@ -87,12 +109,28 @@ def command_order(column = None, order = None, start_num = None, step = None):
     Returns:
         tuple: (True, markets, column_info, order).
     """
+    uiLib.print_header_numbers()
+    uiLib.print_table_header()
     if column is None and order is None:
-        column = int(input('Введите номер колонки, по которой вы хотите отсортировать список: '))
-        order = input('Введите порядок сортировки d - от большего к меньшему, a - от меньшего к большему: ')
+        column, order = uiLib.request_column_and_order()
     markets, column = get_all_markets_ordered_by_column(column, order)
     markets = prepare_ordered_list(markets)
-    return True, markets, column, order
+    if markets is None:
+        uiLib.print_input_error()
+    else:
+        ordered_list, position, step = uiLib.print_list(markets_for_show=markets, column_name=column, step=10)
+        is_continue = True
+        while is_continue:
+            continue_command = uiLib.request_continue()
+            match continue_command:
+                case 'y':
+                    ordered_list, position, step = uiLib.print_list(markets_for_show=ordered_list, column_name=column,
+                                                                    step=step, start_pos=position)
+                case 'n':
+                    is_continue = False
+                case _:
+                    uiLib.print_input_error()
+    return True
 
 
 def command_show():
@@ -105,18 +143,28 @@ def command_show():
         (True, market_info) — кортеж (статус, данные рынка),
         (True, None) — при ошибке (рынок не найден или неверный ввод).
     """
-    try:
-        market_id = int(input('Введите ID рынка: '))
-        market_info = get_market_by_id(market_id)
-        if market_info is None:
-            print('Ошибка в ID, попробуйте ещё раз')
-            return True, None
-        else:
-            return True, market_info
-    except ValueError:
-        print('ID рынка должно быть числом')
-        return True, None
-
+    market_id = uiLib.request_market_id()
+    market_info = get_market_by_id(market_id)
+    if market_info is None:
+        uiLib.print_invalid_id_error()
+        return True
+    else:
+        uiLib.print_detailed_market_info(market_info.get_ui_dict())
+        should_continue = uiLib.request_review_for_market()
+    match should_continue:
+        case 'y':
+            review_collection = market_info.get_reviews()
+            market_info = market_info.get_ui_dict()
+            reviews = []
+            for review in review_collection:
+                review_author = User.from_db(review.user_id)
+                rev = review.get_as_dict()
+                rev.update({"user_name": review_author.firstname + " " + review_author.lastname})
+                reviews.append(rev)
+            uiLib.print_market_reviews(reviews, market_info['basic_info']['score'])
+            return True
+        case _:
+            return True
 
 def register_user():
     """
@@ -132,41 +180,39 @@ def register_user():
     """
     registration_process = True
     while registration_process:
-        user_name = input('Введите ваш логин: ')
-        match user_name:
-            case 'stop':
-                return True, None
-            case _:
-                user = User.from_db(username = user_name)
-                if user.username == user_name:
-                    print('Пожалуйста, введите другой username или введите stop для завершения регистрации')
-                else:
-                    user.username = user_name
-                    user_password = getpass.getpass("Введите ваш пароль: ")
-                    password_bytes = user_password.encode('utf-8')
-                    salt = bcrypt.gensalt(rounds=12)
-                    hashed_password = bcrypt.hashpw(password_bytes, salt)
-                    user_password = hashed_password.decode('utf-8')
-                    user.password = user_password
-                    user.firstname = input('Введите Ваше имя ')
-                    user.lastname = input('Введите Вашу фамилию ')
-                    command = input('Вы хотите указать свои координаты?\n'
-                                    'Введите `y` чтобы указать\n'
-                                    'Введите `n` чтобы не указывать (координаты нужны, чтобы работала'
-                                    'функция определения дистанции до рынков\n')
-                    match command:
-                        case 'y':
-                            latitude, longitude = uiLib.get_user_coordinates_manually()
-                            user.latitude = str(latitude)
-                            user.longitude = str(longitude)
-                        case 'n':
-                            user.latitude, user.longitude = ('','')
-                        case _:
-                            print('Команда не распознана, вы сможете указать координаты позже')
-                            user.latitude, user.longitude = ('','')
-                    user.add_to_db()
-                    print('Регистрация успешна! Добро пожаловать!')
-                    return True, user
+        user_name_valid = True
+        while user_name_valid:
+            uiLib.request_user_profile()
+            user = User.from_db(username = user_name)
+            if user.username == user_name:
+                        print('Пожалуйста, введите другой username или введите stop для завершения регистрации')
+                    else:
+                        user.username = user_name
+                        user_password = getpass.getpass("Введите ваш пароль: ")
+                        password_bytes = user_password.encode('utf-8')
+                        salt = bcrypt.gensalt(rounds=12)
+                        hashed_password = bcrypt.hashpw(password_bytes, salt)
+                        user_password = hashed_password.decode('utf-8')
+                        user.password = user_password
+                        user.firstname = input('Введите Ваше имя ')
+                        user.lastname = input('Введите Вашу фамилию ')
+                        command = input('Вы хотите указать свои координаты?\n'
+                                        'Введите `y` чтобы указать\n'
+                                        'Введите `n` чтобы не указывать (координаты нужны, чтобы работала'
+                                        'функция определения дистанции до рынков\n')
+                        match command:
+                            case 'y':
+                                latitude, longitude = uiLib.get_user_coordinates_manually()
+                                user.latitude = str(latitude)
+                                user.longitude = str(longitude)
+                            case 'n':
+                                user.latitude, user.longitude = ('','')
+                            case _:
+                                print('Команда не распознана, вы сможете указать координаты позже')
+                                user.latitude, user.longitude = ('','')
+                        user.add_to_db()
+                        print('Регистрация успешна! Добро пожаловать!')
+                        return True, user
 def login_user(user):
     if user is None:
         user_name = input('Введите ваш логин: ')
@@ -355,4 +401,13 @@ def command_zip():
         dist = input('Введите радиус поиска: ')
     markets_to_show = get_all_markets_filtered_by_column(9, ('<', dist), coords)
     uiLib.print_list(markets_to_show[0], column_name=COLUMNS_INFO[9])
+    return True
+
+def get_command(user):
+    command = uiLib.print_invitation(user)
+    return command
+
+
+def unknown_command():
+    uiLib.print_unknown_command()
     return True

@@ -19,15 +19,15 @@ uiLib — библиотека функций вывода и ввода в ко
 
 Зависимости:
 - DAL.userLib: get_user для проверки уникальности username
-- UI.column_helper: COLUMNS (перевод колонок), COLUMNS_INFO (тип и имя колонок), COLUMN_TO_SHOW (отображаемые колонки)
-- UI.comparison_helper: COMPARISON_SIGNS (знаки сравнения для числовых фильтров)
+- view.column_helper: COLUMNS (перевод колонок), COLUMNS_INFO (тип и имя колонок), COLUMN_TO_SHOW (отображаемые колонки)
+- view.comparison_helper: COMPARISON_SIGNS (знаки сравнения для числовых фильтров)
 
 Использование:
-    from UI.uiLib import print_welcome, print_help, print_list, request_filter
+    from view.uiLib import print_welcome, print_help, print_list, request_filter
 """
 from DAL.userlib2 import get_user
-from UI.column_helper import COLUMNS, COLUMNS_INFO, COLUMN_TO_SHOW
-from UI.comparison_helper import COMPARISON_SIGNS
+from view.helpers.column_helper import COLUMNS, COLUMNS_INFO, COLUMN_TO_SHOW
+from view.helpers.comparison_helper import COMPARISON_SIGNS
 
 
 def print_welcome():
@@ -36,7 +36,14 @@ def print_welcome():
     print('Добро пожаловать в приложение для просмотра')
     print('информации о фермерских рынках США')
     print('======--------------------------------======')
-
+def print_invitation(user):
+    if user is None:
+        print('Часть функций недоступна, неавторизованным пользователям.\nИспользуйте `login` чтобы войти')
+        command = input('Пожалуйста, введите команду: ').strip()
+        return command
+    else:
+        command = input(f'Привет, {str(user.firstname)}! \nПожалуйста, введите команду: ').strip()
+        return command
 def print_help():
     """Выводит справку по всем доступным командам."""
     print('Доступные команды:')
@@ -56,7 +63,7 @@ def print_help():
     print('exit - завершает работу приложения')
 def print_table_header():
     """Выводит шапку таблицы с русскими названиями колонок."""
-    from UI.column_helper import  COLUMN_TO_SHOW
+    from view.helpers.column_helper import  COLUMN_TO_SHOW
     header = ''
     for column in COLUMN_TO_SHOW:
         header += ' | ' + column
@@ -352,3 +359,44 @@ def request_user_updates(user):
             case _:
                 print('Ошибка ввода, попробуйте ещё раз')
                 continue
+
+
+def request_start_and_step():
+    start_input = input('Введите стартовый номер: ').strip()
+    start_num = int(start_input) if start_input else 1
+    step_input = input('Введите  шаг: ').strip()
+    step = int(step_input) if step_input else 1
+    return  start_num, step
+
+def print_input_error():
+    print('Ошибка. Попробуйте ещё раз')
+def print_invalid_id_error():
+    print('Ошибка в ID, попробуйте ещё раз')
+def request_continue():
+    return input('Желаете продолжить? Введите \'y\' для продолжения, или \'n\' для завершения: ')
+
+
+def request_column_and_order():
+    column = int(input('Введите номер колонки, по которой вы хотите отсортировать список: '))
+    order = input('Введите порядок сортировки d - от большего к меньшему, a - от меньшего к большему: ')
+    return column, order
+def request_market_id():
+    try:
+        return int(input('Введите ID рынка: '))
+    except ValueError:
+        print('ID рынка должно быть числом')
+def request_review_for_market():
+    return input('Если хотите увидеть отзывы на рынок, введите `y`\n'
+                            'Если хотите вернуться к вводу команд, нажмите Enter\n')
+
+
+def print_unknown_command():
+    print('Такой команды нет. Введите help, чтобы вывести список всех команд')
+
+
+def request_user_profile():
+    user_name = input('Введите ваш логин: ')
+    user_password = input("Введите ваш пароль: ")
+    user_firstname = input('Введите Ваше имя ')
+    user_lastname = input('Введите Вашу фамилию ')
+    return user_name, user_password, user_firstname, user_lastname

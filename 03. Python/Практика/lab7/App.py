@@ -11,16 +11,13 @@ App — точка входа приложения для управления �
 Использование:
     python App.py
 """
-
-
-from UI.uiLib import print_welcome
-from BusinessLogic.workflowLib import *
+from view.ui import run_gui
+from view.uiLib import print_welcome
+from controller.workflow import *
 from models.entities.market import Market
 from models.entities.review import Review
 from models.entities.user import User
-import sys
-from UI.table_view import MainWindow
-from PyQt5.QtWidgets import QApplication
+
 
 def testing():
     """Тестирование OOP-функций SQLite.
@@ -68,16 +65,12 @@ def main():
     run_app = True
     print_welcome()
     user = None
-    run_gui()
+    #run_gui()
     while run_app:
         command = get_command(user)
         run_app, user = proceed_command(command, user)
 
-def run_gui():
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec_())
+
 if __name__ == "__main__":
     main()
 

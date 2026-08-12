@@ -6,12 +6,12 @@ processFilter — модуль обработки фильтрации рынк�
 Для числовых — сравнение с оператором (>, <, >=, <=, =).
 
 Зависимости:
-- UI.column_helper: COLUMNS_INFO для маппинга номеров колонок
+- view.column_helper: COLUMNS_INFO для маппинга номеров колонок
 
 Использование:
     from BusinessLogic.processFilter import process
 """
-from UI.column_helper import COLUMNS_INFO
+from view.helpers.column_helper import COLUMNS_INFO
 
 
 def process(market_list, column, filter_value):
