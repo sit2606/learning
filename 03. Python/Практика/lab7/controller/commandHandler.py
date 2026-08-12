@@ -25,7 +25,7 @@ commandHandler — обработчики команд пользователя.
 - models.entities.user.User: сущность пользователя
 
 Каждая функция возвращает кортеж (статус, данные) для передачи в view.
-Вызывается из workflowLib.proceed_command().
+Вызывается из controller/workflow.proceed_command().
 """
 
 import bcrypt

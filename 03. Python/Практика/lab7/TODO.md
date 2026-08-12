@@ -36,14 +36,25 @@
 - reviewlib2.py: добавлен `delete_reviews_by_market_id()`
 - config.py: DEFAULT_USER содержит 'id'
 
+## Сделано (10.08)
+- **Рефакторинг MVC**: `workflowLib.py` и `commandHandler.py` перемещены из `BusinessLogic/` в `controller/`
+- **UI реструктуризация**: `UI/` переименован в `view/` с подпапками `components/`, `helpers/`, `qtsrc/`
+- **GUI**: добавлен `view/ui.py` (запуск PyQt5), `view/components/table_view.py` (главное окно)
+- **Qt Designer**: `view/qtsrc/table_ui.py` — сгенерированный UI-код из `table_view.ui`
+- **PyQt5**: установка `pyqt5` и `pyqt5-tools`, работа Qt Designer на Python 3.14
+- **commandHandler.py**: часть `input()` вынесена в `uiLib` (`request_start_and_step`, `request_continue`, `request_column_and_order`)
+
 ## Исправленные баги
 - **datalib2.py**: пропущен пробел перед `WHERE` в UPDATE-запросе
 - **datalib2.py**: SQL injection через f-string → параметризованный запрос
 - **datalib2.py**: неправильные тексты ошибок в get_market/get_all_markets
 - **market_queries.py**: TypeError при сортировке с None (score) → разделение на with/without values
+- **workflow.py**: `return com = ...` — неверный синтаксис, разбито на две строки
 
 ## Не сделано
 - MARKETS таблица: street, city хранятся как TEXT, а должны быть INTEGER (FK на справочники)
 - distance — расчёт расстояния (geoLib.get_distance) не интегрирован в market_queries
 - `userlib2.delete_user()` — нет docstring
 - Тесты (tests.py)
+- commandHandler: оставшиеся `input()` в `command_show`, `register_user`, `login_user`, `add_review`, `delete_market`, `command_zip`
+- table_view.py: данные захардкожены, нужен вызов `load_data()` из controller

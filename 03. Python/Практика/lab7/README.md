@@ -4,7 +4,7 @@
 
 Приложение для управления данными о фермерских рынках США. Загружает CSV-датасет (Export.csv) в SQLite-базу, предоставляет интерфейс для просмотра, поиска, фильтрации, сортировки и отзывов.
 
-Архитектура: UI → BusinessLogic → DAL + models (OOP).
+Архитектура: view → controller → BusinessLogic → DAL + models (MVC).
 
 ### Возможности приложения
 
@@ -77,9 +77,10 @@ python App.py
 lab7/
 ├── App.py                          # Точка входа приложения
 ├── config.py                       # DATABASE_PATH, DEFAULT_USER
+├── controller/                     # Слой контроллера (MVC)
+│   ├── workflow.py                 # Оркестрация процесса и маршрутизация команд
+│   └── commandHandler.py           # Обработчики команд
 ├── BusinessLogic/                  # Слой бизнес-логики
-│   ├── workflowLib.py              # Оркестрация процесса и обработка команд
-│   ├── commandHandler.py           # Обработчики команд
 │   ├── market_queries.py           # OOP-запросы к рынкам (сортировка, фильтрация)
 │   ├── processFilter.py            # Обработка фильтрации рынков
 │   └── geoLib.py                   # Библиотека геоданных и расчёта дистанций
@@ -98,10 +99,16 @@ lab7/
 │   │   └── user.py                 # User — сущность пользователя
 │   └── collections/
 │       └── market_collection.py    # MarketCollection — коллекция рынков
-├── UI/                             # Слой интерфейса пользователя
+├── view/                           # Слой представления (MVC)
+│   ├── ui.py                       # Запуск GUI (PyQt5)
 │   ├── uiLib.py                    # Функции вывода и ввода в консоль
-│   ├── column_helper.py            # Словари перевода названий колонок и описания типов
-│   └── comparison_helper.py        # Константы знаков сравнения для фильтрации
+│   ├── components/                 # Qt-виджеты
+│   │   └── table_view.py           # Главное окно с таблицей рынков
+│   ├── helpers/                    # Вспомогательные константы
+│   │   ├── column_helper.py        # Словари перевода названий колонок и описания типов
+│   │   └── comparison_helper.py    # Константы знаков сравнения для фильтрации
+│   └── qtsrc/                      # Сгенерированные файлы Qt Designer
+│       └── table_ui.py             # UI-код, сгенерированный из table_view.ui
 ├── database/                       # SQLite-база данных
 │   └── base.db
 ├── документация/                   # Диаграммы и пользовательские истории
@@ -221,37 +228,45 @@ python App.py
 ```
 App.py
  │
- ├── UI/
- │    ├── uiLib.py                    — приветствие, справка, ввод фильтра, вывод данных
- │    ├── column_helper.py            — COLUMNS (перевод), COLUMNS_INFO (тип и имя колонок)
- │    └── comparison_helper.py        — COMPARISON_SIGNS (знаки сравнения для фильтров)
+ ├── view/                           ← View (отображение)
+ │    ├── ui.py                      — запуск GUI (PyQt5)
+ │    ├── uiLib.py                   — приветствие, справка, ввод фильтра, вывод данных
+ │    ├── components/
+ │    │    └── table_view.py         — главное окно с таблицей рынков
+ │    ├── helpers/
+ │    │    ├── column_helper.py      — COLUMNS (перевод), COLUMNS_INFO (тип и имя колонок)
+ │    │    └── comparison_helper.py  — COMPARISON_SIGNS (знаки сравнения для фильтров)
+ │    └── qtsrc/
+ │         └── table_ui.py           — сгенерированный UI-код из Qt Designer
  │
- ├── BusinessLogic/
- │    ├── workflowLib.py              — оркестрация, командный цикл, вызов UI
- │    ├── commandHandler.py           — обработчики команд (ввод + бизнес-логика)
- │    ├── market_queries.py           — OOP-запросы к рынкам (сортировка, фильтрация)
- │    ├── processFilter.py            — обработка фильтрации
- │    └── geoLib.py                   — геоданные и расчёт дистанций
+ ├── controller/                     ← Controller (оркестрация)
+ │    ├── workflow.py                — маршрутизация команд, вызов BusinessLogic и view
+ │    └── commandHandler.py          — обработчики команд (бизнес-логика + вызов view)
  │
- ├── models/
+ ├── BusinessLogic/                  ← Бизнес-логика
+ │    ├── market_queries.py          — OOP-запросы к рынкам (сортировка, фильтрация)
+ │    ├── processFilter.py           — обработка фильтрации
+ │    └── geoLib.py                  — геоданные и расчёт дистанций
+ │
+ ├── models/                         ← Model (сущности)
  │    ├── entities/
- │    │    ├── market.py              — Market, Marketinfo, Timesheet, Coordinates, Location, BankInfo, MediaInfo, GroceryInfo
- │    │    ├── reference.py           — Reference (Common + Connection)
- │    │    ├── review.py              — Review
- │    │    └── user.py                — User
+ │    │    ├── market.py             — Market, Marketinfo, Timesheet, Coordinates, Location, BankInfo, MediaInfo, GroceryInfo
+ │    │    ├── reference.py          — Reference (Common + Connection)
+ │    │    ├── review.py             — Review
+ │    │    └── user.py               — User
  │    └── collections/
- │         └── market_collection.py   — MarketCollection
+ │         └── market_collection.py  — MarketCollection
  │
- └── DAL/
-      ├── datalib2.py                 — CRUD рынков (SQLite)
-      ├── referencelib2.py            — CRUD справочников и связей (SQLite)
-      ├── reviewlib2.py               — CRUD отзывов (SQLite)
-      ├── userlib2.py                 — CRUD пользователей (SQLite)
-      ├── filelib2.py                 — импорт CSV → SQLite
-      └── requiredFiles.py            — константы, создание таблиц
+ └── DAL/                            ← Доступ к данным
+      ├── datalib2.py                — CRUD рынков (SQLite)
+      ├── referencelib2.py           — CRUD справочников и связей (SQLite)
+      ├── reviewlib2.py              — CRUD отзывов (SQLite)
+      ├── userlib2.py                — CRUD пользователей (SQLite)
+      ├── filelib2.py                — импорт CSV → SQLite
+      └── requiredFiles.py           — константы, создание таблиц
 ```
 
-Зависимости: `App.py` → `BusinessLogic` + `UI` → `models` → `DAL`
+Зависимости: `App.py` → `controller` → `view` + `BusinessLogic` → `models` → `DAL`
 
 ---
 
@@ -307,6 +322,7 @@ pip install -r requirements.txt
 |-------|--------|------------|
 | bcrypt | ≥ 4.0 | Хеширование паролей пользователей |
 | geopy | ≥ 2.4 | Геокодирование по почтовому индексу (get_zip_coords) |
+| PyQt5 | ≥ 5.15 | Графический интерфейс (GUI) |
 
 ---
 

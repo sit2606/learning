@@ -81,16 +81,21 @@
 
 ```
 ┌─────────────────────────────────────────┐
-│                  UI                      │
-│  Вывод данных, ввод пользователя        │
-│  (uiLib, column_helper, comparison)      │
+│                 view                     │
+│  Отображение (консоль + GUI PyQt5)      │
+│  (ui.py, uiLib, components, helpers)    │
 └──────────────────┬──────────────────────┘
                    │
 ┌──────────────────▼──────────────────────┐
-│            BusinessLogic                 │
-│  Бизнес-логика, обработка команд        │
-│  (workflowLib, commandHandler,           │
-│   market_queries, processFilter, geoLib) │
+│              controller                  │
+│  Оркестрация, маршрутизация команд      │
+│  (workflow, commandHandler)              │
+└──────────────────┬──────────────────────┘
+                   │
+┌──────────────────▼──────────────────────┐
+│           BusinessLogic                  │
+│  Бизнес-логика (запросы, фильтрация)    │
+│  (market_queries, processFilter, geoLib) │
 └──────────────────┬──────────────────────┘
                    │
 ┌──────────────────▼──────────────────────┐
@@ -134,6 +139,12 @@ user → proceed_command('review') → add_review(user)
     → market.calculate_score() → market.update()
 ```
 
+**Запуск GUI:**
+```
+App.py → run_gui() → MainWindow → commandHandler.command_list_all()
+    → MarketCollection.from_db() → get_as_dict() → QStandardItemModel → tableView
+```
+
 ---
 
 ## Добавление новой команды
@@ -143,7 +154,7 @@ user → proceed_command('review') → add_review(user)
 Создайте функцию-обработчик, которая возвращает данные для вывода:
 
 ```python
-# BusinessLogic/commandHandler.py
+# controller/commandHandler.py
 
 def command_new_command():
     # Бизнес-логика (работа с данными)
@@ -151,12 +162,12 @@ def command_new_command():
     return True, result  # (статус_работы, данные_для_UI)
 ```
 
-### Шаг 2: Добавить маршрутизацию в workflowLib.py
+### Шаг 2: Добавить маршрутизацию в workflow.py
 
 Добавьте новую ветку в `match` внутри `proceed_command()`. Функция принимает `command` и `user`:
 
 ```python
-# BusinessLogic/workflow.py
+# controller/workflow.py
 
 def proceed_command(command, user):
     is_run = True
@@ -323,10 +334,10 @@ def create_new_entity_table():
     conn.close()
 ```
 
-### Шаг 4: Вызвать создание в workflowLib.py
+### Шаг 4: Вызвать создание в workflow.py
 
 ```python
-# BusinessLogic/workflow.py
+# controller/workflow.py
 
 def file_creation():
     # ... существующий код ...
@@ -336,7 +347,7 @@ def file_creation():
 ### Шаг 5: Создать обработчик в commandHandler.py
 
 ```python
-# BusinessLogic/commandHandler.py
+# controller/commandHandler.py
 
 def add_entity(user):
     """Добавление новой сущности."""
@@ -347,10 +358,10 @@ def add_entity(user):
     return True, user
 ```
 
-### Шаг 6: Добавить команду в workflowLib.py
+### Шаг 6: Добавить команду в workflow.py
 
 ```python
-# BusinessLogic/workflow.py
+# controller/workflow.py
 
 def proceed_command(command, user):
     match command:
@@ -446,7 +457,7 @@ CREATE TABLE REVIEWS (
 Все функции обработки команд принимают и возвращают `user`:
 
 ```python
-# commandHandler.py
+# controller/commandHandler.py
 def add_review(user):
     if user is None:
         print('Требуется авторизация.')
@@ -454,7 +465,7 @@ def add_review(user):
     # ... работа с user ...
     return True, user
 
-# workflow.py
+# controller/workflow.py
 def proceed_command(command, user):
     match command:
         case 'review':

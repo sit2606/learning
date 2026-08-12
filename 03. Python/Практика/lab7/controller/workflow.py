@@ -1,9 +1,9 @@
 """
-workflowLib — модуль оркестрации рабочего процесса.
+workflow — модуль оркестрации рабочего процесса.
 
 Зависимости:
 - os: работа с файловой системой
-- BusinessLogic.commandHandler: обработчики команд
+- controller.commandHandler: обработчики команд
 - DAL.requiredFiles: инициализация таблиц и справочников
 - DAL.filelib2: импорт CSV в SQLite
 - DAL.datalib2: batch-вставка рынков
@@ -33,7 +33,7 @@ workflowLib — модуль оркестрации рабочего проце�
 - exit — выход
 
 Использование:
-    from BusinessLogic.workflowLib import directory_creation, file_creation, proceed_command
+    from controller.workflow import directory_creation, file_creation, proceed_command
 """
 import os
 
