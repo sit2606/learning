@@ -70,7 +70,6 @@ def command_list():
     Запрашивает у пользователя стартовую позицию и шаг.
     Возвращает (True, dict_рынков_с_нумерацией, старт, шаг).
     """
-    start_pos, step  = uiLib.request_start_and_step()
     market_list = get_markets_ordered_by_mode('num')
     if market_list is None:
         uiLib.print_input_error()
@@ -78,6 +77,9 @@ def command_list():
     else:
         for k, i in market_list.items():
             market_list[k] = i.get_as_dict()
+    start_pos, step  = uiLib.request_start_and_step()
+    uiLib.print_list(start_pos= start_pos, step= step)
+
     uiLib.print_list(markets_for_show=market_list, start_pos=start_pos, step=step)
     is_continue = True
     while is_continue:

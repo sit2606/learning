@@ -18,14 +18,12 @@ uiLib — библиотека функций вывода и ввода в ко
 - request_user_updates(user): интерфейс обновления данных пользователя
 
 Зависимости:
-- DAL.userLib: get_user для проверки уникальности username
 - view.column_helper: COLUMNS (перевод колонок), COLUMNS_INFO (тип и имя колонок), COLUMN_TO_SHOW (отображаемые колонки)
 - view.comparison_helper: COMPARISON_SIGNS (знаки сравнения для числовых фильтров)
 
 Использование:
     from view.uiLib import print_welcome, print_help, print_list, request_filter
 """
-from DAL.userlib2 import get_user
 from view.helpers.column_helper import COLUMNS, COLUMNS_INFO, COLUMN_TO_SHOW
 from view.helpers.comparison_helper import COMPARISON_SIGNS
 
@@ -296,13 +294,14 @@ def request_user_updates(user):
     Интерфейс обновления данных пользователя.
 
     Показывает текущие значения полей и позволяет выбрать, какое изменить:
-    1 — username, 2 — имя, 3 — фамилия, 4 — широта, 5 — долгота.
+    1 — username, 2 — имя, 3 — фамилия, 4 — координаты.
 
     Args:
         user: Текущий авторизованный пользователь.
 
     Returns:
-        dict: обновлённый словарь пользователя с изменённым полем.
+        tuple: (field_name, new_value) — имя поля и новое значение,
+               или (None, None) при отмене.
     """
     updates_process = True
     while updates_process:
@@ -316,49 +315,33 @@ def request_user_updates(user):
                         'Введите `b`, чтобы выйти без изменений\n')
         match command:
             case '1':
-                user_name_process = True
-                while user_name_process:
-                    print('Вы выбрали изменить username')
-                    new_user_name = input('Введите новый username: ')
-                    match new_user_name:
-                        case 'b':
-                            user_name_process = False
-                        case _:
-                            user_exist = get_user(new_user_name)
-                            if user_exist is not None:
-                                print('Пожалуйста, введите другой username или введите `b` чтобы выйти')
-                            else:
-                                print('username обновлён!')
-                                user.update({'user_name': new_user_name})
-                                return user
+                print('Вы выбрали изменить username')
+                new_user_name = input('Введите новый username: ')
+                if new_user_name == 'b':
+                    continue
+                return 'username', new_user_name
             case '2':
                 print('Вы выбрали изменить имя')
                 new_name = input('Введите новое имя: ')
-                user.firstname =  new_name
-                print('Имя обновлено!')
-                return user
+                return 'firstname', new_name
             case '3':
                 print('Вы выбрали изменить фамилию')
                 new_name = input('Введите новую фамилию: ')
-                user.lastname =  new_name
-                print('Фамилия обновлена!')
-                return user
+                return 'lastname', new_name
             case '4':
                 print('Вы выбрали изменить координаты')
                 coords = get_user_coordinates_manually()
                 if coords[0] is not None and coords[1] is not None:
-                    user.latitude =  coords[0]
-                    user.longitude =  coords[1]
-                    print('Координаты обновлены!')
-                    return user
+                    return 'coordinates', coords
                 else:
                     print('Координаты не изменены')
             case 'b':
                 updates_process = False
-                return user
+                return None, None
             case _:
                 print('Ошибка ввода, попробуйте ещё раз')
                 continue
+    return None, None
 
 
 def request_start_and_step():
