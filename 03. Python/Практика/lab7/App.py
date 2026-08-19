@@ -7,7 +7,7 @@ App — точка входа приложения для управления �
     python App.py
 """
 from controller.AppController import AppController
-from controller.workflow import run_console
+from controller.workflow import run_console, run_gui
 
 
 def main():
@@ -21,7 +21,9 @@ def main():
     """
     controller = AppController()
     controller.init_db()
-    run_console(controller)
+    #run_console(controller)
+    run_gui(controller)
+
 
 
 if __name__ == "__main__":

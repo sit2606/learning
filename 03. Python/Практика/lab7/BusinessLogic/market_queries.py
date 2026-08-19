@@ -11,9 +11,7 @@ market_queries — запросы к данным о фермерских рын
     get_all_markets_filtered_by_column(col, filter, user) — фильтрация по колонке
     prepare_ordered_list(markets) — переиндексация для пагинации
 
-TODO:
-    - get_market_references(market_id) — получение связей рынка (в Market.from_db)
-    - distance — расчёт расстояния (geoLib.get_distance)
+
 """
 from BusinessLogic import processFilter, geoLib
 from view.helpers.column_helper import COLUMNS_INFO

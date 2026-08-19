@@ -11,7 +11,7 @@ import os
 import getpass
 
 from controller.AppController import AppController
-from view import uiLib
+from view import uiLib, ui
 from view.helpers.column_helper import COLUMNS_INFO
 
 
@@ -22,6 +22,8 @@ def run_console(controller: AppController):
     while run_app:
         command = get_command(controller)
         run_app = proceed_command(command, controller)
+def run_gui(controller :AppController):
+    ui.run_gui(controller)
 
 
 def directory_creation():
