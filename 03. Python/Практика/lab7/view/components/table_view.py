@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QDialog
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 from controller.AppController import AppController
-from view.components import login_view
+from view.components.paginationWidget import  PaginationWidget
 from view.components.login_view import LoginWindow
 # Сгенерированный файл
 from view.qtsrc.table_ui import Ui_MainWindow
@@ -19,16 +19,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.model.setHorizontalHeaderLabels(COLUMN_TO_SHOW)
         self.tableView.setModel(self.model)
         # --- Загрузка данных при старте ---
+        self.markets = self.controller.get_all_markets()
         self.show_markets()
         self.currentUser.setText(controller.user)
         self.loginButton.clicked.connect(self.open_login)
+        self.pagination = PaginationWidget()
+        self.horizontalLayout_2.addWidget(self.pagination)
+        self.viewButton.clicked.connect(self.open_view)
+        self.pagination.setVisible(False)
+        self.viewButton.setText('All')
+        self.pageControlWidget.setVisible(False)
+        self.pagination.radioButton_page5.setChecked(True)
+        self.pagination.page_size_changed.connect(self.show_paged_markets)
+        self.page_size = 5
+        self.current_page = 0
     def update_current_user(self):
         self.currentUser.setText(str(self.controller.user))
     def show_markets(self):
-        markets = self.controller.get_all_markets()
-        if markets is None:
+        if self.markets is None:
             return
-        for num, market_dict in markets.items():
+        for num, market_dict in self.markets.items():
             row = []
             for col in COLUMN_TO_SHOW:
                 row.append(str(market_dict.get(col, '')))
@@ -38,3 +48,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         result = dialog.exec_()
         if result == QDialog.Accepted:
             self.update_current_user()
+    def open_view(self):
+        a = self.viewButton.text()
+        if a == 'All':
+            self.viewButton.setText('By page')
+            self.pagination.setVisible(True)
+            self.pageControlWidget.setVisible(True)
+            self.show_paged_markets()
+        if a == 'By page':
+            self.viewButton.setText('All')
+            self.pagination.setVisible(False)
+            self.pageControlWidget.setVisible(False)
+            self.show_markets()
+    def show_paged_markets(self, page_size = 5):
+        self.model.removeRows(0, self.model.rowCount())
+        start = self.current_page * page_size
+        end = start + self.page_size
+        page_data = list(self.markets.items())[start:end]
+        for num, market_dict in page_data:
+            row = []
+            for col in COLUMN_TO_SHOW:
+                row.append(str(market_dict.get(col, '')))
+            self.model.appendRow([QStandardItem(v) for v in row])
