@@ -31,8 +31,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pageControlWidget.setVisible(False)
         self.pagination.radioButton_page5.setChecked(True)
         self.pagination.page_size_changed.connect(self.show_paged_markets)
+        self.forwardPage.clicked.connect(self.next_page)
+        self.backPage.clicked.connect(self.prev_page)
         self.page_size = 5
         self.current_page = 0
+        self.pageCount.setText(str(self.current_page))
     def update_current_user(self):
         self.currentUser.setText(str(self.controller.user))
     def show_markets(self):
@@ -60,13 +63,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.pagination.setVisible(False)
             self.pageControlWidget.setVisible(False)
             self.show_markets()
-    def show_paged_markets(self, page_size = 5):
+    def show_paged_markets(self, page_size = 5, current_page = 0):
         self.model.removeRows(0, self.model.rowCount())
-        start = self.current_page * page_size
-        end = start + self.page_size
+        self.page_size = page_size
+        self.current_page = current_page
+        self.pageCount.setText(str(self.current_page))
+        start = current_page * page_size
+        end = start + page_size
         page_data = list(self.markets.items())[start:end]
         for num, market_dict in page_data:
             row = []
             for col in COLUMN_TO_SHOW:
                 row.append(str(market_dict.get(col, '')))
             self.model.appendRow([QStandardItem(v) for v in row])
+    def next_page(self):
+        self.current_page += 1
+        self.show_paged_markets(self.page_size, self.current_page)
+
+    def prev_page(self):
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.show_paged_markets(self.page_size, self.current_page)
