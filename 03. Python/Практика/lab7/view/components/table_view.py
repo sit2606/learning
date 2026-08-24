@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QDialog
+from PyQt5.QtWidgets import QMainWindow, QDialog, QMessageBox
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 from controller.AppController import AppController
+from view.components.detail_view import DetailView
 from view.components.paginationWidget import  PaginationWidget
 from view.components.login_view import LoginWindow
 # Сгенерированный файл
@@ -36,6 +37,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.page_size = 5
         self.current_page = 0
         self.pageCount.setText(str(self.current_page))
+        self.tableView.clicked.connect(self.on_row_clicked)
+
     def update_current_user(self):
         self.currentUser.setText(str(self.controller.user))
     def show_markets(self):
@@ -84,3 +87,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.current_page > 0:
             self.current_page -= 1
             self.show_paged_markets(self.page_size, self.current_page)
+    def on_row_clicked(self, index):
+        row = index.row()  # номер строки
+        market_id = int(self.model.item(row, 0).text()) # первая колонка
+        dialog = DetailView(market_info=self.controller.get_market_by_id(market_id),reviews_info=self.controller.get_market_reviews(market_id)
+                            ,user_name=self.controller.user)
+        dialog.review_created.connect(self.on_review_created)
+        result = dialog.exec_()
+    def on_review_created(self, market_id, score, text):
+        res = self.controller.add_review(market_id, score, text)
+        if not res:
+            QMessageBox.warning(self, "Review error",
+                                    "You should be logged in to post a review")
