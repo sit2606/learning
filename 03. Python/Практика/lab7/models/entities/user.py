@@ -56,7 +56,7 @@ class User:
     def from_db(user_id = None, username = None):
         from DAL import userlib2
         if user_id is not None:
-            return User(user = userlib2.get_user(user_id))
+            return User(user = userlib2.get_user(user_id, mode = 'uid') )
         if username is not None:
             return User(user = userlib2.get_user(username, mode='username'))
         else:

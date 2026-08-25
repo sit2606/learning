@@ -115,6 +115,9 @@ class Ui_marketDetailDialog(object):
         self.timesheettextEdit.setReadOnly(True)
         self.timesheettextEdit.setObjectName("timesheettextEdit")
         self.verticalLayout.addWidget(self.timesheettextEdit)
+        self.backToTablepushButton = QtWidgets.QPushButton(self.detailsTab)
+        self.backToTablepushButton.setObjectName("backToTablepushButton")
+        self.verticalLayout.addWidget(self.backToTablepushButton)
         self.tabWidget.addTab(self.detailsTab, "")
         self.reviewsTab = QtWidgets.QWidget()
         self.reviewsTab.setObjectName("reviewsTab")
@@ -141,7 +144,7 @@ class Ui_marketDetailDialog(object):
         self.verticalLayout_5.addWidget(self.tabWidget)
 
         self.retranslateUi(marketDetailDialog)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(marketDetailDialog)
 
     def retranslateUi(self, marketDetailDialog):
@@ -158,6 +161,7 @@ class Ui_marketDetailDialog(object):
         self.bankinginfolabel.setText(_translate("marketDetailDialog", "Banking Info"))
         self.groceryInfolabel.setText(_translate("marketDetailDialog", "Grocery Info"))
         self.timesheetlabel.setText(_translate("marketDetailDialog", "Timesheet"))
+        self.backToTablepushButton.setText(_translate("marketDetailDialog", "Back to table"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.detailsTab), _translate("marketDetailDialog", "Details"))
         self.addReviewpushButton.setText(_translate("marketDetailDialog", "Add review"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.reviewsTab), _translate("marketDetailDialog", "Reviews"))

@@ -5,7 +5,7 @@ from models.entities.market import Location
 from view.components.add_review_view import AddReviewView
 from view.qtsrc.detail_ui import Ui_marketDetailDialog
 class DetailView(QDialog, Ui_marketDetailDialog):
-    review_created = pyqtSignal(int, int, str)
+    review_created = pyqtSignal(int, float, str)
     def __init__(self, market_info, reviews_info, user_name):
         super().__init__()
         self.setupUi(self)
@@ -18,6 +18,9 @@ class DetailView(QDialog, Ui_marketDetailDialog):
         self.locationCitylineEdit.setText(self.market_info.location.city)
         self.locationStatelineEdit.setText(self.market_info.location.state)
         self.addReviewpushButton.clicked.connect(self.add_review)
+        self.backToTablepushButton.clicked.connect(self.reject)
+        self.reviews_info = reviews_info
+        self._update_review_text()
         self.user_name = user_name
         txt = ''
         for media, link in self.market_info.media_info.media.items():
@@ -38,9 +41,15 @@ class DetailView(QDialog, Ui_marketDetailDialog):
     def add_review(self):
         dialog = AddReviewView(self.user_name)
         dialog.review_created.connect(self.on_review_created)
+        self._update_review_text()
         result = dialog.exec_()
+    def _update_review_text(self):
+        if self.reviews_info:
+            txt = ''
+            for review in self.reviews_info[0]:
+                txt += review['review_date'] + ' | ' + review['user_name'] + ' | ' + str(review['score']) + ' | ' + \
+                       review['review_text'] + '\n'
+            self.reviewstextEdit.setText(txt)
+            self.scorelcdNumber.display(self.reviews_info[1])
     def on_review_created(self, score, text):
         self.review_created.emit(self.market_info.id ,score, text)
-
-
-

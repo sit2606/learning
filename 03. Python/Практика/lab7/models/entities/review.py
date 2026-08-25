@@ -82,7 +82,7 @@ class Review:
         Returns:
             Review: объект отзыва
         """
-        rev = cls(user=User.from_db(data['user_id']), market=Market.from_db(market_id=data['market_id']), id=data['id'], review_date=data['review_date'])
+        rev = cls(user=User.from_db(user_id= data['user_id']), market=Market.from_db(market_id=data['market_id']), id=data['id'], review_date=data['review_date'])
         rev.set_text(data['review_text'])
         rev.set_score(data['score'])
         return rev

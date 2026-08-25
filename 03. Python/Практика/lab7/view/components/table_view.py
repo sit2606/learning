@@ -99,3 +99,4 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not res:
             QMessageBox.warning(self, "Review error",
                                     "You should be logged in to post a review")
+        
