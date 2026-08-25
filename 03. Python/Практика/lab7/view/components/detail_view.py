@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QDialog
 from models.entities.market import Location
 from view.components.add_review_view import AddReviewView
 from view.qtsrc.detail_ui import Ui_marketDetailDialog
-class DetailView(QDialog, Ui_marketDetailDialog):
+class DetailWindow(QDialog, Ui_marketDetailDialog):
     review_created = pyqtSignal(int, float, str)
     def __init__(self, market_info, reviews_info, user_name):
         super().__init__()

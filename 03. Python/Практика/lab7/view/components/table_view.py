@@ -2,10 +2,11 @@ from PyQt5.QtWidgets import QMainWindow, QDialog, QMessageBox
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 from controller.AppController import AppController
-from view.components.detail_view import DetailView
+from view.components.detail_view import DetailWindow
+from view.components.filter_view import FilterWindow
 from view.components.paginationWidget import  PaginationWidget
 from view.components.login_view import LoginWindow
-# Сгенерированный файл
+
 from view.qtsrc.table_ui import Ui_MainWindow
 
 from view.helpers.column_helper import COLUMN_TO_SHOW
@@ -38,6 +39,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.current_page = 0
         self.pageCount.setText(str(self.current_page))
         self.tableView.clicked.connect(self.on_row_clicked)
+        self.filterButton.clicked.connect(self.on_filter_clicked)
 
     def update_current_user(self):
         self.currentUser.setText(str(self.controller.user))
@@ -90,8 +92,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def on_row_clicked(self, index):
         row = index.row()  # номер строки
         market_id = int(self.model.item(row, 0).text()) # первая колонка
-        dialog = DetailView(market_info=self.controller.get_market_by_id(market_id),reviews_info=self.controller.get_market_reviews(market_id)
-                            ,user_name=self.controller.user)
+        dialog = DetailWindow(market_info=self.controller.get_market_by_id(market_id), reviews_info=self.controller.get_market_reviews(market_id)
+                              , user_name=self.controller.user)
         dialog.review_created.connect(self.on_review_created)
         result = dialog.exec_()
     def on_review_created(self, market_id, score, text):
@@ -99,4 +101,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not res:
             QMessageBox.warning(self, "Review error",
                                     "You should be logged in to post a review")
-        
+    def on_filter_clicked(self):
+        dialog = FilterWindow()
+        result = dialog.exec_()
