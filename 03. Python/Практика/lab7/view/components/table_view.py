@@ -9,7 +9,8 @@ from view.components.login_view import LoginWindow
 
 from view.qtsrc.table_ui import Ui_MainWindow
 
-from view.helpers.column_helper import COLUMN_TO_SHOW
+from view.helpers.column_helper import COLUMN_TO_SHOW, COLUMNS, COLUMNS_INFO_REVERSED
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, controller: AppController):
@@ -103,4 +104,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                     "You should be logged in to post a review")
     def on_filter_clicked(self):
         dialog = FilterWindow()
+        dialog.filter_options.connect(self.filter)
         result = dialog.exec_()
+    def filter(self, options):
+        self.markets = self.controller.get_filtered_markets(column= COLUMNS_INFO_REVERSED[options['column']], filter_value=options['filter_value'])[0]
+        self.show_paged_markets(self.page_size, self.current_page)

@@ -9,9 +9,11 @@ class FilterWindow(QDialog, Ui_filterDialog):
         super().__init__()
         self.setupUi(self)
         self.FilterListcomboBox.addItems(COLUMN_TO_SHOW)
-        self.AcceptpushButton.clicked.connect(self.get_filter)
-    def get_filter(self):
+        self.AcceptpushButton.clicked.connect(self._get_filter)
+        self.BackpushButton.clicked.connect(self.reject)
+    def _get_filter(self):
         data = dict()
-
         data.update({'column': self.FilterListcomboBox.currentText()})
-        #data.update({'order': })
+        data.update({'filter_value': self.FilterCriterialineEdit.text().split()})
+        self.filter_options.emit(data)
+        self.accept()

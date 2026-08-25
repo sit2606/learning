@@ -24,7 +24,5 @@ def main():
     #run_console(controller)
     run_gui(controller)
 
-
-
 if __name__ == "__main__":
     main()

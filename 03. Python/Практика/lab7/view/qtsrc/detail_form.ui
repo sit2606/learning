@@ -211,7 +211,14 @@
           <widget class="QTextEdit" name="reviewstextEdit"/>
          </item>
          <item>
-          <widget class="QLCDNumber" name="scorelcdNumber"/>
+          <widget class="QLCDNumber" name="scorelcdNumber">
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="segmentStyle">
+            <enum>QLCDNumber::Flat</enum>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="Line" name="line">

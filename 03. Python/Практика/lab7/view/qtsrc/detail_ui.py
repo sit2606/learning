@@ -129,6 +129,8 @@ class Ui_marketDetailDialog(object):
         self.reviewstextEdit.setObjectName("reviewstextEdit")
         self.verticalLayout_2.addWidget(self.reviewstextEdit)
         self.scorelcdNumber = QtWidgets.QLCDNumber(self.reviewsTab)
+        self.scorelcdNumber.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.scorelcdNumber.setSegmentStyle(QtWidgets.QLCDNumber.Flat)
         self.scorelcdNumber.setObjectName("scorelcdNumber")
         self.verticalLayout_2.addWidget(self.scorelcdNumber)
         self.line = QtWidgets.QFrame(self.reviewsTab)
