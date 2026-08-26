@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>380</width>
+    <height>230</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>380</width>
+    <height>230</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>380</width>
+    <height>230</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -21,6 +33,12 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>40</height>
+      </size>
      </property>
      <property name="text">
       <string>Please, provide correct username and password</string>
@@ -66,16 +84,16 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="loginButton">
+      <widget class="QPushButton" name="backButton">
        <property name="text">
-        <string>Login</string>
+        <string>Back</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="backButton">
+      <widget class="QPushButton" name="loginButton">
        <property name="text">
-        <string>Back</string>
+        <string>Login</string>
        </property>
       </widget>
      </item>
