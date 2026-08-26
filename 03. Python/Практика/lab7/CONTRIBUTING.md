@@ -57,6 +57,15 @@
    python App.py
    ```
 
+### Проблема с Qt на Windows
+
+Если при запуске появляется ошибка `qt.qpa.plugin: Could not find the Qt platform plugin "windows"`:
+
+```powershell
+$env:QT_QPA_PLATFORM_PLUGIN_PATH=".venv\Lib\site-packages\PyQt5\Qt5\plugins\platforms"
+python App.py
+```
+
 ### Автоматическая настройка
 
 При первом запуске приложение автоматически:
@@ -69,27 +78,27 @@
 
 ### Первый запуск
 
-1. Зарегистрируйтесь командой `register`
+1. Нажмите кнопку **User** → окно входа → кнопка регистрации
 2. Укажите координаты для работы фильтра по расстоянию
-3. Просматривайте рынки командой `list_all` или `list`
+3. Просматривайте рынки в таблице, кликайте по строкам для подробностей
 
 ---
 
 ## Архитектура приложения
 
-### Четырёхуровневая архитектура
+### MVC с AppController
 
 ```
 ┌─────────────────────────────────────────┐
 │                 view                     │
-│  Отображение (консоль + GUI PyQt5)      │
-│  (ui.py, uiLib, components, helpers)    │
+│  Отображение (GUI PyQt5 + консоль)      │
+│  (ui.py, uiLib, components/, helpers/)  │
 └──────────────────┬──────────────────────┘
-                   │
+                   │ вызывает методы контроллера
 ┌──────────────────▼──────────────────────┐
 │              controller                  │
-│  Оркестрация, маршрутизация команд      │
-│  (workflow, commandHandler)              │
+│  AppController (класс, хранит self.user) │
+│  workflow.py (консольный View-контроллер)│
 └──────────────────┬──────────────────────┘
                    │
 ┌──────────────────▼──────────────────────┐
@@ -113,98 +122,177 @@
 └─────────────────────────────────────────┘
 ```
 
-### Хранение данных
+**Правило:** зависимости только вниз. View ничего не знает о DAL. Controller не содержит `input()`/`print()`.
 
-Данные хранятся в SQLite-базе `database/base.db`. Справочники (CITY, COUNTY, STATE и др.) хранятся в отдельных таблицах с полями `id` (INTEGER PK) и `name` (TEXT UNIQUE). Связи между рынками и справочниками — в связующих таблицах с составным ключом `(market_id, reference_id)`.
+### AppController
+
+Центральный контроллер — класс, хранящий состояние сессии (`self.user`):
+
+```python
+class AppController:
+    def __init__(self):
+        self.user = None
+
+    def init_db(self): ...           # инициализация таблиц и импорт CSV
+    def get_all_markets(self): ...   # все рынки
+    def get_market_by_id(self, id): ...  # один рынок
+    def get_ordered_markets(self, column, order): ...  # сортировка
+    def get_filtered_markets(self, column, filter_value, coords): ...  # фильтрация
+    def get_market_reviews(self, market_id): ...  # отзывы
+    def delete_market(self, market_id): ...  # удаление
+    def search_by_zip(self, postalcode, radius): ...  # поиск по ZIP
+    def register(self, username, password, ...): ...  # регистрация
+    def login(self, username, password): ...  # авторизация
+    def logout(self): ...            # выход
+    def update_user(self, **fields): ...  # обновление профиля
+    def is_logged_in(self): ...      # проверка авторизации
+    def add_review(self, market_id, score, text): ...  # добавление отзыва
+```
 
 ### Потоки данных
 
-**Просмотр рынков:**
+**GUI — просмотр рынков:**
 ```
-user → get_command() → proceed_command('list') → command_list()
-    → MarketCollection.from_db() → change_mode() → print_list()
-```
-
-**Фильтрация по расстоянию:**
-```
-user → proceed_command('filter') → show_filtered(user)
-    → request_filter() → get_all_markets_filtered_by_column(col, filter, user)
-    → geoLib.get_distance() → print_list()
+MainWindow.__init__()
+    → controller.get_all_markets()
+    → MarketCollection.from_db() → get_as_dict()
+    → QStandardItemModel → tableView
 ```
 
-**Добавление отзыва:**
+**GUI — фильтрация:**
 ```
-user → proceed_command('review') → add_review(user)
-    → command_show() → Review(user, market) → save_to_db()
-    → market.calculate_score() → market.update()
+MainWindow.filter(options)
+    → controller.get_filtered_markets(column, filter_value)
+    → processFilter.process() → отфильтрованный dict
+    → show_paged_markets() → обновление таблицы
 ```
 
-**Запуск GUI:**
+**GUI — добавление отзыва (цепочка сигналов):**
 ```
-App.py → run_gui() → MainWindow → commandHandler.command_list_all()
-    → MarketCollection.from_db() → get_as_dict() → QStandardItemModel → tableView
+MainWindow → DetailView → AddReviewView
+    AddReviewView.review_created.emit(score, text)
+    → DetailView.on_review_created(score, text)
+    → DetailView.review_created.emit(market_id, score, text)
+    → MainWindow.on_review_created(market_id, score, text)
+    → controller.add_review(market_id, score, text)
+```
+
+**GUI — авторизация:**
+```
+MainWindow.open_login()
+    → LoginWindow(controller)
+    → controller.login(username, password)
+    → MainWindow.update_current_user()
+```
+
+**Консоль:**
+```
+App.py → run_console(controller)
+    → get_command() → proceed_command(command, controller)
+    → controller.method() → uiLib.print_*()
 ```
 
 ---
 
-## Добавление новой команды
+## Добавление новой команды (GUI)
 
-### Шаг 1: Добавить обработчик в commandHandler.py
-
-Создайте функцию-обработчик, которая возвращает данные для вывода:
+### Шаг 1: Добавить метод в AppController
 
 ```python
-# controller/commandHandler.py
+# controller/AppController.py
 
-def command_new_command():
-    # Бизнес-логика (работа с данными)
-    result = some_business_logic()
-    return True, result  # (статус_работы, данные_для_UI)
+def new_method(self, param):
+    """Новая операция."""
+    # бизнес-логика
+    return result
+```
+
+### Шаг 2: Создать окно в Qt Designer
+
+1. Создайте `.ui` файл в `view/qtsrc/` (Dialog)
+2. Сгенерируйте Python-код: `pyuic5 view/qtsrc/form.ui -o view/qtsrc/form_ui.py`
+
+### Шаг 3: Создать компонент
+
+```python
+# view/components/new_view.py
+
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QDialog
+from view.qtsrc.form_ui import Ui_Dialog
+
+class NewView(QDialog, Ui_Dialog):
+    result_ready = pyqtSignal(dict)  # сигнал с результатом
+
+    def __init__(self, data):
+        super().__init__()
+        self.setupUi(self)
+        self.submitButton.clicked.connect(self._submit)
+
+    def _submit(self):
+        self.result_ready.emit({'key': 'value'})
+        self.accept()
+```
+
+### Шаг 4: Подключить в MainWindow
+
+```python
+# view/components/table_view.py
+
+from view.components.new_view import NewView
+
+def open_new_view(self):
+    dialog = NewView(data)
+    dialog.result_ready.connect(self.on_new_result)
+    dialog.exec_()
+
+def on_new_result(self, result):
+    self.controller.new_method(result['key'])
+```
+
+---
+
+## Добавление новой команды (консоль)
+
+### Шаг 1: Добавить метод в AppController
+
+```python
+# controller/AppController.py
+
+def new_method(self, param):
+    # бизнес-логика
+    return result
 ```
 
 ### Шаг 2: Добавить маршрутизацию в workflow.py
 
-Добавьте новую ветку в `match` внутри `proceed_command()`. Функция принимает `command` и `user`:
+```python
+# controller/workflow.py
+
+def proceed_command(command, controller):
+    match command:
+        # ... существующие команды ...
+        case 'new_command':
+            return _new_command(controller)
+```
+
+### Шаг 3: Добавить обработчик
 
 ```python
 # controller/workflow.py
 
-def proceed_command(command, user):
-    is_run = True
-    match command:
-        # ... существующие команды ...
-        case 'new_command':
-            is_run, data = commandHandler.command_new_command()
-            if data is None:
-                print('Ошибка. Попробуйте ещё раз')
-            else:
-                uiLib.print_new_command(data)
-        # ...
-    return is_run, user
+def _new_command(controller):
+    param = input('Введите параметр: ')
+    result = controller.new_method(param)
+    print(f'Результат: {result}')
+    return True
 ```
 
-### Шаг 3: Добавить функцию вывода в uiLib.py
-
-Создайте функцию для отображения результатов:
+### Шаг 4: Обновить справку
 
 ```python
-# view/uiLib.py
-
-def print_new_command(data):
-    print('======--------------------------------======')
-    # Форматирование и вывод данных
-    print('======--------------------------------======')
-```
-
-### Шаг 4: Обновить справку в uiLib.py
-
-Добавьте описание новой команды в `print_help()`:
-
-```python
-def print_help():
-    print('Доступные команды:')
-    # ... существующие команды ...
-    print('new_command - описание новой команды')
+# view/uiLib.py — в print_help()
+print('new_command - описание новой команды')
 ```
 
 ---
@@ -266,37 +354,27 @@ def read_csv():
 
 ### Шаг 1: Создать модуль в models/entities/
 
-Создайте файл `models/entities/new_entity.py`:
-
 ```python
 # models/entities/new_entity.py
 
 class NewEntity:
-    """Сущность нового типа."""
-
     def __init__(self, id=None):
         self.id = id
 
     def save_to_db(self):
-        """Сохраняет сущность в БД."""
         from DAL.new_entity_lib import create_new_entity
         create_new_entity(self)
 
     @classmethod
     def from_dict(cls, data):
-        """Создаёт сущность из словаря (данные из БД)."""
         entity = cls(id=data['id'])
-        # ... заполнение полей ...
         return entity
 
     def get_as_dict(self):
-        """Конвертирует сущность в словарь."""
         return {'id': self.id}
 ```
 
 ### Шаг 2: Создать DAL-модуль
-
-Создайте файл `DAL/new_entity_lib.py` с функциями CRUD:
 
 ```python
 # DAL/new_entity_lib.py
@@ -305,7 +383,6 @@ import sqlite3
 from config import DATABASE_PATH
 
 def create_new_entity(entity):
-    """Добавляет сущность в таблицу."""
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute(
@@ -322,7 +399,6 @@ def create_new_entity(entity):
 # DAL/requiredFiles.py
 
 def create_new_entity_table():
-    """Создаёт таблицу NEW_ENTITY (если не существует)."""
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS NEW_ENTITY (
@@ -334,40 +410,15 @@ def create_new_entity_table():
     conn.close()
 ```
 
-### Шаг 4: Вызвать создание в workflow.py
+### Шаг 4: Вызвать создание в AppController.init_db()
 
 ```python
-# controller/workflow.py
+# controller/AppController.py
 
-def file_creation():
+def init_db(self):
+    from DAL import requiredFiles
     # ... существующий код ...
     requiredFiles.create_new_entity_table()
-```
-
-### Шаг 5: Создать обработчик в commandHandler.py
-
-```python
-# controller/commandHandler.py
-
-def add_entity(user):
-    """Добавление новой сущности."""
-    if user is None:
-        print('Требуется авторизация.')
-        return True, user
-    # ... создание и сохранение ...
-    return True, user
-```
-
-### Шаг 6: Добавить команду в workflow.py
-
-```python
-# controller/workflow.py
-
-def proceed_command(command, user):
-    match command:
-        # ... существующие команды ...
-        case 'new_entity':
-            is_run, user = commandHandler.add_entity(user)
 ```
 
 ---
@@ -441,36 +492,73 @@ CREATE TABLE REVIEWS (
 
 ## Система сессий (авторизация)
 
-Приложение поддерживает отслеживание текущего пользователя через объект `user` (экземпляр `User` или `None`):
+AppController хранит текущего пользователя в `self.user`:
 
-- `user = None` — пользователь не авторизован
-- `user = User(...)` — объект с данными пользователя
+- `self.user = None` — пользователь не авторизован
+- `self.user = User(...)` — объект с данными пользователя
 
 ### Поток авторизации
 
-1. **Регистрация** (`register`) — создаёт пользователя в USERS, возвращает `User`
-2. **Вход** (`login`) — проверяет логин/пароль через bcrypt, возвращает `User` или `None`
-3. **Выход** (`logout`) — сбрасывает `user` в `None`
+1. **Регистрация** (`register`) — создаёт пользователя в USERS, сохраняет в `self.user`
+2. **Вход** (`login`) — проверяет логин/пароль через bcrypt, сохраняет в `self.user`
+3. **Выход** (`logout`) — сбрасывает `self.user = None`
 
-### Передача user между функциями
-
-Все функции обработки команд принимают и возвращают `user`:
+### Проверка авторизации
 
 ```python
-# controller/commandHandler.py
-def add_review(user):
-    if user is None:
-        print('Требуется авторизация.')
-        return True, user
-    # ... работа с user ...
-    return True, user
+# В контроллере
+if not self.controller.is_logged_in():
+    return  # или показать ошибку
 
-# controller/workflow.py
-def proceed_command(command, user):
-    match command:
-        case 'review':
-            is_run, user = commandHandler.add_review(user)
-    return is_run, user
+# В GUI — через сигналы
+def on_action(self):
+    if not self.controller.is_logged_in():
+        QMessageBox.warning(self, "Ошибка", "Требуется авторизация")
+        return
+```
+
+---
+
+## Работа с Qt Designer
+
+### Генерация Python-кода из .ui
+
+```bash
+pyuic5 view/qtsrc/form.ui -o view/qtsrc/form_ui.py
+```
+
+### Добавление кастомного виджета
+
+Не используйте promote — добавляйте программно:
+
+```python
+# В __init__ окна:
+from view.components.paginationWidget import PaginationWidget
+self.pagination = PaginationWidget()
+self.verticalLayout.addWidget(self.pagination)
+```
+
+### Сигналы между окнами
+
+Дочерние окна не знают о контроллере. Данные передаются через сигналы:
+
+```python
+# Дочернее окно
+class ChildWindow(QDialog):
+    data_ready = pyqtSignal(int, str)
+
+    def submit(self):
+        self.data_ready.emit(42, "hello")
+        self.accept()
+
+# Родительское окно
+def open_child(self):
+    dialog = ChildWindow()
+    dialog.data_ready.connect(self.on_data)
+    dialog.exec_()
+
+def on_data(self, number, text):
+    self.controller.do_something(number, text)
 ```
 
 ---
@@ -484,6 +572,9 @@ def proceed_command(command, user):
 | `ImportError: cannot import name` | Циклический импорт | Использовать lazy import внутри функции |
 | `Invalid salt` при login | Пароль не хеширован | Проверить bcrypt при регистрации |
 | `KeyError` в change_mode | Справочник не заполнен | Вызвать prepare_refs() перед импортом |
+| `Could not find Qt platform plugin` | PyQt5 не находит плагины | Установить QT_QPA_PLATFORM_PLUGIN_PATH |
+| `AttributeError: 'tuple' has no attribute 'lower'` | tuple передан в текстовый фильтр | Проверять тип колонки перед фильтрацией |
+| `TypeError: 'module' object is not callable` | Импортирован модуль вместо класса | `from module import Class` вместо `from package import module` |
 
 ---
 
@@ -505,3 +596,4 @@ def proceed_command(command, user):
 
 - При добавлении нового функционала — следовать инструкции в разделе "Добавление новой команды"
 - При изменении структуры таблиц — удалить `database/base.db` и запустить заново
+- При изменении `.ui` файлов — перегенерировать `pyuic5`

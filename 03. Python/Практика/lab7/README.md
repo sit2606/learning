@@ -2,9 +2,9 @@
 
 ## Описание
 
-Приложение для управления данными о фермерских рынках США. Загружает CSV-датасет (Export.csv) в SQLite-базу, предоставляет интерфейс для просмотра, поиска, фильтрации, сортировки и отзывов.
+Приложение для управления данными о фермерских рынках США. Загружает CSV-датасет (Export.csv) в SQLite-базу, предоставляет графический (PyQt5) и консольный интерфейс для просмотра, поиска, фильтрации, сортировки и отзывов.
 
-Архитектура: view → controller → BusinessLogic → DAL + models (MVC).
+Архитектура: MVC — View → Controller (AppController) → BusinessLogic → DAL + models.
 
 ### Возможности приложения
 
@@ -16,7 +16,7 @@
 - Регистрация и авторизация пользователей
 - Добавление отзывов с оценкой 1-5
 - Обновление данных пользователя (логин, имя, фамилия, координаты)
-- Удаление рынков
+- Поиск рынков в радиусе от почтового индекса
 
 ---
 
@@ -42,8 +42,11 @@ python -m venv .venv
 
 3. Активируйте окружение:
 ```bash
-# Windows
-.venv\Scripts\activate
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+
+# Windows (CMD)
+.venv\Scripts\activate.bat
 
 # macOS/Linux
 source .venv/bin/activate
@@ -61,6 +64,15 @@ pip install -r requirements.txt
 python App.py
 ```
 
+### Проблема с Qt на Windows
+
+Если при запуске появляется ошибка `Could not find the Qt platform plugin "windows"`, установите переменную окружения перед запуском:
+
+```powershell
+$env:QT_QPA_PLATFORM_PLUGIN_PATH=".venv\Lib\site-packages\PyQt5\Qt5\plugins\platforms"
+python App.py
+```
+
 ### Автоматическая инициализация
 
 При первом запуске приложение автоматически:
@@ -75,49 +87,65 @@ python App.py
 
 ```
 lab7/
-├── App.py                          # Точка входа приложения
-├── config.py                       # DATABASE_PATH, DEFAULT_USER
-├── controller/                     # Слой контроллера (MVC)
-│   ├── workflow.py                 # Оркестрация процесса и маршрутизация команд
-│   └── commandHandler.py           # Обработчики команд
-├── BusinessLogic/                  # Слой бизнес-логики
-│   ├── market_queries.py           # OOP-запросы к рынкам (сортировка, фильтрация)
-│   ├── processFilter.py            # Обработка фильтрации рынков
-│   └── geoLib.py                   # Библиотека геоданных и расчёта дистанций
-├── DAL/                            # Слой доступа к данным (Data Access Layer)
-│   ├── datalib2.py                 # CRUD-операции с рынками (SQLite)
-│   ├── referencelib2.py            # CRUD-операции со справочниками и связями (SQLite)
-│   ├── reviewlib2.py               # CRUD-операции с отзывами (SQLite)
-│   ├── userlib2.py                 # CRUD-операции с пользователями (SQLite)
-│   ├── filelib2.py                 # Импорт Export.csv → SQLite
-│   └── requiredFiles.py            # Константы категорий, создание таблиц
-├── models/                         # Слой сущностей (OOP)
+├── App.py                              # Точка входа приложения
+├── config.py                           # DATABASE_PATH, DEFAULT_USER
+├── controller/                         # Слой контроллера (MVC)
+│   ├── AppController.py                # Центральный контроллер (класс с self.user)
+│   └── workflow.py                     # Консольный View-контроллер, маршрутизация команд
+├── BusinessLogic/                      # Слой бизнес-логики
+│   ├── market_queries.py               # OOP-запросы к рынкам (сортировка, фильтрация)
+│   ├── processFilter.py                # Обработка фильтрации рынков
+│   └── geoLib.py                       # Библиотека геоданных и расчёта дистанций
+├── DAL/                                # Слой доступа к данным (Data Access Layer)
+│   ├── datalib2.py                     # CRUD-операции с рынками (SQLite)
+│   ├── referencelib2.py                # CRUD-операции со справочниками и связями (SQLite)
+│   ├── reviewlib2.py                   # CRUD-операции с отзывами (SQLite)
+│   ├── userlib2.py                     # CRUD-операции с пользователями (SQLite)
+│   ├── filelib2.py                     # Импорт Export.csv → SQLite
+│   └── requiredFiles.py               # Константы категорий, создание таблиц
+├── models/                             # Слой сущностей (OOP)
 │   ├── entities/
-│   │   ├── market.py               # Market + dataclass-ы (Marketinfo, Timesheet, Coordinates, Location, BankInfo, MediaInfo, GroceryInfo)
-│   │   ├── reference.py            # Reference — обёртка над справочниками
-│   │   ├── review.py               # Review — сущность отзыва
-│   │   └── user.py                 # User — сущность пользователя
+│   │   ├── market.py                   # Market + dataclass-ы
+│   │   ├── reference.py                # Reference — обёртка над справочниками
+│   │   ├── review.py                   # Review — сущность отзыва
+│   │   └── user.py                     # User — сущность пользователя
 │   └── collections/
-│       └── market_collection.py    # MarketCollection — коллекция рынков
-├── view/                           # Слой представления (MVC)
-│   ├── ui.py                       # Запуск GUI (PyQt5)
-│   ├── uiLib.py                    # Функции вывода и ввода в консоль
-│   ├── components/                 # Qt-виджеты
-│   │   └── table_view.py           # Главное окно с таблицей рынков
-│   ├── helpers/                    # Вспомогательные константы
-│   │   ├── column_helper.py        # Словари перевода названий колонок и описания типов
-│   │   └── comparison_helper.py    # Константы знаков сравнения для фильтрации
-│   └── qtsrc/                      # Сгенерированные файлы Qt Designer
-│       └── table_ui.py             # UI-код, сгенерированный из table_view.ui
-├── database/                       # SQLite-база данных
+│       └── market_collection.py        # MarketCollection — коллекция рынков
+├── view/                               # Слой представления (MVC)
+│   ├── ui.py                           # Запуск GUI (PyQt5)
+│   ├── uiLib.py                        # Функции вывода и ввода в консоль
+│   ├── components/                     # Qt-виджеты (окна приложения)
+│   │   ├── table_view.py               # Главное окно с таблицей рынков
+│   │   ├── detail_view.py              # Окно подробностей о рынке
+│   │   ├── login_view.py               # Окно авторизации
+│   │   ├── register_view.py            # Окно регистрации
+│   │   ├── add_review_view.py          # Окно добавления отзыва
+│   │   ├── filter_view.py              # Окно фильтрации
+│   │   ├── user_detail.py              # Окно профиля пользователя
+│   │   ├── zipdistance_view.py         # Окно поиска по ZIP
+│   │   └── paginationWidget.py         # Виджет пагинации
+│   ├── helpers/                        # Вспомогательные константы
+│   │   ├── column_helper.py            # Словари перевода названий колонок
+│   │   └── comparison_helper.py        # Константы знаков сравнения
+│   └── qtsrc/                          # Сгенерированные файлы Qt Designer
+│       ├── table_view.ui / table_ui.py
+│       ├── detail_form.ui / detail_ui.py
+│       ├── login_form.ui / login_ui.py
+│       ├── register_form.ui / register_ui.py
+│       ├── add_review_form.ui / add_review_ui.py
+│       ├── filter_form.ui / filter_ui.py
+│       ├── user_form.ui / user_ui.py
+│       └── pagination_widget.ui / pagination_widget.py
+├── database/                           # SQLite-база данных
 │   └── base.db
-├── документация/                   # Диаграммы и пользовательские истории
-├── Задание.md                      # Техническое задание
-├── .gitignore                      # Исключения Git
-├── README.md                       # Руководство пользователя
-├── CONTRIBUTING.md                 # Руководство администратора
-├── requirements.txt                # Зависимости проекта
-└── Export.csv                      # Исходный датасет
+├── документация/                       # Диаграммы и пользовательские истории
+├── Задание.md                          # Техническое задание
+├── MVC_REFACTORING_PLAN.md             # План рефакторинга MVC
+├── .gitignore                          # Исключения Git
+├── README.md                           # Руководство пользователя
+├── CONTRIBUTING.md                     # Руководство администратора
+├── requirements.txt                    # Зависимости проекта
+└── Export.csv                          # Исходный датасет
 ```
 
 ---
@@ -130,7 +158,46 @@ lab7/
 python App.py
 ```
 
-### Доступные команды
+Приложение запускается с графическим интерфейсом (PyQt5). Для переключения на консольный режим измените `App.py`:
+
+```python
+run_console(controller)   # консольный режим
+# run_gui(controller)     # графический режим (по умолчанию)
+```
+
+### Графический интерфейс (GUI)
+
+#### Главное окно
+
+- Таблица со списком рынков с пагинацией
+- Кнопки: **View** (переключение All/By page), **User** (профиль/вход), **Filter** (фильтрация)
+- Панель пагинации: выбор размера страницы (5/10/20/30/50), навигация ←/→
+- Клик по строке таблицы открывает подробности о рынке
+
+#### Авторизация
+
+- Кнопка **User** без авторизации → окно входа
+- В окне входа: ввод логина/пароля, кнопка регистрации
+- Кнопка **User** с авторизацией → профиль пользователя (выход, обновление данных)
+
+#### Просмотр рынка
+
+- Клик по строке таблицы → окно с подробной информацией
+- Адрес, расписание, соцсети, способы оплаты, продаваемые товары
+- Кнопка добавления отзыва (требуется авторизация)
+
+#### Фильтрация
+
+- Кнопка **Filter** → окно выбора колонки и критерия
+- Для текстовых колонок: ввод подстроки
+- Для числовых: выбор оператора (>, <, >=, <=, =) и значения
+- Кнопка сброса фильтра возвращает полный список
+
+#### Сортировка
+
+- Через ComboBox в окне фильтрации или через меню
+
+### Консольный интерфейс
 
 | Команда | Описание | Требуется авторизация |
 |---------|----------|:---------------------:|
@@ -138,7 +205,7 @@ python App.py
 | `list_all` | Вывод таблицы со списком всех рынков | Нет |
 | `list` | Вывод таблицы рынков с пагинацией | Нет |
 | `order` | Сортировка рынков по колонке (1-9) | Нет |
-| `show` | Подробная информация о рынке по ID | Нет |
+| `show` | Подробная информации о рынке по ID | Нет |
 | `filter` | Фильтрация рынков по критерию | Да |
 | `register` | Регистрация нового пользователя | Нет |
 | `login` | Авторизация пользователя | Нет |
@@ -149,78 +216,6 @@ python App.py
 | `zip` | Поиск рынков в радиусе от почтового индекса | Нет |
 | `exit` | Выход из приложения | Нет |
 
-### Просмотр списка рынков
-
-**Команда `list_all`** — выводит таблицу со всеми рынками:
-```
-| market_id | city | county | state | marketname | zip | score | distance |
-```
-
-**Команда `list`** — список с пагинацией:
-1. Введите стартовый номер (по умолчанию 1)
-2. Введите шаг (по умолчанию 10)
-3. Нажмите `y` для продолжения или `n` для завершения
-
-### Сортировка
-
-**Команда `order`** — сортировка по колонке:
-1. Введите номер колонки (1-9):
-   - 1: Номер, 2: ID, 3: Город, 4: Графство, 5: Штат
-   - 6: Название, 7: Индекс, 8: Оценка, 9: Расстояние
-2. Введите порядок: `a` — по возрастанию, `d` — по убыванию
-
-### Просмотр данных рынка
-
-**Команда `show`** — подробная информация:
-1. Введите ID рынка
-2. Просмотрите информацию (адрес, расписание, соцсети, оплата, товары)
-3. Введите `y` для просмотра отзывов или Enter для возврата
-
-### Фильтрация
-
-**Команда `filter`** — фильтрация по критерию (требуется авторизация):
-1. Выберите номер колонки (1-9)
-2. Для текстовых колонок: введите название (город, штат и т.д.)
-3. Для числовых колонок: введите формулу (например, `> 100`, `< 50`, `= 0`)
-4. Для расстояния (колонка 9): фильтрация по км от вашего местоположения
-
-### Поиск по почтовому индексу
-
-**Команда `zip`** — поиск рынков в радиусе от ZIP-кода:
-1. Введите почтовый индекс (например, `87501`)
-2. Введите радиус поиска в км
-3. Приложение покажет все рынки в указанном радиусе
-
-### Работа с отзывами
-
-**Команда `review`** — добавление отзыва (требуется авторизация):
-1. Введите ID рынка
-2. Введите оценку от 1 до 5
-3. Введите текст отзыва (опционально)
-4. Введите `back` для отмены
-
-### Управление профилем
-
-**Команда `register`** — регистрация:
-1. Введите логин (уникальный)
-2. Введите пароль
-3. Введите имя и фамилию
-4. Укажите координаты (опционально, для фильтрации по расстоянию)
-
-**Команда `login`** — авторизация:
-1. Введите логин
-2. Введите пароль
-
-**Команда `update_user`** — обновление данных (требуется авторизация):
-1. Выберите пункт для изменения (1-4)
-2. Введите новое значение
-
-**Команда `delete`** — удаление рынка (требуется авторизация):
-1. Введите ID рынка для удаления
-2. Просмотрите данные рынка
-3. Введите `yes` для подтверждения или `back` для отмены
-4. Рынок и все его связи удаляются безвозвратно
-
 ---
 
 ## Архитектура
@@ -228,45 +223,38 @@ python App.py
 ```
 App.py
  │
+ ├── controller/AppController.py     ← Controller (класс, хранит self.user)
+ │    Методы: get_all_markets, get_market_by_id, get_ordered_markets,
+ │    get_filtered_markets, get_market_reviews, delete_market,
+ │    search_by_zip, register, login, logout, update_user,
+ │    is_logged_in, add_review, init_db
+ │
+ ├── controller/workflow.py          ← View-контроллер консоли
+ │    Связывает uiLib с AppController
+ │
  ├── view/                           ← View (отображение)
  │    ├── ui.py                      — запуск GUI (PyQt5)
- │    ├── uiLib.py                   — приветствие, справка, ввод фильтра, вывод данных
- │    ├── components/
- │    │    └── table_view.py         — главное окно с таблицей рынков
- │    ├── helpers/
- │    │    ├── column_helper.py      — COLUMNS (перевод), COLUMNS_INFO (тип и имя колонок)
- │    │    └── comparison_helper.py  — COMPARISON_SIGNS (знаки сравнения для фильтров)
- │    └── qtsrc/
- │         └── table_ui.py           — сгенерированный UI-код из Qt Designer
- │
- ├── controller/                     ← Controller (оркестрация)
- │    ├── workflow.py                — маршрутизация команд, вызов BusinessLogic и view
- │    └── commandHandler.py          — обработчики команд (бизнес-логика + вызов view)
+ │    ├── uiLib.py                   — консольный ввод/вывод
+ │    ├── components/                — GUI-окна (каждое получает controller)
+ │    ├── helpers/                   — константы колонок и сравнения
+ │    └── qtsrc/                     — сгенерированный UI-код
  │
  ├── BusinessLogic/                  ← Бизнес-логика
- │    ├── market_queries.py          — OOP-запросы к рынкам (сортировка, фильтрация)
- │    ├── processFilter.py           — обработка фильтрации
- │    └── geoLib.py                  — геоданные и расчёт дистанций
+ │    ├── market_queries.py          — запросы к рынкам
+ │    ├── processFilter.py           — фильтрация
+ │    └── geoLib.py                  — гео-расчёты
  │
- ├── models/                         ← Model (сущности)
- │    ├── entities/
- │    │    ├── market.py             — Market, Marketinfo, Timesheet, Coordinates, Location, BankInfo, MediaInfo, GroceryInfo
- │    │    ├── reference.py          — Reference (Common + Connection)
- │    │    ├── review.py             — Review
- │    │    └── user.py               — User
- │    └── collections/
- │         └── market_collection.py  — MarketCollection
+ ├── models/                         ← Сущности (OOP)
+ │    ├── entities/                  — Market, User, Review, Reference
+ │    └── collections/               — MarketCollection
  │
- └── DAL/                            ← Доступ к данным
-      ├── datalib2.py                — CRUD рынков (SQLite)
-      ├── referencelib2.py           — CRUD справочников и связей (SQLite)
-      ├── reviewlib2.py              — CRUD отзывов (SQLite)
-      ├── userlib2.py                — CRUD пользователей (SQLite)
-      ├── filelib2.py                — импорт CSV → SQLite
-      └── requiredFiles.py           — константы, создание таблиц
+ └── DAL/                            ← Доступ к данным (SQLite)
+      ├── datalib2.py, userlib2.py, reviewlib2.py, referencelib2.py
+      ├── filelib2.py               — импорт CSV
+      └── requiredFiles.py          — создание таблиц
 ```
 
-Зависимости: `App.py` → `controller` → `view` + `BusinessLogic` → `models` → `DAL`
+**Правило зависимостей:** View → Controller → BusinessLogic → models → DAL. View ничего не знает о DAL. Controller не содержит I/O.
 
 ---
 
