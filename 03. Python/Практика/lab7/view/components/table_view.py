@@ -6,6 +6,8 @@ from view.components.detail_view import DetailWindow
 from view.components.filter_view import FilterWindow
 from view.components.paginationWidget import  PaginationWidget
 from view.components.login_view import LoginWindow
+from view.components.user_detail import UserDetail
+from view.components.zipdistance_view import ZipDistanceWindow
 
 from view.qtsrc.table_ui import Ui_MainWindow
 
@@ -15,14 +17,11 @@ from view.helpers.column_helper import COLUMN_TO_SHOW, COLUMNS, COLUMNS_INFO_REV
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, controller: AppController):
         super().__init__()
-        self.setupUi(self)  # строим интерфейс из Designer
+        self.setupUi(self)
         self.controller = controller
-        # --- Данные для таблицы ---
         self.model = QStandardItemModel()
         self.model.setHorizontalHeaderLabels(COLUMN_TO_SHOW)
         self.tableView.setModel(self.model)
-        # --- Загрузка данных при старте ---
-
         self.show_markets()
         self.currentUser.setText(controller.user)
         self.loginButton.clicked.connect(self.open_login)
@@ -43,6 +42,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.filterButton.clicked.connect(self.on_filter_clicked)
         self.ResetFilterpushButton.setVisible(False)
         self.ResetFilterpushButton.clicked.connect(self._reset_filter)
+        self.zipdistancepushButton.clicked.connect(self._open_zip_distance)
     def update_current_user(self):
         self.currentUser.setText(str(self.controller.user))
     def show_markets(self):
@@ -56,10 +56,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 row.append(str(market_dict.get(col, '')))
             self.model.appendRow([QStandardItem(v) for v in row])
     def open_login(self):
-        dialog = LoginWindow(self.controller)
-        result = dialog.exec_()
-        if result == QDialog.Accepted:
-            self.update_current_user()
+        if self.controller.user:
+            dialog = UserDetail(self.controller)
+            dialog.on_update_view.connect(self.update_current_user)
+            result = dialog.exec_()
+        else:
+            dialog = LoginWindow(self.controller)
+            result = dialog.exec_()
+            if result == QDialog.Accepted:
+                self.update_current_user()
     def open_view(self):
         a = self.viewButton.text()
         if a == 'All':
@@ -88,7 +93,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def next_page(self):
         self.current_page += 1
         self.show_paged_markets(self.page_size, self.current_page)
-
     def prev_page(self):
         if self.current_page > 0:
             self.current_page -= 1
@@ -121,3 +125,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _reset_filter(self):
         self.show_markets()
         self.ResetFilterpushButton.setVisible(False)
+    def _update_view(self):
+        self.currentUser.setText(None)
+    def _open_zip_distance(self):
+        dialog = ZipDistanceWindow()
+        dialog.filter_options.connect(self.zip_distance)
+        result = dialog.exec_()
+    def zip_distance(self,options):
+        print('s')
+        distance = float(options['distance'][0])
+        self.markets = self.controller.search_by_zip(postalcode=options['zip'], radius= distance)[0]
+        self.show_paged_markets(self.page_size, self.current_page)
+        self.ResetFilterpushButton.setVisible(True)
