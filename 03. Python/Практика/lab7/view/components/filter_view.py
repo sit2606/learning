@@ -11,9 +11,14 @@ class FilterWindow(QDialog, Ui_filterDialog):
         self.FilterListcomboBox.addItems(COLUMN_TO_SHOW)
         self.AcceptpushButton.clicked.connect(self._get_filter)
         self.BackpushButton.clicked.connect(self.reject)
+        self.AcceptpushButton.setEnabled(False)
+        self.FilterCriterialineEdit.textChanged.connect(self._validate)
     def _get_filter(self):
         data = dict()
         data.update({'column': self.FilterListcomboBox.currentText()})
         data.update({'filter_value': self.FilterCriterialineEdit.text().split()})
         self.filter_options.emit(data)
         self.accept()
+    def _validate(self):
+        has_text = len(self.FilterCriterialineEdit.text().strip()) > 0
+        self.AcceptpushButton.setEnabled(has_text)

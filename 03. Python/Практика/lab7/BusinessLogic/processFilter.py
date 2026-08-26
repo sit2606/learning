@@ -39,6 +39,7 @@ def process(market_list, column, filter_value):
             match filter_value[0]:
                     case '>':
                         for key,value in market_list.items():
+                            if value[column_to_filter['name']] is None: continue
                             try:
                                 if float(value[column_to_filter['name']]) > float(filter_value[1]):
                                     filtered_market.update({key : value})
@@ -46,6 +47,7 @@ def process(market_list, column, filter_value):
                                 continue
                     case '<':
                         for key,value in market_list.items():
+                            if value[column_to_filter['name']] is None: continue
                             try:
                                 if float(value[column_to_filter['name']]) < float(filter_value[1]):
                                     filtered_market.update({key : value})
@@ -53,6 +55,7 @@ def process(market_list, column, filter_value):
                                 continue
                     case '>=':
                         for key,value in market_list.items():
+                            if value[column_to_filter['name']] is None: continue
                             try:
                                 if float(value[column_to_filter['name']]) >= float(filter_value[1]):
                                     filtered_market.update({key : value})
@@ -60,6 +63,7 @@ def process(market_list, column, filter_value):
                                 continue
                     case '<=':
                         for key,value in market_list.items():
+                            if value[column_to_filter['name']] is None: continue
                             try:
                                 if float(value[column_to_filter['name']]) <= float(filter_value[1]):
                                     filtered_market.update({key : value})
@@ -67,6 +71,7 @@ def process(market_list, column, filter_value):
                                 continue
                     case '=':
                         for key,value in market_list.items():
+                            if value[column_to_filter['name']] is None: continue
                             try:
                                 if float(value[column_to_filter['name']]) == float(filter_value[1]):
                                     filtered_market.update({key : value})

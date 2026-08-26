@@ -94,6 +94,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="ResetFilterpushButton">
+        <property name="text">
+         <string>Reset filter</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QWidget" name="pageControlWidget" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>

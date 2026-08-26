@@ -9,7 +9,7 @@ from view.components.login_view import LoginWindow
 
 from view.qtsrc.table_ui import Ui_MainWindow
 
-from view.helpers.column_helper import COLUMN_TO_SHOW, COLUMNS, COLUMNS_INFO_REVERSED
+from view.helpers.column_helper import COLUMN_TO_SHOW, COLUMNS, COLUMNS_INFO_REVERSED, COLUMNS_INFO
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -22,7 +22,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.model.setHorizontalHeaderLabels(COLUMN_TO_SHOW)
         self.tableView.setModel(self.model)
         # --- Загрузка данных при старте ---
-        self.markets = self.controller.get_all_markets()
+
         self.show_markets()
         self.currentUser.setText(controller.user)
         self.loginButton.clicked.connect(self.open_login)
@@ -41,10 +41,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pageCount.setText(str(self.current_page))
         self.tableView.clicked.connect(self.on_row_clicked)
         self.filterButton.clicked.connect(self.on_filter_clicked)
-
+        self.ResetFilterpushButton.setVisible(False)
+        self.ResetFilterpushButton.clicked.connect(self._reset_filter)
     def update_current_user(self):
         self.currentUser.setText(str(self.controller.user))
     def show_markets(self):
+        self.markets = self.controller.get_all_markets()
+        self.model.removeRows(0, self.model.rowCount())
         if self.markets is None:
             return
         for num, market_dict in self.markets.items():
@@ -107,5 +110,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog.filter_options.connect(self.filter)
         result = dialog.exec_()
     def filter(self, options):
-        self.markets = self.controller.get_filtered_markets(column= COLUMNS_INFO_REVERSED[options['column']], filter_value=options['filter_value'])[0]
+        column = COLUMNS_INFO_REVERSED[options['column']]
+        if COLUMNS_INFO[column]['type'] == 'text':
+            filter_value = options['filter_value'][0]
+        else:
+            filter_value = tuple(options['filter_value'])
+        self.markets = self.controller.get_filtered_markets(column= COLUMNS_INFO_REVERSED[options['column']], filter_value=filter_value)[0]
         self.show_paged_markets(self.page_size, self.current_page)
+        self.ResetFilterpushButton.setVisible(True)
+    def _reset_filter(self):
+        self.show_markets()
+        self.ResetFilterpushButton.setVisible(False)
