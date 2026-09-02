@@ -1,19 +1,21 @@
 from model.entities.Cell import Cell
-from model.entities.helpers.statuses import ShipState
+from model.entities.helpers.statuses import ShipState, CellState
 
 
 class Ship:
     def __init__(self, head_cell: Cell, tail_cell: Cell):
         self.head_cell = head_cell
         self.tail_cell = tail_cell
-        if self.head_cell.x == self.tail_cell.x:
-            self.orientation = 'horizontal'
-            first = max(self.head_cell.y, self.tail_cell.y)
-            second = min(self.head_cell.x, self.tail_cell.x)
-        else:
+        if head_cell.x == tail_cell.x:
             self.orientation = 'vertical'
-            first = max(self.head_cell.x, self.tail_cell.x)
-            second = min(self.head_cell.y, self.tail_cell.y)
+            self.cells = [Cell(head_cell.x, y, CellState.FILL)
+                          for y in range(min(head_cell.y, tail_cell.y),
+                                         max(head_cell.y, tail_cell.y) + 1)]
+        else:
+            self.orientation = 'horizontal'
+            self.cells = [Cell(x, head_cell.y, CellState.FILL)
+                          for x in range(min(head_cell.x, tail_cell.x),
+                                         max(head_cell.x, tail_cell.x) + 1)]
         match self.orientation:
             case 'horizontal':
                 print('horizontal')
