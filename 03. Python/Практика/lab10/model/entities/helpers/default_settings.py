@@ -1,0 +1,5 @@
+DEFAULTS = {
+    "size": "10x10",
+    "ships_count": 10,
+    "AI_difficulty": 5
+}

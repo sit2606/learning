@@ -16,16 +16,18 @@ class Ship:
             self.cells = [Cell(x, head_cell.y, CellState.FILL)
                           for x in range(min(head_cell.x, tail_cell.x),
                                          max(head_cell.x, tail_cell.x) + 1)]
-        match self.orientation:
-            case 'horizontal':
-                print('horizontal')
-            case 'vertical':
-                print('vertical')
-    def set_cells(self, cells : list[Cell] ):
-        self.cells = cells
     def get_cells(self):
         return self.cells
     def get_length(self):
         return len(self.cells)
     def get_state(self) -> ShipState:
-        pass
+        total_hp = self.get_length()
+        for cell in self.cells:
+            if cell.state == CellState.HIT:
+                total_hp -= 1
+        if total_hp == 0:
+            return ShipState.KILLED
+        if total_hp == self.get_length():
+            return ShipState.FULL
+        else:
+            return ShipState.WOUNDED

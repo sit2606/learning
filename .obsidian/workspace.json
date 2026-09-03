@@ -25,10 +25,12 @@
             "id": "f64db9e420e5c49a",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "Новая вкладка"
+              "type": "python-viewer",
+              "state": {
+                "file": "03. Python/Практика/lab5/Life.py"
+              },
+              "icon": "file-code-2",
+              "title": "Life"
             }
           }
         ],
@@ -210,24 +212,24 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "2874c1a338282320",
+  "active": "f64db9e420e5c49a",
   "lastOpenFiles": [
-    "03. Python/Практика/lab10/model/entities/Ship.py~",
-    "03. Python/Практика/lab10/use cases.md",
-    "Excalidraw/Drawing 2026-09-02 19.43.09.excalidraw.md",
+    "03. Python/Практика/lab5/CellInfo.py",
+    "03. Python/Практика/lab5/Grid.py",
     "03. Python/Практика/lab10/CRC.md",
-    "03. Python/Практика/lab10/model/entities/__pycache__/Ship.cpython-314.pyc",
-    "03. Python/Практика/lab10/tests/__pycache__/test_ship.cpython-314.pyc",
-    "03. Python/Практика/lab10/tests/test_ship.py~",
-    "03. Python/Практика/lab10/tests/test_ship.py",
-    "03. Python/Практика/lab10/model/entities/helpers/__pycache__/statuses.cpython-314.pyc",
-    "03. Python/Практика/lab10/model/entities/helpers/__pycache__",
-    "03. Python/Практика/lab10/model/entities/__pycache__/Cell.cpython-314.pyc",
-    "03. Python/Практика/lab10/model/entities/__pycache__",
-    "03. Python/Практика/lab10/tests/__pycache__/test_cell.cpython-314.pyc",
-    "03. Python/Практика/lab10/tests/__pycache__",
+    "03. Python/Практика/lab10/settings.json",
+    "03. Python/Практика/lab10/model/entities/helpers/__pycache__/default_settings.cpython-314.pyc",
+    "03. Python/Практика/lab10/model/entities/__pycache__/Board.cpython-314.pyc",
+    "03. Python/Практика/lab10/tests/__pycache__/test_board.cpython-314.pyc",
+    "03. Python/Практика/lab10/model/entities/helpers/default_settings.py",
+    "03. Python/Практика/lab10/tests/test_board.py",
+    "03. Python/Практика/lab10/model/entities/Board.py~",
     "03. Python/Практика/lab10/contracts.md",
     "03. Python/Практика/lab10/entities.md",
+    "03. Python/Практика/lab10/model/entities/__pycache__/Config.cpython-314.pyc",
+    "03. Python/Практика/lab10/tests/__pycache__/test_config.cpython-314.pyc",
+    "03. Python/Практика/lab10/use cases.md",
+    "Excalidraw/Drawing 2026-09-02 19.43.09.excalidraw.md",
     "03. Python/Практика/Без названия.md",
     "03. Python/Практика/lab8/Задание.md",
     "03. Python/Практика/lab10/task.md",
