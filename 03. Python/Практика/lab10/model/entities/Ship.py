@@ -31,3 +31,5 @@ class Ship:
             return ShipState.FULL
         else:
             return ShipState.WOUNDED
+    def __str__(self):
+        return f'{self.head_cell}: {self.tail_cell}'
