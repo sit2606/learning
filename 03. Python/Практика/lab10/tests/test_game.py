@@ -11,6 +11,7 @@ class TestGame(unittest.TestCase):
     def setUp(self):
         self.settings = Config()
         self.settings.create_default_settings()
+        self.settings.player = 'Player1'
         self.game = Game(self.settings)
         self.ship1 = Ship(Cell(0, 0, CellState.EMPTY), Cell(2, 0, CellState.EMPTY))
         self.ship2 = Ship(Cell(0, 0, CellState.EMPTY), Cell(2, 0, CellState.EMPTY))
@@ -42,7 +43,7 @@ class TestGame(unittest.TestCase):
         self.assertEqual(self.game.get_state(), GameState.PLAYER_TURN)
         self.assertEqual(self.game.current_player.name, 'Player1')
 
-    def test_make_shot(self):
+    def test_make_shot_hit(self):
         self.game.place_ship(self.ship1)
         self.game.start_game()
         self.game.switch_turn()
@@ -64,17 +65,21 @@ class TestGame(unittest.TestCase):
         self.game.make_shot(0, 0)
         self.game.make_shot(1, 0)
         self.game.make_shot(2, 0)
+        self.game.board1.update_board_ship_state()
         self.assertTrue(self.game.is_game_over())
 
     def test_get_winner(self):
         self.game.place_ship(self.ship1)
+        ship_for_board2 = Ship(Cell(5, 5, CellState.EMPTY), Cell(7, 5, CellState.EMPTY))
+        self.game.board2.place_ship(ship_for_board2)
         self.game.start_game()
         self.game.switch_turn()
         self.assertEqual(self.game.get_winner(), 'The game is still on!')
         self.game.make_shot(0, 0)
         self.game.make_shot(1, 0)
         self.game.make_shot(2, 0)
-        self.assertEqual(self.game.get_winner(), 'Player1')
+        self.game.board1.update_board_ship_state()
+        self.assertEqual(self.game.get_winner(), 'Player2')
 
 
 if __name__ == "__main__":

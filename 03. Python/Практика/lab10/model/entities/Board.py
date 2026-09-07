@@ -65,6 +65,7 @@ class Board:
                 return cell.state
             case CellState.FILL:
                 cell.set_state(CellState.HIT)
+                self.update_board_ship_state()
                 return cell.state
             case _:
                 return cell.state
