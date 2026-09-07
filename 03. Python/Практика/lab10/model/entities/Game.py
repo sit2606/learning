@@ -2,6 +2,7 @@ from model.entities.Board import Board
 from model.entities.Config import Config
 from model.entities.Player import Player
 from model.entities.helpers.statuses import GameState,  CellState
+from model.AI import AI
 
 
 class Game:
@@ -14,6 +15,7 @@ class Game:
         self.state = GameState.SETUP
         self.current_player = self.player1
         self.current_board = self.board1
+        self.ai = AI(config.AI_difficulty)
     # === Состояние игры ===
     def get_state(self) -> GameState:
         return self.state
@@ -58,3 +60,9 @@ class Game:
         if self.current_board == self.board1:
             return self.board2
         return self.board1
+
+    def computer_turn(self) -> CellState:
+        x, y = self.ai.choose_cell(self._get_opponent_board())
+        result = self.make_shot(x, y)
+        self.switch_turn()
+        return result
