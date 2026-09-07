@@ -9,12 +9,14 @@ class TestSettings(unittest.TestCase):
         self.data1 = {
                "size": "10x10",
                "ships_count": 3,
-               "AI_difficulty": 1
+               "AI_difficulty": 1,
+               "player" : 'Player1'
        }
         self.data2 = {
             "size": "15x10",
             "ships_count": 4,
-            "AI_difficulty": 1
+            "AI_difficulty": 1,
+            "player" : 'Player2'
         }
     def test_create(self):
         conf = Config()
@@ -26,6 +28,7 @@ class TestSettings(unittest.TestCase):
         self.assertEqual(conf.ships_count, self.data1["ships_count"])
         self.assertEqual(conf.AI_difficulty, self.data1["AI_difficulty"])
         self.assertEqual(conf.size, self.data1["size"])
+        self.assertEqual(conf.player, self.data1["player"])
         os.remove("settings.json")
     def test_write(self):
         conf = Config()

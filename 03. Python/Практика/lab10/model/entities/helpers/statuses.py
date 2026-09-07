@@ -10,10 +10,6 @@ class ShipState(Enum):
     FULL = 'Full'
     WOUNDED = 'Wounded'
     KILLED = 'Killed'
-class ShotState(Enum):
-    MISS = 'Miss'
-    HIT = 'Hit'
-    SUNK = 'Sunk'
 
 class GameState(Enum):
     SETUP = 'Setup'

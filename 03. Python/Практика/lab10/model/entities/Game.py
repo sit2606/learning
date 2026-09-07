@@ -1,35 +1,60 @@
 from model.entities.Board import Board
 from model.entities.Config import Config
-from model.entities.helpers.statuses import GameState, ShotState
+from model.entities.Player import Player
+from model.entities.helpers.statuses import GameState,  CellState
 
 
 class Game:
     def __init__(self, config: Config):
-        pass
-
+        self.config = config
+        self.player1 = Player('Player1')
+        self.player2 = Player('Player2')
+        self.board1 = Board(config, self.player1)
+        self.board2 = Board(config, self.player2)
+        self.state = GameState.SETUP
+        self.current_player = self.player1
+        self.current_board = self.board1
     # === Состояние игры ===
     def get_state(self) -> GameState:
-        pass
-
+        return self.state
     def switch_turn(self):
-        pass
-
+        if self.state == GameState.PLAYER_TURN:
+            self.state = GameState.COMPUTER_TURN
+            self.current_board = self.board2
+            self.current_player = self.current_board.owner
+        elif self.state == GameState.COMPUTER_TURN:
+            self.state = GameState.PLAYER_TURN
+            self.current_board = self.board1
+            self.current_player = self.current_board.owner
     def is_game_over(self) -> bool:
-        pass
-
-    # === Расстановка кораблей (SETUP) ===
+        return self._get_opponent_board().get_board_ship_count() == 0
     def place_ship(self, ship) -> bool:
-        pass
+        return self.current_board.place_ship(ship)
 
     def can_place_ship(self, ship) -> bool:
-        pass
+        return self.current_board.validate_ship_position(ship)
 
     def start_game(self):
-        pass
-
-
-    def make_shot(self, x: int, y: int) -> ShotState:
-        pass
-
+        player = self.config.player
+        if player == 'Player1':
+            self.current_player = self.player1
+            self.current_board = self.board1
+            self.state = GameState.PLAYER_TURN
+        elif player == 'Player2':
+            self.current_player = self.player2
+            self.current_board = self.board2
+            self.state = GameState.COMPUTER_TURN
+    def make_shot(self, x: int, y: int) -> CellState:
+        return self._get_opponent_board().shot(str(x), str(y))
     def get_winner(self) -> str:
-        pass
+        if self.board1.get_board_ship_count() == 0:
+            return self.board2.owner.name
+        elif self.board2.get_board_ship_count() == 0:
+            return self.board1.owner.name
+        else:
+            return 'The game is still on!'
+
+    def _get_opponent_board(self) -> Board:
+        if self.current_board == self.board1:
+            return self.board2
+        return self.board1

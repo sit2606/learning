@@ -1,19 +1,19 @@
-from unittest import case
-
 from model.entities.Cell import Cell
+from model.entities.Player import Player
 from model.entities.Ship import Ship
 from model.entities.Config import Config
-from model.entities.helpers.statuses import ShotState, CellState, ShipState
+from model.entities.helpers.statuses import  CellState, ShipState
 
 
 class Board:
-    def __init__(self, settings: Config):
+    def __init__(self, settings: Config, owner : Player):
         self.size = settings.size
         self.ships_count = settings.ships_count
         self.AI_difficulty = settings.AI_difficulty
         self.ships = {}
         self.cells = {}
         self.width, self.height = self.size.split("x")
+        self.owner = owner
         x,y = 0,0
         while y< int(self.height):
             x = 0
@@ -69,9 +69,12 @@ class Board:
             case _:
                 return cell.state
     def update_board_ship_state(self):
-        for ship in self.ships.values():
+        to_remove = []
+        for ship_key, ship in self.ships.items():
             if ship.get_state() == ShipState.KILLED:
-                    self.ships.pop(str(ship))
+                to_remove.append(ship_key)
+        for key in to_remove:
+            self.ships.pop(key)
     def get_board_ship_count(self) -> int:
         return len(self.ships)
 
