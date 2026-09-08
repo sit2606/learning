@@ -32,9 +32,21 @@
               "icon": "file-code-2",
               "title": "run_tests"
             }
+          },
+          {
+            "id": "9300e8eb3f29e37d",
+            "type": "leaf",
+            "state": {
+              "type": "excalidraw",
+              "state": {
+                "file": "Excalidraw/Drawing 2026-09-08 16.51.08.excalidraw.md"
+              },
+              "icon": "excalidraw-icon",
+              "title": "Drawing 2026-09-08 16.51.08.excalidraw"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -212,19 +224,20 @@
       "obsidian-excalidraw-plugin:Создать новый чертеж": false
     }
   },
-  "active": "f64db9e420e5c49a",
+  "active": "9300e8eb3f29e37d",
   "lastOpenFiles": [
-    "03. Python/Практика/lab10/model/GameResult.py",
-    "03. Python/ПRACTICA/lab10/model/GameResult.py",
-    "03. Python/ПRACTICA/lab10/model",
-    "03. Python/ПRACTICA/lab10",
-    "03. Python/ПRACTICA",
-    "03. Python/Практика/lab10/model/__pycache__/AI.cpython-314.pyc",
-    "03. Python/Практика/lab10/model/__pycache__",
-    "03. Python/Практика/lab10/model/AI.py",
-    "03. Python/Практика/lab5/Life.py",
-    "03. Python/Практика/lab5/CellInfo.py",
-    "03. Python/Практика/lab5/Grid.py",
+    "03. Python/Практика/lab10/view/MainWindow_raw.ui",
+    "03. Python/Практика/lab10/view/MainWindow_raw.ui.XdAaza",
+    "03. Python/Практика/lab10/view/src",
+    "03. Python/Практика/lab10/view/Новая папка",
+    "03. Python/Практика/lab10/view",
+    "03. Python/Практика/lab10/Новая папка",
+    "03. Python/Практика/lab10/run_tests.py",
+    "Excalidraw/Drawing 2026-09-08 16.51.08.excalidraw.md",
+    "03. Python/Практика/lab10/tests/__pycache__/test_ship.cpython-311.pyc",
+    "03. Python/Практика/lab10/model/__pycache__/AI.cpython-311.pyc",
+    "03. Python/Практика/lab10/model/entities/__pycache__/Game.cpython-311.pyc",
+    "03. Python/Практика/lab10/tests/__pycache__/test_game.cpython-311.pyc",
     "03. Python/Практика/lab10/CRC.md",
     "03. Python/Практика/lab10/contracts.md",
     "03. Python/Практика/lab10/entities.md",
@@ -258,7 +271,6 @@
     "03. Python/Практика/lab7/документация/2026-06-29 16.10 Пользовательские истории.md",
     "03. Python/Практика/lab7/документация/Изменения после 2026-06-29.md",
     "03. Python/Практика/lab7/документация/2026-06-29 16.23.31 сущности.md",
-    "03. Python/Практика/lab4_3.md",
-    "README.md"
+    "03. Python/Практика/lab4_3.md"
   ]
 }
