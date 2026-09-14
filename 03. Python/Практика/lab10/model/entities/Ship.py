@@ -16,6 +16,16 @@ class Ship:
             self.cells = [Cell(x, head_cell.y, CellState.FILL)
                           for x in range(min(head_cell.x, tail_cell.x),
                                          max(head_cell.x, tail_cell.x) + 1)]
+
+    @classmethod
+    def from_head(cls, x, y, orientation, length):
+        if orientation == 'horizontal':
+            head = Cell(x, y, CellState.FILL)
+            tail = Cell(x + length - 1, y, CellState.FILL)
+        else:
+            head = Cell(x, y, CellState.FILL)
+            tail = Cell(x, y + length - 1, CellState.FILL)
+        return cls(head, tail)
     def get_cells(self):
         return self.cells
     def get_length(self):

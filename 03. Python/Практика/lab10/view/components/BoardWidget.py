@@ -18,10 +18,15 @@ class BoardWidget(QWidget):
             for col in range(self.size):
                 x = col * cell_size
                 y = row * cell_size
-                if self.grid[row][col] == 1:
-                    painter.setBrush(QColor(100, 100, 100))
-                else:
-                    painter.setBrush(QColor(255, 255, 255))
+                match self.grid[row][col]:
+                    case 1:
+                        painter.setBrush(QColor(100, 100, 100))
+                    case 2:
+                        painter.setBrush(QColor(178, 34, 34))
+                    case 3:
+                        painter.setBrush(QColor(128, 128, 128))
+                    case _:
+                        painter.setBrush(QColor(255, 255, 255))
                 painter.drawRect(x, y, cell_size, cell_size)
 
     def mousePressEvent(self, event):

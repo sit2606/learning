@@ -2,5 +2,11 @@ DEFAULTS = {
     "size": "10x10",
     "ships_count": 10,
     "AI_difficulty": 5,
-    "player" : 'Player'
+    "player" : 'Player',
+    "ship_sizes":   {
+    1 : 4,
+    2 : 3,
+    3 : 2,
+    4 : 1
+                    },
 }

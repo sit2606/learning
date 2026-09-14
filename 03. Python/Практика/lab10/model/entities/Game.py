@@ -36,6 +36,11 @@ class Game:
     def can_place_ship(self, ship) -> bool:
         return self.current_board.validate_ship_position(ship)
 
+    def can_place_ship_size(self, size: int) -> bool:
+        placed = sum(1 for ship in self.current_board.ships.values()
+                     if ship.get_length() == size)
+        return placed < self.config.ship_sizes.get(size, 0)
+
     def start_game(self):
         player = self.config.player
         if player == 'Player1':

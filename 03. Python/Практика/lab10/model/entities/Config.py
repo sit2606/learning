@@ -7,6 +7,7 @@ class Config:
     def __init__(self):
         self.size = None
         self.ships_count = None
+        self.ship_sizes = None
         self.AI_difficulty = None
         self.data = None
         self.player = None
@@ -25,13 +26,15 @@ class Config:
         self.ships_count = data['ships_count']
         self.AI_difficulty = data['AI_difficulty']
         self.player = data['player']
+        self.ship_sizes = {int(k): v for k, v in data['ship_sizes'].items()}
     def write_to_json(self):
         self.data.update(
             {
                 "size": self.size,
                 "ships_count": self.ships_count,
                 "AI_difficulty": self.AI_difficulty,
-                "player": "Player1"
+                "player": self.player,
+                "ship_sizes": self.ship_sizes
                           })
         with open("settings.json", "w", encoding="utf-8") as file:
             json.dump(self.data, file, indent=4)
