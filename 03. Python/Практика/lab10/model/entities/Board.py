@@ -14,6 +14,7 @@ class Board:
         self.cells = {}
         self.width, self.height = self.size.split("x")
         self.owner = owner
+        self.ship_sizes = settings.ship_sizes
         x,y = 0,0
         while y< int(self.height):
             x = 0
@@ -24,7 +25,7 @@ class Board:
             y += 1
         self.vacant_cells = self.cells
     def place_ship(self, ship: Ship):
-        if self.validate_ship_position(ship):
+        if self.validate_ship_position(ship) and self.can_place_ship_size(ship.get_length()):
             self.ships.update({str(ship): ship})
             for cell in ship.cells:
                 self.cells.update({str(cell): cell})
@@ -41,9 +42,20 @@ class Board:
                 if 0 <= nx < int(self.width) and 0 <= ny < int(self.height):
                     neighbors.append(self.cells[f"({nx}, {ny})"])
         return neighbors
+    def can_place_ship_size(self, size: int) -> bool:
+        remaining = self.get_remaining_ships()
+        return remaining.get(size, 0) > 0
+    def get_remaining_ships(self) -> dict[int, int]:
+        remaining = {}
+        for size, max_count in self.ship_sizes.items():
+            placed = sum(1 for ship in self.ships.values()
+                         if ship.get_length() == size)
+            remaining[size] = max_count - placed
+        return remaining
     def clear_board(self):
         for cell in self.cells.values():
             cell.set_state(CellState.EMPTY)
+        self.ships = {}
     def validate_ship_position(self, ship: Ship):
         for cell in ship.cells:
             # 1. Клетка в пределах поля?
