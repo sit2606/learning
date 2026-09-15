@@ -11,5 +11,14 @@ class GameWindow(QWidget, Ui_GameWindow):
         super().__init__()
         self.setupUi(self)
         self.BoardWidget.cell_clicked.connect(self.on_cell_clicked)
+        self.CommandpushButton.setEnabled(False)
+        self.CommandpushButton.setText('Начать игру')
+        self.CommandpushButton.clicked.connect(self.command_button_clicked)
     def on_cell_clicked(self, row, col):
         self.cell_clicked.emit(row, col)
+    def command_button_clicked(self):
+        pass
+    def set_status_text(self, text):              # обновить лейбл
+        self.InstructionLabellabel.setText(text)
+    def enable_command_button(self):  # активировать кнопку
+        self.CommandpushButton.setEnabled(True)

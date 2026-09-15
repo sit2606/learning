@@ -13,14 +13,25 @@ class Ui_GameWindow(object):
     def setupUi(self, GameWindow):
         GameWindow.setObjectName("GameWindow")
         GameWindow.resize(625, 490)
-        self.verticalLayout = QtWidgets.QVBoxLayout(GameWindow)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(GameWindow)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
+        self.InstructionLabellabel = QtWidgets.QLabel(parent=GameWindow)
+        self.InstructionLabellabel.setMaximumSize(QtCore.QSize(16777215, 20))
+        self.InstructionLabellabel.setObjectName("InstructionLabellabel")
+        self.verticalLayout.addWidget(self.InstructionLabellabel)
         self.BoardWidget = BoardWidget(parent=GameWindow)
-        self.BoardWidget.setAutoFillBackground(True)
+        self.BoardWidget.setAutoFillBackground(False)
         self.BoardWidget.setStyleSheet("border: 2px solid #3498db;\n"
 "")
         self.BoardWidget.setObjectName("BoardWidget")
         self.verticalLayout.addWidget(self.BoardWidget)
+        self.horizontalLayout_2.addLayout(self.verticalLayout)
+        self.CommandpushButton = QtWidgets.QPushButton(parent=GameWindow)
+        self.CommandpushButton.setMaximumSize(QtCore.QSize(90, 16777215))
+        self.CommandpushButton.setObjectName("CommandpushButton")
+        self.horizontalLayout_2.addWidget(self.CommandpushButton)
 
         self.retranslateUi(GameWindow)
         QtCore.QMetaObject.connectSlotsByName(GameWindow)
@@ -28,4 +39,6 @@ class Ui_GameWindow(object):
     def retranslateUi(self, GameWindow):
         _translate = QtCore.QCoreApplication.translate
         GameWindow.setWindowTitle(_translate("GameWindow", "Form"))
+        self.InstructionLabellabel.setText(_translate("GameWindow", "TextLabel"))
+        self.CommandpushButton.setText(_translate("GameWindow", "PushButton"))
 from view.components.BoardWidget import BoardWidget
