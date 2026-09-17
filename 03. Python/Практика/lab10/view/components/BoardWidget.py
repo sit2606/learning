@@ -25,6 +25,10 @@ class BoardWidget(QWidget):
                         painter.setBrush(QColor(178, 34, 34))
                     case 3:
                         painter.setBrush(QColor(128, 128, 128))
+                    case 4:
+                        painter.setBrush(QColor(0, 255, 127))
+                    case 5:
+                        painter.setBrush(QColor(0, 128, 0))
                     case _:
                         painter.setBrush(QColor(255, 255, 255))
                 painter.drawRect(x, y, cell_size, cell_size)

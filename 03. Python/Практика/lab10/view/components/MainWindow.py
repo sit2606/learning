@@ -18,4 +18,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Exit_pushButton.clicked.connect(self.exit_clicked)
     def on_new_game_clicked(self):
         self.new_game_clicked.emit()
-    
