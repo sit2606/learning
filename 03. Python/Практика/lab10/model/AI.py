@@ -2,6 +2,7 @@ import random
 from model.entities.Board import Board
 from model.entities.Ship import Ship
 from model.entities.helpers.statuses import CellState
+from model.entities.helpers.exceptions import ShipPlacementError
 
 
 class AI:
@@ -25,12 +26,14 @@ class AI:
             board: доска противника
 
         Returns:
-            кортеж (x, y) — координаты клетки
+            кортеж (x, y) — координаты клетки, или None если нет пустых
         """
         available = []
         for cell in board.cells.values():
-            if cell.get_state() == CellState.EMPTY:
+            if cell.get_state() in (CellState.EMPTY, CellState.FILL):
                 available.append((cell.x, cell.y))
+        if not available:
+            return None
         return random.choice(available)
 
     def place_ship(self, board: Board):
@@ -54,8 +57,11 @@ class AI:
             x, y = self.choose_cell(board)
             orientation = random.choice(['horizontal', 'vertical'])
             ship = Ship.from_head(x=x, y=y, orientation=orientation, length=size)
-            if board.place_ship(ship):
+            try:
+                board.place_ship(ship)
                 return True
+            except ShipPlacementError:
+                continue
         return False
 
     def populate_board(self, board: Board):

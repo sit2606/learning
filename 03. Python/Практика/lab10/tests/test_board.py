@@ -6,6 +6,7 @@ from model.entities.Config import Config
 from model.entities.Player import Player
 from model.entities.Ship import Ship
 from model.entities.helpers.statuses import CellState
+from model.entities.helpers.exceptions import CellOccupiedError, SizeLimitError
 
 
 class TestBoard(unittest.TestCase):
@@ -23,11 +24,13 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(len(self.testBoard.cells), 100)
     def test_place_ship(self):
         self.assertTrue(self.testBoard.place_ship(self.ship_3_horizontal))
-        self.assertFalse(self.testBoard.place_ship(self.ship_4_vertical))
+        with self.assertRaises(CellOccupiedError):
+            self.testBoard.place_ship(self.ship_4_vertical)
         self.testBoard.clear_board()
         self.assertTrue(self.testBoard.place_ship(self.ship_4_vertical))
         self.assertTrue(self.testBoard.place_ship(self.ship_3_vertical))
-        self.assertFalse(self.testBoard.place_ship(self.ship_not_in_board))
+        with self.assertRaises(SizeLimitError):
+            self.testBoard.place_ship(self.ship_not_in_board)
         self.testBoard.clear_board()
     def test_shot(self):
         self.testBoard.place_ship(self.ship_3_horizontal)

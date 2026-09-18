@@ -76,7 +76,7 @@ class Game:
     def start_game(self):
         """Переводит игру из SETUP в PLAYER_TURN."""
         player = self.config.player
-        if player == 'Player1':
+        if player in ('Player1', 'Player'):
             self.current_player = self.player1
             self.current_board = self.board1
             self.state = GameState.PLAYER_TURN

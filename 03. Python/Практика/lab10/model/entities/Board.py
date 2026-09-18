@@ -3,6 +3,9 @@ from model.entities.Player import Player
 from model.entities.Ship import Ship
 from model.entities.Config import Config
 from model.entities.helpers.statuses import CellState, ShipState
+from model.entities.helpers.exceptions import (
+    OutOfBoundsError, CellOccupiedError, NeighborError, SizeLimitError
+)
 
 
 class Board:
@@ -48,21 +51,38 @@ class Board:
     def place_ship(self, ship: Ship):
         """Размещает корабль на доске, если позиция допустима.
 
-        Проверяет: валидность позиции + допустимость размера.
-
         Args:
             ship: корабль для размещения
 
+        Raises:
+            SizeLimitError: все корабли такого размера уже стоят
+            OutOfBoundsError: корабль выходит за пределы поля
+            CellOccupiedError: клетка уже занята
+            NeighborError: рядом уже есть корабль
+
         Returns:
-            True если корабль размещён, False если нельзя
+            True если корабль размещён
         """
-        if self.validate_ship_position(ship) and self.can_place_ship_size(ship.get_length()):
-            self.ships.update({str(ship): ship})
-            for cell in ship.cells:
-                self.cells.update({str(cell): cell})
-            return True
-        else:
-            return False
+        self._validate_ship(ship)
+        self.ships.update({str(ship): ship})
+        for cell in ship.cells:
+            self.cells.update({str(cell): cell})
+        return True
+
+    def _validate_ship(self, ship: Ship):
+        """Проверяет корабль и выбрасывает исключение при ошибке."""
+        if not self.can_place_ship_size(ship.get_length()):
+            raise SizeLimitError(
+                f"Все {ship.get_length()}-палубные корабли уже расставлены"
+            )
+        for cell in ship.cells:
+            if not (0 <= cell.x < int(self.width) and 0 <= cell.y < int(self.height)):
+                raise OutOfBoundsError("Корабль выходит за пределы поля")
+            if self.cells.get(f'({str(cell.x)}, {str(cell.y)})').get_state() != CellState.EMPTY:
+                raise CellOccupiedError("Клетка уже занята")
+            for neighbor in self._get_neighbors(cell.x, cell.y):
+                if neighbor.get_state() == CellState.FILL:
+                    raise NeighborError("Рядом уже есть корабль")
 
     def _get_neighbors(self, x: int, y: int) -> list[Cell]:
         """Возвращает список соседних клеток (8 направлений).
