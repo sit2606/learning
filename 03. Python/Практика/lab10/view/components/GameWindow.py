@@ -6,7 +6,7 @@ from view.src.GameWindow_ui import Ui_GameWindow
 
 class GameWindow(QWidget, Ui_GameWindow):
     cell_clicked = pyqtSignal(int, int)
-
+    command_button_clicked = pyqtSignal()
     def __init__(self):
         super().__init__()
         self.setupUi(self)

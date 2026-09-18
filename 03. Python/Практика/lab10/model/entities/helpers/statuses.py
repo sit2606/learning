@@ -2,17 +2,23 @@ from enum import Enum
 
 
 class CellState(Enum):
-    FILL = 'Fill'
-    EMPTY = 'Empty'
-    HIT = 'Hit'
-    MISS = 'Miss'
+    """Состояния клетки на доске."""
+    FILL = 'Fill'       # клетка занята кораблём
+    EMPTY = 'Empty'     # клетка пуста
+    HIT = 'Hit'         # клетка с попаданием
+    MISS = 'Miss'       # клетка с промахом
+
+
 class ShipState(Enum):
-    FULL = 'Full'
-    WOUNDED = 'Wounded'
-    KILLED = 'Killed'
+    """Состояния корабля."""
+    FULL = 'Full'           # корабль цел
+    WOUNDED = 'Wounded'     # корабль ранен
+    KILLED = 'Killed'       # корабль уничтожен
+
 
 class GameState(Enum):
-    SETUP = 'Setup'
-    PLAYER_TURN = 'PlayerTurn'
-    COMPUTER_TURN = 'ComputerTurn'
-    GAME_OVER = 'GameOver'
+    """Состояния игры."""
+    SETUP = 'Setup'                     # расстановка кораблей
+    PLAYER_TURN = 'PlayerTurn'          # ход игрока
+    COMPUTER_TURN = 'ComputerTurn'      # ход компьютера
+    GAME_OVER = 'GameOver'              # игра окончена
