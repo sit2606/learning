@@ -41,11 +41,11 @@ class Config:
     def read_from_json(self):
         """Читает настройки из settings.json и заполняет атрибуты."""
         with open("settings.json", "r") as f:
-            data = json.load(f)
-        self.size = data['size']
-        self.AI_difficulty = data['AI_difficulty']
-        self.player = data['player']
-        self.ship_sizes = {int(k): v for k, v in data['ship_sizes'].items()}
+            self.data = json.load(f)
+        self.size = self.data['size']
+        self.AI_difficulty = self.data['AI_difficulty']
+        self.player = self.data['player']
+        self.ship_sizes = {int(k): v for k, v in self.data['ship_sizes'].items()}
 
     def write_to_json(self):
         """Сохраняет текущие атрибуты в settings.json."""

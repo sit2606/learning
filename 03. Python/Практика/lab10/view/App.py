@@ -15,6 +15,10 @@ def run_gui():
     config.create_default_settings()
     game = Game(config)
     game_result = GameResult()
+    try:
+        game_result.load_from_json()
+    except FileNotFoundError:
+        pass
     window = MainWindow()
     controller = AppController(game, window, game_result)
     window.show()

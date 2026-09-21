@@ -1,4 +1,8 @@
+import json
+from idlelib import window
+
 from model.entities.Cell import Cell
+from model.entities.Config import Config
 from model.entities.Game import Game
 from model.entities.Ship import Ship
 from model.entities.helpers.statuses import CellState, GameState
@@ -6,9 +10,11 @@ from model.entities.helpers.exceptions import (
     ShipPlacementError, OutOfBoundsError, CellOccupiedError,
     NeighborError, SizeLimitError
 )
+from model.entities.helpers.default_settings import DEFAULTS
 from model.GameResult import GameResult
 from view.components.SettingsWindow import SettingsWindow
 from view.components.GameWindow import GameWindow
+from view.components.LeaderboardWindow import LeaderboardWindow
 from PyQt6.QtWidgets import QMessageBox
 
 
@@ -39,8 +45,11 @@ class AppController:
         self.game_result = game_result
         self.view.new_game_clicked.connect(self.new_game)
         self.view.settings_clicked.connect(self.settings)
+        self.view.leaderboard_clicked.connect(self.leaderboard)
+        self.view.exit_clicked.connect(self.view.close)
         self.settings_window = SettingsWindow()
         self.settings_window.save_clicked.connect(self._on_settings_save)
+        self.settings_window.reset_clicked.connect(self._on_settings_reset)
         self.game_window = GameWindow()
         self.game_window.player_board_clicked.connect(self.on_player_board_clicked)
         self.game_window.enemy_board_clicked.connect(self.on_enemy_board_clicked)
@@ -54,14 +63,75 @@ class AppController:
         self.settings_window.set_ship_sizes(self.game.config.ship_sizes)
         self.settings_window.show()
 
-    def _on_settings_save(self):
-        """Сохраняет настройки из SettingsWindow в Config."""
-        self.game.config.size = self.settings_window.get_size()
-        self.game.config.AI_difficulty = self.settings_window.get_difficulty()
-        self.game.config.ship_sizes = self.settings_window.get_ship_sizes()
-        self.game.config.write_to_json()
+    def leaderboard(self):
+        """Открывает окно таблицы результатов."""
+        window = LeaderboardWindow(self.view)
+        window.load_results(self.game_result.results)
+        window.exec()
+
+    def _on_settings_save(self, size, difficulty, ship_sizes_str):
+        """Принимает настройки из SettingsWindow, создаёт новый Config,
+        передаёт его в Game и сохраняет в файл.
+
+        Args:
+            size: размер поля (строка, например '10x10')
+            difficulty: индекс сложности AI (0, 1 или 2)
+            ship_sizes_str: словарь кораблей в формате JSON-строки
+        """
+        # Проверка size
+        parts = size.lower().split("x")
+        if len(parts) != 2:
+            QMessageBox.warning(self.settings_window, "Ошибка",
+                                'Размер поля должен быть в формате "NxN", например "10x10"')
+            return
+        try:
+            n, m = int(parts[0]), int(parts[1])
+        except ValueError:
+            QMessageBox.warning(self.settings_window, "Ошибка",
+                                'Размер поля должен содержать числа, например "10x10"')
+            return
+        if n <= 0 or m <= 0:
+            QMessageBox.warning(self.settings_window, "Ошибка",
+                                "Размер поля должен быть положительным числом")
+            return
+        max_ship = min(n, m)
+
+        # Проверка ship_sizes
+        try:
+            ship_sizes = {int(k): v for k, v in json.loads(ship_sizes_str).items()}
+        except (json.JSONDecodeError, ValueError, TypeError):
+            QMessageBox.warning(self.settings_window, "Ошибка",
+                                'Список кораблей должен быть в формате JSON, например {"1": 4, "2": 3}')
+            return
+        for ship_size, count in ship_sizes.items():
+            if ship_size <= 0 or count <= 0:
+                QMessageBox.warning(self.settings_window, "Ошибка",
+                                    "Размер корабля и количество должны быть положительными числами")
+                return
+            if ship_size > max_ship:
+                QMessageBox.warning(self.settings_window, "Ошибка",
+                                    f"Корабль размером {ship_size} не помещается на поле {n}x{m}")
+                return
+
+        new_config = Config()
+        new_config.read_from_json()
+        new_config.size = size
+        new_config.AI_difficulty = difficulty
+        new_config.ship_sizes = ship_sizes
+        new_config.write_to_json()
+        self.game.config = new_config
+        self.game.ai.difficulty = difficulty
+        self.settings_window.close()
+
+    def _on_settings_reset(self):
+        """Загружает настройки по умолчанию в поля SettingsWindow."""
+        self.settings_window.set_size(DEFAULTS["size"])
+        self.settings_window.set_difficulty(DEFAULTS["AI_difficulty"])
+        self.settings_window.set_ship_sizes(DEFAULTS["ship_sizes"])
     def new_game(self):
         """Показывает окно игры при нажатии 'New Game'."""
+        cols, rows = self.game.config.size.split("x")
+        self.game_window.reset_boards(int(rows), int(cols))
         self.game.ai.populate_board(self.game.board2)
         self._update_information()
         self.game_window.show()
@@ -198,5 +268,6 @@ class AppController:
         self.game.state = GameState.GAME_OVER
         self.game_result.record(winner, loser)
         self.game_result.save_to_json()
-        self.game_window.set_status_text(f"Игра окончена! Победитель: {winner}")
         QMessageBox.information(self.view, "Конец игры", f"Победил: {winner}")
+        self.game_window.close()
+        self.view.show()

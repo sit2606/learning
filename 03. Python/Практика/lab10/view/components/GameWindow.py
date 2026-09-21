@@ -14,10 +14,12 @@ class GameWindow(QWidget, Ui_GameWindow):
         self.setupUi(self)
         self.PlayerBoard.cell_clicked.connect(self.player_board_clicked)
         self.EnemyBoard.cell_clicked.connect(self.enemy_board_clicked)
+
         self.CommandpushButton.setEnabled(False)
         self.CommandpushButton.setText('Начать игру')
         self.CommandpushButton.clicked.connect(self.command_clicked)
         self.SwitchModeButton.clicked.connect(self.dev_switch_mode)
+        self.SwitchModeButton.setVisible(False)
     def command_clicked(self):
         self.command_button_clicked.emit()
     def dev_switch_mode(self):
@@ -33,3 +35,13 @@ class GameWindow(QWidget, Ui_GameWindow):
 
     def hide_command_button(self):
         self.CommandpushButton.setVisible(False)
+
+    def reset_boards(self, rows, cols):
+        """Сбрасывает обе доски с указанным размером сетки.
+
+        Args:
+            rows: количество строк
+            cols: количество столбцов
+        """
+        self.PlayerBoard.reset_grid(rows, cols)
+        self.EnemyBoard.reset_grid(rows, cols)
