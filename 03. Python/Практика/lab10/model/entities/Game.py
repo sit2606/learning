@@ -75,15 +75,10 @@ class Game:
 
     def start_game(self):
         """Переводит игру из SETUP в PLAYER_TURN."""
-        player = self.config.player
-        if player in ('Player1', 'Player'):
-            self.current_player = self.player1
-            self.current_board = self.board1
-            self.state = GameState.PLAYER_TURN
-        elif player == 'Player2':
-            self.current_player = self.player2
-            self.current_board = self.board2
-            self.state = GameState.COMPUTER_TURN
+        self.current_player = self.player1
+        self.current_board = self.board1
+        self.state = GameState.PLAYER_TURN
+
 
     def make_shot(self, x: int, y: int) -> CellState:
         """Производит выстрел по доске противника.

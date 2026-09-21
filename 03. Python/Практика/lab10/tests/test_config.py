@@ -8,14 +8,12 @@ class TestSettings(unittest.TestCase):
     def setUp(self):
         self.data1 = {
                "size": "10x10",
-               "ships_count": 3,
                "AI_difficulty": 1,
                "player" : 'Player1',
                "ship_sizes": {1: 2, 2: 1}
        }
         self.data2 = {
             "size": "15x10",
-            "ships_count": 4,
             "AI_difficulty": 1,
             "player" : 'Player2',
             "ship_sizes": {1: 3, 2: 1}
@@ -27,7 +25,6 @@ class TestSettings(unittest.TestCase):
     def test_read(self):
         conf = Config()
         conf.read_from_json()
-        self.assertEqual(conf.ships_count, self.data1["ships_count"])
         self.assertEqual(conf.AI_difficulty, self.data1["AI_difficulty"])
         self.assertEqual(conf.size, self.data1["size"])
         self.assertEqual(conf.player, self.data1["player"])
@@ -43,14 +40,12 @@ class TestSettings(unittest.TestCase):
         conf = Config()
         conf.create_json(self.data1)
         conf.size = self.data2["size"]
-        conf.ships_count = self.data2["ships_count"]
         conf.AI_difficulty = self.data2["AI_difficulty"]
         conf.player = self.data2["player"]
         conf.ship_sizes = self.data2["ship_sizes"]
         conf.write_to_json()
         conf.read_from_json()
-        self.assertEqual(conf.ships_count, self.data2["ships_count"])
+        self.assertEqual(conf.size, self.data2["size"])
         os.remove("settings.json")
 if __name__ == "__main__":
     unittest.main()
-

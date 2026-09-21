@@ -13,8 +13,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.NewGame_pushButton.clicked.connect(self.on_new_game_clicked)
-        self.Settings_pushButton.clicked.connect(self.settings_clicked)
+        self.Settings_pushButton.clicked.connect(self.on_settings_clicked)
         self.Leaderboard_pushButton.clicked.connect(self.leaderboard_clicked)
         self.Exit_pushButton.clicked.connect(self.exit_clicked)
     def on_new_game_clicked(self):
         self.new_game_clicked.emit()
+    def on_settings_clicked(self):
+        self.settings_clicked.emit()

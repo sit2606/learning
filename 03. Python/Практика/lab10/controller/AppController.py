@@ -7,6 +7,7 @@ from model.entities.helpers.exceptions import (
     NeighborError, SizeLimitError
 )
 from model.GameResult import GameResult
+from view.components.SettingsWindow import SettingsWindow
 from view.components.GameWindow import GameWindow
 from PyQt6.QtWidgets import QMessageBox
 
@@ -37,13 +38,28 @@ class AppController:
         self.view = view
         self.game_result = game_result
         self.view.new_game_clicked.connect(self.new_game)
+        self.view.settings_clicked.connect(self.settings)
+        self.settings_window = SettingsWindow()
+        self.settings_window.save_clicked.connect(self._on_settings_save)
         self.game_window = GameWindow()
         self.game_window.player_board_clicked.connect(self.on_player_board_clicked)
         self.game_window.enemy_board_clicked.connect(self.on_enemy_board_clicked)
         self.game_window.switch_mode_clicked.connect(self.dev_switch_mode)
         self.game_window.command_button_clicked.connect(self.on_start_game)
         self.first_click = None
+    def settings(self):
+        """Открывает окно настроек."""
+        self.settings_window.set_size(self.game.config.size)
+        self.settings_window.set_difficulty(self.game.config.AI_difficulty)
+        self.settings_window.set_ship_sizes(self.game.config.ship_sizes)
+        self.settings_window.show()
 
+    def _on_settings_save(self):
+        """Сохраняет настройки из SettingsWindow в Config."""
+        self.game.config.size = self.settings_window.get_size()
+        self.game.config.AI_difficulty = self.settings_window.get_difficulty()
+        self.game.config.ship_sizes = self.settings_window.get_ship_sizes()
+        self.game.config.write_to_json()
     def new_game(self):
         """Показывает окно игры при нажатии 'New Game'."""
         self.game.ai.populate_board(self.game.board2)

@@ -2,8 +2,7 @@
 
 DEFAULTS = {
     "size": "10x10",
-    "ships_count": 10,
-    "AI_difficulty": 5,
+    "AI_difficulty": 0,
     "player": 'Player',
     "ship_sizes": {
         1: 4,   # 4 однопалубных

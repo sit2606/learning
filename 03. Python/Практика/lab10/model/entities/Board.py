@@ -31,7 +31,6 @@ class Board:
             owner: игрок-владелец доски
         """
         self.size = settings.size
-        self.ships_count = settings.ships_count
         self.AI_difficulty = settings.AI_difficulty
         self.ships = {}
         self.cells = {}
